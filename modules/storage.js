@@ -83,7 +83,8 @@ const Storage = (() => {
             if (lat && lon && city) {
                 params.set('lat', lat.toFixed(2));
                 params.set('lon', lon.toFixed(2));
-                params.set('city', encodeURIComponent(city));
+                // Do not pre-encode; URLSearchParams handles encoding
+                params.set('city', city);
             }
             
             if (currentLang) {
@@ -105,11 +106,20 @@ const Storage = (() => {
             const city = params.get('city');
             const lang = params.get('lang');
             
-            if (lat && lon) {
+            // If city is present, prefer it. Include lat/lon only if provided.
+            if (city) {
+                result.location = {
+                    // No manual decode; params.get already returns decoded value
+                    city: city,
+                    lat: lat ? parseFloat(lat) : null,
+                    lon: lon ? parseFloat(lon) : null
+                };
+            } else if (lat && lon) {
+                // No city, but coordinates are present
                 result.location = {
                     lat: parseFloat(lat),
                     lon: parseFloat(lon),
-                    city: city ? decodeURIComponent(city) : 'Location'
+                    city: 'Location'
                 };
             }
             
@@ -127,10 +137,14 @@ const Storage = (() => {
             const currentLang = lang || I18n.getCurrentLanguage();
             const params = new URLSearchParams();
             
-            if (lat && lon && city) {
-                params.set('lat', lat.toFixed(2));
-                params.set('lon', lon.toFixed(2));
-                params.set('city', encodeURIComponent(city));
+            // Prefer human-readable city-only URLs when city is known
+            if (city) {
+                // Set raw string; URLSearchParams encodes for us
+                params.set('city', city);
+            } else if (lat && lon) {
+                // Fall back to coordinates-only when city not available
+                params.set('lat', Number(lat).toFixed(2));
+                params.set('lon', Number(lon).toFixed(2));
             }
             
             if (currentLang) {

@@ -235,7 +235,17 @@ const UI = (() => {
          * Render warming stripes visualization
          */
         renderStripes(annualMeans, baseline) {
+            if (!ELEMENTS.stripes) {
+                console.warn('Stripes element not found');
+                return;
+            }
+            
             ELEMENTS.stripes.innerHTML = '';
+
+            if (!annualMeans || annualMeans.length === 0) {
+                ELEMENTS.stripes.innerHTML = '<div style="text-align: center; color: #999; padding: 10px;">No historical data available</div>';
+                return;
+            }
 
             annualMeans.forEach(item => {
                 const delta = item.mean - baseline;
@@ -554,7 +564,11 @@ const UI = (() => {
             const nextLang = currentLang === 'en' ? 'fr' : 'en';
             const nextLangName = I18n.getLanguageName(nextLang);
             if (ELEMENTS.languageToggleBtn) {
-                ELEMENTS.languageToggleBtn.textContent = I18n.t('ui.toggleLanguage', nextLangName);
+                const buttonText = I18n.t('ui.toggleLanguage', nextLangName);
+                console.log(`Setting language toggle button text: "${buttonText}" (current: ${currentLang}, next: ${nextLang})`);
+                ELEMENTS.languageToggleBtn.textContent = buttonText;
+            } else {
+                console.warn('Language toggle button element not found');
             }
         },
 
@@ -661,7 +675,8 @@ const UI = (() => {
                     </div>
                 </div>
                 <div style="font-size: 0.75rem; color: #a0aec0; margin-top: 12px; text-align: right;">
-                    Based on ${normals.yearsOfData} years of data
+                    Based on ${normals.yearsOfData} years of data • 
+                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: #3182ce; text-decoration: none;">Data: Open-Meteo Archive API</a>
                 </div>
             `;
 

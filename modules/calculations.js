@@ -64,9 +64,11 @@ const Calculations = (() => {
 
         // Parse day name for forecast table
         getDayName(dateString, isToday) {
-            if (isToday) return 'Today';
+            if (isToday) return I18n.t('day.today');
             const date = new Date(dateString + 'T00:00:00');
-            return date.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayIndex = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            return I18n.t(`day.${days[dayIndex]}`);
         },
 
         // Detect if location is in Canada

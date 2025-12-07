@@ -40,6 +40,7 @@ const I18n = (() => {
             'ui.education': 'Understanding Weather & Risk',
             'ui.loadingLesson': 'Loading lesson...',
             'ui.historyTitle': '📜 On This Day in Climate History',
+            'ui.historicalNormals': '📈 Historical Averages (Last 10 Years)',
             'ui.uncertaintyTitle': '🎯 Understanding Model Disagreement',
             'ui.uncertaintyDescription': 'When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.',
             'ui.resetLocation': 'Reset Location & History',
@@ -112,11 +113,12 @@ const I18n = (() => {
             'table.low': 'Low',
             'table.rain': 'Rain %',
 
-            // Rain legend
-            'rain.lowRisk': 'Low Risk',
-            'rain.moderateRisk': 'Moderate Risk',
-            'rain.highRisk': 'High Risk',
-            'rain.veryHighRisk': 'Very High Risk',
+            // Precipitation legend
+            'rain.legendTitle': 'Precipitation Risk',
+            'rain.lowRisk': 'Unlikely',
+            'rain.moderateRisk': 'Possible',
+            'rain.highRisk': 'Likely',
+            'rain.veryHighRisk': 'Very Likely',
 
             // Weather conditions
             'weather.clear': 'Clear',
@@ -147,7 +149,9 @@ const I18n = (() => {
             'weather.gusts': 'gusts',
 
             // Days of week
+            'day.today': 'Today',
             'day.sunday': 'Sunday',
+            'day.monday': 'Monday',
             'day.monday': 'Monday',
             'day.tuesday': 'Tuesday',
             'day.wednesday': 'Wednesday',
@@ -185,7 +189,8 @@ const I18n = (() => {
             'ui.climateContext': '🌍 Contexte climatique',
             'ui.education': 'Comprendre la météo et le risque',
             'ui.loadingLesson': 'Chargement de la leçon...',
-            'ui.historyTitle': '📜 Ce jour dans l’histoire du climat',
+            'ui.historyTitle': '📜 Ce jour dans l\'histoire du climat',
+            'ui.historicalNormals': '📈 Moyennes historiques (10 dernières années)',
             'ui.uncertaintyTitle': '🎯 Comprendre le désaccord des modèles',
             'ui.uncertaintyDescription': 'Lorsque les modèles sont en désaccord significatif, l\'incertitude des prévisions est <strong>élevée</strong>. Recherchez les icônes 🤔 (incertitude élevée) ou 🔀 (incertitude modérée) à côté des jours ci-dessous.',
             'ui.resetLocation': 'Réinitialiser l\'emplacement et l\'historique',
@@ -258,11 +263,12 @@ const I18n = (() => {
             'table.low': 'Min',
             'table.rain': 'Pluie %',
 
-            // Légende de probabilité de pluie
-            'rain.lowRisk': 'Risque faible',
-            'rain.moderateRisk': 'Risque modéré',
-            'rain.highRisk': 'Risque élevé',
-            'rain.veryHighRisk': 'Risque très élevé',
+            // Légende de probabilité de précipitations
+            'rain.legendTitle': 'Risque de précipitations',
+            'rain.lowRisk': 'Peu probable',
+            'rain.moderateRisk': 'Possible',
+            'rain.highRisk': 'Probable',
+            'rain.veryHighRisk': 'Très probable',
 
             // Conditions météorologiques
             'weather.clear': 'Dégagé',
@@ -293,6 +299,7 @@ const I18n = (() => {
             'weather.gusts': 'rafales',
 
             // Jours de la semaine
+            'day.today': 'Aujourd\'hui',
             'day.sunday': 'Dimanche',
             'day.monday': 'Lundi',
             'day.tuesday': 'Mardi',
@@ -357,7 +364,7 @@ const I18n = (() => {
      */
     function getLanguageName(lang) {
         const names = {
-            en: { en: 'English', fr: 'Anglais' },
+            en: { en: 'English', fr: 'English' },
             fr: { en: 'Français', fr: 'Français' }
         };
         return names[lang]?.[getCurrentLanguage()] || lang;

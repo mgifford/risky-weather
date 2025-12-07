@@ -49,11 +49,47 @@ const App = (() => {
 
         // Check URL parameters first (highest priority for sharing)
         if (urlParams.location) {
+            let startedFromUrl = false;
             UI.setStatus(I18n.t('status.savedLocation'));
-            console.log(`Using URL location: ${urlParams.location.city} (${urlParams.location.lat}, ${urlParams.location.lon})`);
-            Storage.saveLocation(urlParams.location.lat, urlParams.location.lon, urlParams.location.city);
-            runApp(urlParams.location.lat, urlParams.location.lon, urlParams.location.city);
-            return;
+            const urlCity = urlParams.location.city;
+            const urlLat = urlParams.location.lat;
+            const urlLon = urlParams.location.lon;
+            console.log(`URL params detected: city=${urlCity}, lat=${urlLat}, lon=${urlLon}`);
+            // If city is present, geocode and use its coordinates; ignore mismatched lat/lon
+            try {
+                if (urlCity) {
+                    const normalizedCity = urlCity.replace(/-/g, ' ').trim();
+                    console.log(`Geocoding city from URL: "${normalizedCity}"`);
+                    const results = await Geo.searchCities(normalizedCity);
+                    if (results && results.length) {
+                        const best = results[0];
+                        console.log(`Using geocoded city: ${best.displayName} (${best.lat}, ${best.lon})`);
+                        Storage.saveLocation(best.lat, best.lon, best.displayName);
+                        // Ensure URL is city-only for clarity
+                        Storage.updateUrl(best.lat, best.lon, best.displayName);
+                        await runApp(best.lat, best.lon, best.displayName);
+                        startedFromUrl = true;
+                    } else {
+                        console.warn('No geocode results for city. Falling back to coordinates if present.');
+                    }
+                }
+                // Fallbacks: if no city or geocoding failed but coords exist, use coords
+                if (urlLat !== null && urlLon !== null) {
+                    console.log(`Using URL coordinates: (${urlLat}, ${urlLon}) with city label: ${urlCity || 'Location'}`);
+                    Storage.saveLocation(urlLat, urlLon, urlCity || 'Location');
+                    await runApp(urlLat, urlLon, urlCity || 'Location');
+                    startedFromUrl = true;
+                }
+            } catch (e) {
+                console.warn('City geocode failed; falling back to URL coordinates:', e);
+                if (urlLat !== null && urlLon !== null) {
+                    Storage.saveLocation(urlLat, urlLon, urlCity || 'Location');
+                    await runApp(urlLat, urlLon, urlCity || 'Location');
+                    startedFromUrl = true;
+                }
+            }
+            // Only return if we successfully started from URL params.
+            if (startedFromUrl) return;
         }
 
         // Try IP geolocation first - most reliable for VPN/real-world scenarios
@@ -464,7 +500,12 @@ const App = (() => {
             UI.setStatus('Complete');
         } catch (error) {
             console.error('Stripes generation failed:', error);
-            UI.setStatus(`Stripes error: ${error.message}`);
+            UI.setStatus(I18n.t('status.stripesError', error.message));
+            // Show placeholder in stripes area
+            const stripesEl = document.getElementById('stripes');
+            if (stripesEl) {
+                stripesEl.innerHTML = '<div style="text-align: center; color: #999; padding: 10px; font-size: 0.85rem;">Historical climate data unavailable (may be rate-limited)</div>';
+            }
         }
     }
 
@@ -521,7 +562,9 @@ const App = (() => {
      * Toggle between English and French
      */
     function toggleLanguage() {
+        console.log('toggleLanguage called');
         const currentLang = I18n.getCurrentLanguage();
+        console.log(`Current language before toggle: ${currentLang}`);
         const newLang = currentLang === 'en' ? 'fr' : 'en';
         I18n.setLanguage(newLang);
         
@@ -546,6 +589,15 @@ const App = (() => {
             }
         });
         
+        // Persist language in URL before reload so shared links keep language
+        const savedLoc = Storage.getLocation();
+        if (savedLoc && savedLoc.lat && savedLoc.lon && savedLoc.city) {
+            Storage.updateUrl(savedLoc.lat, savedLoc.lon, savedLoc.city, newLang);
+        } else {
+            // If no saved location, still update just the lang param
+            Storage.updateUrl(null, null, null, newLang);
+        }
+
         // Refresh page to update all translations including dynamic content
         location.reload();
     }

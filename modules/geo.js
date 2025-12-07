@@ -216,37 +216,75 @@ const Geo = (() => {
     async function searchCities(query) {
         if (!query || query.length < 2) return [];
 
-        try {
+        const currentLang = (typeof I18n !== 'undefined' && I18n.getCurrentLanguage) ? I18n.getCurrentLanguage() : 'en';
+
+        // Normalize common patterns: "City-Region" -> "City, Region"
+        function normalize(q) {
+            const trimmed = q.trim();
+            // Replace multiple separators with single space
+            let normalized = trimmed.replace(/[\s_]+/g, ' ');
+            // Convert dashes to comma-space to hint admin1
+            normalized = normalized.replace(/\s*-\s*/g, ', ');
+            return normalized;
+        }
+
+        // Extract possible admin1/country tokens
+        function splitTokens(q) {
+            // Split on comma or dash
+            const parts = q.split(/[,-]/).map(p => p.trim()).filter(Boolean);
+            return parts;
+        }
+
+        async function queryGeocoding(name) {
             const params = new URLSearchParams({
-                name: query,
-                count: 10,
-                language: 'en',
+                name,
+                count: '10',
+                language: currentLang,
                 format: 'json'
             });
-
-            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`, {
+            const resp = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`, {
                 signal: AbortSignal.timeout(5000)
             });
+            if (!resp.ok) throw new Error(`Geocoding API returned ${resp.status}`);
+            const data = await resp.json();
+            return Array.isArray(data.results) ? data.results : [];
+        }
 
-            if (!response.ok) throw new Error(`Geocoding API returned ${response.status}`);
-            const data = await response.json();
+        try {
+            const attempts = [];
+            const normalized = normalize(query);
+            const tokens = splitTokens(query);
 
-            if (!data.results) return [];
+            // Attempt 1: normalized (handles City-Region -> City, Region)
+            attempts.push(normalized);
+            // Attempt 2: raw query (as-is)
+            attempts.push(query);
+            // Attempt 3: city-only (first token)
+            if (tokens.length > 0) attempts.push(tokens[0]);
 
-            // Format results with city, region, country
-            return data.results.map(result => ({
-                name: result.name,
-                region: result.admin1 || '',
-                country: result.country,
-                countryCode: result.country_code,
-                lat: result.latitude,
-                lon: result.longitude,
-                displayName: [
-                    result.name,
-                    result.admin1,
-                    result.country
-                ].filter(Boolean).join(', ')
-            }));
+            // Deduplicate attempts
+            const uniqueAttempts = [...new Set(attempts)].filter(a => a && a.length >= 2);
+
+            for (const name of uniqueAttempts) {
+                try {
+                    const results = await queryGeocoding(name);
+                    if (results.length) {
+                        return results.map(result => ({
+                            name: result.name,
+                            region: result.admin1 || '',
+                            country: result.country,
+                            countryCode: result.country_code,
+                            lat: result.latitude,
+                            lon: result.longitude,
+                            displayName: [result.name, result.admin1, result.country].filter(Boolean).join(', ')
+                        }));
+                    }
+                } catch (innerErr) {
+                    console.warn('Geocoding attempt failed for', name, innerErr);
+                }
+            }
+
+            return [];
         } catch (error) {
             console.error('City search failed:', error);
             return [];
