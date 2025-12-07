@@ -115,7 +115,7 @@
             min-width: 35px;
             text-align: center;
         }
-        .rain-none { color: #cbd5e0; }
+        .rain-none { background: #f7fafc; color: #718096; font-weight: 600; }
         .rain-low { background: #ebf8ff; color: #2b6cb0; }
         .rain-med { background: #bee3f8; color: #2c5282; }
         .rain-high { background: #fed7d7; color: #c53030; }
@@ -208,6 +208,61 @@
             font-weight: 600;
             color: #4a5568;
         }
+
+        /* UNCERTAINTY INDICATORS */
+        .uncertainty-badge {
+            display: inline-block;
+            font-size: 1rem;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .info-box {
+            background: #edf2f7;
+            border-left: 4px solid #3182ce;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box-warning {
+            background: #fffaf0;
+            border-left-color: #ed8936;
+        }
+
+        .info-box-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #2d3748;
+        }
+
+        /* RAIN PROBABILITY LEGEND */
+        .rain-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #edf2f7;
+            justify-content: center;
+        }
+        .rain-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .rain-legend-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            min-width: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -215,8 +270,8 @@
     <header>
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="flex: 1;">
-                <h1>Risky <span style="color:var(--gem-color)">Weather</span></h1>
-                <p class="subtitle">Comparing Models & Assessing Uncertainty</p>
+                <h1 data-i18n="ui.title">Risky <span style="color:var(--gem-color)">Weather</span></h1>
+                <p class="subtitle" data-i18n="ui.subtitle">Comparing Models & Assessing Uncertainty</p>
             </div>
             <button id="language-toggle-btn" class="language-toggle" title="Toggle language"></button>
         </div>
@@ -235,15 +290,15 @@
         
         <section id="scoreboard-section" class="card hidden">
             <div class="card-title">
-                <span>🏆 Model Scoreboard</span>
-                <span style="font-size:0.75rem; font-weight:400; color:#718096;">Wins since <span id="start-date">--</span></span>
+                <span data-i18n="ui.scoreboard">🏆 Model Scoreboard</span>
+                <span style="font-size:0.75rem; font-weight:400; color:#718096;"><span data-i18n="ui.winsSince">Wins since</span> <span id="start-date">--</span></span>
             </div>
             <div class="scoreboard">
                 <div class="score-box">
                     <div class="score-val" id="score-a">0</div>
                     <div class="score-label" id="score-label-a">Model A</div>
                 </div>
-                <div style="align-self:center; color:#718096; font-weight:900;">VS</div>
+                <div style="align-self:center; color:#718096; font-weight:900;" data-i18n="ui.versus">vs</div>
                 <div class="score-box">
                     <div class="score-val" id="score-b">0</div>
                     <div class="score-label" id="score-label-b">Model B</div>
@@ -252,15 +307,15 @@
         </section>
 
         <section id="reality-check" class="card hidden">
-            <div class="card-title"><span>🔍 Yesterday's Result</span></div>
+            <div class="card-title"><span data-i18n="ui.yesterday">🔍 Yesterday's Result</span></div>
             <div id="reality-content" style="font-size: 0.95rem; line-height: 1.6;"></div>
             <div id="winner-display"></div>
         </section>
 
         <section class="card">
             <div class="card-title">
-                <span>⚔️ Today's Forecast</span>
-                <span style="font-size: 0.8rem; color: #a0aec0;">High Temp</span>
+                <span data-i18n="ui.today">📊 Today's Forecast</span>
+                <span style="font-size: 0.8rem; color: #a0aec0;" data-i18n="ui.highTemp">High Temp</span>
             </div>
 
             <div class="model-battle">
@@ -283,8 +338,20 @@
         </section>
 
         <section class="card">
+            <div class="info-box">
+                <div class="info-box-title" data-i18n="ui.uncertaintyTitle">🎯 Understanding Model Disagreement</div>
+                <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for ⚠️ (high uncertainty) or ⚡ (moderate uncertainty) icons next to days below.</p>
+                <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #555;">
+                    • <strong>Temperature difference &gt;5°C:</strong> Plan for a wide range<br>
+                    • <strong>Rain difference &gt;30%:</strong> One model sees rain, another doesn't<br>
+                    • <strong>Models agree closely:</strong> High confidence forecast
+                </p>
+            </div>
+        </section>
+
+        <section class="card">
             <div class="card-title">
-                <span>📅 7-Day War Room</span>
+                <span data-i18n="ui.sevenDay">📅 7-Day Competition</span>
             </div>
             <table class="forecast-table">
                 <thead>
@@ -298,25 +365,43 @@
                     <tr><td colspan="3" style="text-align:center; padding:20px;">Waiting for Location...</td></tr>
                 </tbody>
             </table>
+            <div class="rain-legend">
+                <div class="rain-legend-item">
+                    <span class="rain-legend-pill rain-none">0-29%</span>
+                    <span data-i18n="rain.lowRisk">Low Risk</span>
+                </div>
+                <div class="rain-legend-item">
+                    <span class="rain-legend-pill rain-low">30-59%</span>
+                    <span data-i18n="rain.moderateRisk">Moderate Risk</span>
+                </div>
+                <div class="rain-legend-item">
+                    <span class="rain-legend-pill rain-med">60-79%</span>
+                    <span data-i18n="rain.highRisk">High Risk</span>
+                </div>
+                <div class="rain-legend-item">
+                    <span class="rain-legend-pill rain-high">80-100%</span>
+                    <span data-i18n="rain.veryHighRisk">Very High Risk</span>
+                </div>
+            </div>
         </section>
 
         <section class="card">
             <div class="card-title">
                 <span id="lesson-icon">💡</span>
-                <span id="lesson-title" style="flex: 1; margin-left: 10px;">Understanding Weather & Risk</span>
-                <button id="lesson-cycle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;" title="Show next lesson">→</button>
+                <span id="lesson-title" style="flex: 1; margin-left: 10px;" data-i18n="ui.education">Understanding Weather & Risk</span>
+                <button id="lesson-cycle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;" data-i18n-title="education.nextLesson" title="Show next lesson">→</button>
             </div>
-            <p id="lesson-content" style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0;">Loading lesson...</p>
+            <p id="lesson-content" style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0;" data-i18n="ui.loadingLesson">Loading lesson...</p>
             <div style="font-size: 0.75rem; color: #a0aec0; margin-top: 12px; text-align: right;">
                 <span id="lesson-counter">1 / 20</span>
             </div>
         </section>
 
         <section class="card">
-            <div class="card-title"><span>🌍 Climate Context</span></div>
-            <p style="font-size: 0.85rem; color: #555;">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
+            <div class="card-title"><span data-i18n="ui.climateContext">🌍 Climate Context</span></div>
+            <p style="font-size: 0.85rem; color: #555;" data-i18n="stripes.description">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
             <div id="stripes" class="stripes-wrap"></div>
-            <div class="legend"><span>1950</span><span>2023</span></div>
+            <div class="legend"><span data-i18n="stripes.start">1950</span><span data-i18n="stripes.end">2023</span></div>
         </section>
 
         <button id="reset-btn" class="secondary-btn" data-i18n="ui.resetLocation">Reset Location & History</button>

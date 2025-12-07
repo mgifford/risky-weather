@@ -368,13 +368,19 @@ const App = (() => {
         // Update HTML lang attribute
         document.getElementById('html-root').lang = newLang;
         
-        // Update button labels with i18n
+        // Update all elements with data-i18n attributes
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            el.textContent = I18n.t(key);
+            const translated = I18n.t(key);
+            // Use innerHTML for elements that may contain HTML tags
+            if (translated.includes('<')) {
+                el.innerHTML = translated;
+            } else {
+                el.textContent = translated;
+            }
         });
         
-        // Refresh page to update all translations
+        // Refresh page to update all translations including dynamic content
         location.reload();
     }
 

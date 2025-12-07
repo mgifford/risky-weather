@@ -124,6 +124,66 @@ const Calculations = (() => {
         // Convert temperature delta to tooltip text
         getStripeTooltip(year, delta) {
             return `${year}: ${delta > 0 ? '+' : ''}${delta.toFixed(1)}°C`;
+        },
+
+        // Calculate model disagreement (returns absolute difference)
+        calculateDisagreement(valueA, valueB) {
+            if (valueA === null || valueB === null) return null;
+            return Math.abs(valueA - valueB);
+        },
+
+        // Classify uncertainty level based on model disagreement
+        getUncertaintyLevel(tempDiff, rainDiff) {
+            // High uncertainty: >5°C difference OR >30% rain probability difference
+            if (tempDiff !== null && tempDiff > 5) return 'high';
+            if (rainDiff !== null && rainDiff > 30) return 'high';
+            
+            // Medium uncertainty: 2-5°C difference OR 15-30% rain difference
+            if (tempDiff !== null && tempDiff > 2) return 'medium';
+            if (rainDiff !== null && rainDiff > 15) return 'medium';
+            
+            // Low uncertainty: models agree closely
+            return 'low';
+        },
+
+        // Get uncertainty indicator emoji/icon
+        getUncertaintyIcon(level) {
+            if (level === 'high') return '⚠️';
+            if (level === 'medium') return '⚡';
+            return ''; // No icon for low uncertainty (consensus)
+        },
+
+        // Generate tooltip explaining what a probability means
+        getProbabilityTooltip(probability) {
+            if (probability === null) return 'No data available';
+            if (probability >= 80) return `${probability}% risk means rain is very likely. Out of 10 similar forecasts, rain occurs 8+ times. Plan for rain.`;
+            if (probability >= 60) return `${probability}% risk means rain is more likely than not. Out of 10 similar forecasts, rain occurs 6-7 times. Have backup plans.`;
+            if (probability >= 40) return `${probability}% risk means rain is possible but uncertain. Out of 10 similar forecasts, rain occurs 4-5 times. Watch for updates.`;
+            if (probability >= 20) return `${probability}% risk means rain is unlikely but not impossible. Out of 10 similar forecasts, rain occurs 2-3 times. Probably stay dry.`;
+            return `${probability}% risk means rain is very unlikely. Out of 10 similar forecasts, rain occurs 0-1 times. Expect dry conditions.`;
+        },
+
+        // Generate explanation for model disagreement
+        getDisagreementTooltip(tempDiff, rainDiff) {
+            const parts = [];
+            
+            if (tempDiff !== null && tempDiff > 5) {
+                parts.push(`Temperature disagreement: ${tempDiff.toFixed(1)}°C. This is HIGH uncertainty—plan for a wide range.`);
+            } else if (tempDiff !== null && tempDiff > 2) {
+                parts.push(`Temperature disagreement: ${tempDiff.toFixed(1)}°C. Moderate uncertainty—models differ on conditions.`);
+            }
+            
+            if (rainDiff !== null && rainDiff > 30) {
+                parts.push(`Rain disagreement: ${rainDiff}%. HIGH uncertainty—one model sees rain, another doesn't.`);
+            } else if (rainDiff !== null && rainDiff > 15) {
+                parts.push(`Rain disagreement: ${rainDiff}%. Moderate uncertainty about precipitation.`);
+            }
+            
+            if (parts.length === 0) {
+                return 'Models agree closely—high confidence forecast.';
+            }
+            
+            return parts.join(' ');
         }
     };
 })();

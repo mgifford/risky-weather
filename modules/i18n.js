@@ -26,13 +26,21 @@ const I18n = (() => {
             'status.defaultLocation': 'Using Default Location: {0}',
 
             // UI Elements
+            'ui.title': 'Risky Weather',
+            'ui.subtitle': 'Comparing Models & Assessing Uncertainty',
             'ui.location': 'Location',
-            'ui.today': 'Today\'s Forecast',
+            'ui.scoreboard': '🏆 Model Scoreboard',
+            'ui.winsSince': 'Wins since',
+            'ui.versus': 'vs',
+            'ui.today': '📊 Today\'s Forecast',
             'ui.highTemp': 'High Temp',
-            'ui.sevenDay': '7-Day War Room',
-            'ui.yesterday': 'Yesterday\'s Result',
-            'ui.climateContext': 'Climate Context',
+            'ui.sevenDay': '📅 7-Day Competition',
+            'ui.yesterday': '🔍 Yesterday\'s Result',
+            'ui.climateContext': '🌍 Climate Context',
             'ui.education': 'Understanding Weather & Risk',
+            'ui.loadingLesson': 'Loading lesson...',
+            'ui.uncertaintyTitle': '🎯 Understanding Model Disagreement',
+            'ui.uncertaintyDescription': 'When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for ⚠️ (high uncertainty) or ⚡ (moderate uncertainty) icons next to days below.',
             'ui.resetLocation': 'Reset Location & History',
             'ui.refreshLocation': '🔄 Refresh Location',
             'ui.viewCache': '📋 View Cache',
@@ -91,7 +99,7 @@ const I18n = (() => {
 
             // Stripes
             'stripes.title': 'Annual temperature deviation (1950-2023)',
-            'stripes.description': '<strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.',
+            'stripes.description': 'Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.',
             'stripes.start': '1950',
             'stripes.end': '2023',
 
@@ -101,6 +109,12 @@ const I18n = (() => {
             'table.high': 'High',
             'table.low': 'Low',
             'table.rain': 'Rain %',
+
+            // Rain legend
+            'rain.lowRisk': 'Low Risk',
+            'rain.moderateRisk': 'Moderate Risk',
+            'rain.highRisk': 'High Risk',
+            'rain.veryHighRisk': 'Very High Risk',
 
             // Days of week
             'day.sunday': 'Sunday',
@@ -128,13 +142,21 @@ const I18n = (() => {
             'status.defaultLocation': 'Utilisation de l\'emplacement par défaut : {0}',
 
             // Éléments UI
+            'ui.title': 'Météo Risquée',
+            'ui.subtitle': 'Comparaison de modèles et évaluation de l\'incertitude',
             'ui.location': 'Emplacement',
-            'ui.today': 'Prévisions d\'aujourd\'hui',
+            'ui.scoreboard': '🏆 Tableau des scores',
+            'ui.winsSince': 'Victoires depuis',
+            'ui.versus': 'contre',
+            'ui.today': '📊 Prévisions d\'aujourd\'hui',
             'ui.highTemp': 'Température maximale',
-            'ui.sevenDay': 'Salle de guerre 7 jours',
-            'ui.yesterday': 'Résultat d\'hier',
-            'ui.climateContext': 'Contexte climatique',
+            'ui.sevenDay': '📅 Compétition de 7 jours',
+            'ui.yesterday': '🔍 Résultat d\'hier',
+            'ui.climateContext': '🌍 Contexte climatique',
             'ui.education': 'Comprendre la météo et le risque',
+            'ui.loadingLesson': 'Chargement de la leçon...',
+            'ui.uncertaintyTitle': '🎯 Comprendre le désaccord des modèles',
+            'ui.uncertaintyDescription': 'Lorsque les modèles sont en désaccord significatif, l\'incertitude des prévisions est <strong>élevée</strong>. Recherchez les icônes ⚠️ (incertitude élevée) ou ⚡ (incertitude modérée) à côté des jours ci-dessous.',
             'ui.resetLocation': 'Réinitialiser l\'emplacement et l\'historique',
             'ui.refreshLocation': '🔄 Rafraîchir l\'emplacement',
             'ui.viewCache': '📋 Afficher le cache',
@@ -193,16 +215,22 @@ const I18n = (() => {
 
             // Rayures climatiques
             'stripes.title': 'Déviation de température annuelle (1950-2023)',
-            'stripes.description': '<strong>Bleu</strong> = Plus froid que la normale. <strong>Rouge</strong> = Plus chaud.',
+            'stripes.description': 'Déviation de température annuelle (1950-2023). <br><strong>Bleu</strong> = Plus froid que la normale. <strong>Rouge</strong> = Plus chaud.',
             'stripes.start': '1950',
             'stripes.end': '2023',
 
             // En-têtes de tableau
             'table.day': 'Jour',
             'table.date': 'Date',
-            'table.high': 'Haut',
-            'table.low': 'Bas',
+            'table.high': 'Max',
+            'table.low': 'Min',
             'table.rain': 'Pluie %',
+
+            // Légende de probabilité de pluie
+            'rain.lowRisk': 'Risque faible',
+            'rain.moderateRisk': 'Risque modéré',
+            'rain.highRisk': 'Risque élevé',
+            'rain.veryHighRisk': 'Risque très élevé',
 
             // Jours de la semaine
             'day.sunday': 'Dimanche',

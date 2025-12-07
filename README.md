@@ -17,7 +17,7 @@ The codebase is organized into 6 independent modules:
 ```markdown
 # Weather vs. Risk: A Climate Literacy Project
 
-This repository contains a client-side, single-page web app that helps people learn probabilistic thinking, model uncertainty, and climate context by comparing weather forecasts and local observations.
+This repository contains a client-side, single-page web app that helps people learn probabilistic thinking, model uncertainty, and climate context by comparing competing weather forecast models and local observations.
 
 ---
 
@@ -25,6 +25,9 @@ This repository contains a client-side, single-page web app that helps people le
 - **Bilingual UI:** English and French support with browser default detection and a language toggle.
 - **IP Geolocation & Fallbacks:** Displays your IP and uses `ipwho.is`/Nominatim/Open-Meteo fallbacks to resolve a city name when reverse geocoding is unavailable.
 - **Model Comparison:** Side-by-side comparison of regional GEM vs ECMWF/GFS model outputs; GEM regional data is blended with GEM global for later days when needed.
+- **Uncertainty Indicators:** Visual warnings (⚠️ ⚡) highlight days when models disagree significantly on temperature (>5°C) or rain probability (>30%), teaching users when forecasts are less reliable.
+- **Probability Education:** Hover tooltips explain what "60% rain" actually means in practical frequency terms (e.g., "out of 10 similar forecasts, rain occurs 6 times").
+- **20 Educational Lessons:** Cycle through expert explanations of risk vs probability, model uncertainty, climate vs weather, ensemble forecasting, and more.
 - **Warming Stripes:** Optional historical warming-stripes generation using multi-decade historical data (note: archive requests can be rate-limited).
 - **Cache Inspector:** A modal UI to inspect localStorage keys (e.g. `user_loc_v6`, `history_v6_pending`, `scoreboard_v6`).
 - **Shareable URLs:** Generate and copy a URL containing `lat`, `lon`, `city`, and `lang` so others can reproduce the same view.
@@ -45,10 +48,12 @@ The app is split into focused modules under `modules/`:
 ---
 
 ## Educational Goals
-- **Risk Literacy:** Show probabilistic forecasts in context.
-- **Model Uncertainty:** Surface disagreements between scientific models.
-- **Climate Context:** Compare today to the long-run baseline (warming stripes).
-- **Verification:** Encourage users to keep score and calibrate model trust over time.
+- **Risk Literacy:** Show probabilistic forecasts in context with plain-language explanations and frequency interpretations.
+- **Model Uncertainty:** Surface disagreements between scientific models with visual indicators (⚠️⚡) and explanatory tooltips—teaching users that large disagreement = high forecast uncertainty.
+- **Probability Understanding:** Tooltips explain what "60% rain" means in practical terms: "out of 10 similar forecasts, rain occurs 6 times."
+- **Climate vs Weather:** Compare today to the long-run baseline (warming stripes) while teaching the difference between weather models (10-day horizon) and climate models (decades).
+- **Ensemble Thinking:** 20 educational lessons explain why multiple models matter, how consensus builds confidence, and why forecast accuracy degrades over time.
+- **Verification:** Encourage users to keep score and calibrate model trust over time through the scoreboard feature.
 
 ---
 

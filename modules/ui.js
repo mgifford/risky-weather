@@ -86,17 +86,37 @@ const UI = (() => {
         },
 
         /**
-         * Render today's forecast (high temperature and precipitation)
+         * Render today's forecast with uncertainty context
          */
         renderToday(tempA, probA, tempB, probB) {
             ELEMENTS.valA.innerText = Calculations.formatTemp(tempA);
             ELEMENTS.rainA.innerText = Calculations.formatRain(probA);
             ELEMENTS.valB.innerText = Calculations.formatTemp(tempB);
             ELEMENTS.rainB.innerText = Calculations.formatRain(probB);
+
+            // Add tooltips for today's probabilities
+            if (ELEMENTS.rainA) {
+                ELEMENTS.rainA.title = Calculations.getProbabilityTooltip(probA);
+                ELEMENTS.rainA.style.cursor = 'help';
+            }
+            if (ELEMENTS.rainB) {
+                ELEMENTS.rainB.title = Calculations.getProbabilityTooltip(probB);
+                ELEMENTS.rainB.style.cursor = 'help';
+            }
+
+            // Calculate and display uncertainty for today if significant
+            const tempDiff = Calculations.calculateDisagreement(tempA, tempB);
+            const rainDiff = Calculations.calculateDisagreement(probA, probB);
+            const uncertaintyLevel = Calculations.getUncertaintyLevel(tempDiff, rainDiff);
+            
+            if (uncertaintyLevel === 'high') {
+                const disagreementMsg = Calculations.getDisagreementTooltip(tempDiff, rainDiff);
+                this.setStatus(`⚠️ High uncertainty today: ${disagreementMsg}`);
+            }
         },
 
         /**
-         * Render 7-day forecast table
+         * Render 7-day forecast table with uncertainty indicators
          */
         renderSevenDay(dailyData, modelA, modelB) {
             const times = dailyData.time;
@@ -109,13 +129,24 @@ const UI = (() => {
                 const maxB = Calculations.getSafeData(dailyData, modelB, 'temperature_2m_max', index);
                 const probB = Calculations.getSafeData(dailyData, modelB, 'precipitation_probability_max', index);
 
+                // Calculate disagreement
+                const tempDiff = Calculations.calculateDisagreement(maxA, maxB);
+                const rainDiff = Calculations.calculateDisagreement(probA, probB);
+                const uncertaintyLevel = Calculations.getUncertaintyLevel(tempDiff, rainDiff);
+                const uncertaintyIcon = Calculations.getUncertaintyIcon(uncertaintyLevel);
+                const disagreementTooltip = Calculations.getDisagreementTooltip(tempDiff, rainDiff);
+
                 const cellA = Calculations.formatTableCell(probA, maxA);
                 const cellB = Calculations.formatTableCell(probB, maxB);
 
+                // Add uncertainty indicator if present
+                const uncertaintyBadge = uncertaintyIcon ? 
+                    `<span class="uncertainty-badge" title="${disagreementTooltip}" style="cursor: help; margin-left: 4px;">${uncertaintyIcon}</span>` : '';
+
                 html += `<tr>
-                    <td class="col-day">${dayName}</td>
-                    <td>${cellA}</td>
-                    <td>${cellB}</td>
+                    <td class="col-day">${dayName}${uncertaintyBadge}</td>
+                    <td title="${Calculations.getProbabilityTooltip(probA)}" style="cursor: help;">${cellA}</td>
+                    <td title="${Calculations.getProbabilityTooltip(probB)}" style="cursor: help;">${cellB}</td>
                 </tr>`;
             });
 
