@@ -230,6 +230,7 @@ const App = (() => {
 
         // Lazy-load ECCC almanac after main content for Canada only
         try {
+            const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
             let debugInfo = { isCanada: !!config.isCanada, station: null, almanac: null, almanacError: null, city, lat, lon, provCode: null };
             if (config.isCanada) {
                 // Try to infer province from the city display name (supports formats like "City-XX" or "City, Province")
@@ -260,14 +261,21 @@ const App = (() => {
                     if (eccc) {
                         debugInfo.almanac = eccc;
                         UI.renderECCCAlmanac(eccc, station);
+                    } else {
+                        // Render station card with links even when almanac data isn't available
+                        UI.renderECCCAlmanac(null, station);
                     }
                 }
             }
-            // Always show debug banner for now (can make conditional later)
-            UI.renderDebugBanner(debugInfo);
+            if (debugMode) {
+                UI.renderDebugBanner(debugInfo);
+            }
         } catch (e) {
             console.warn('ECCC almanac load skipped:', e.message);
-            UI.renderDebugBanner({ isCanada: !!config.isCanada, station: null, almanac: null, almanacError: e.message });
+            const debugMode = new URLSearchParams(window.location.search).get('debug') === '1';
+            if (debugMode) {
+                UI.renderDebugBanner({ isCanada: !!config.isCanada, station: null, almanac: null, almanacError: e.message });
+            }
         }
     }
 

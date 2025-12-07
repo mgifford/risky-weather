@@ -90,22 +90,26 @@ const UI = (() => {
             stationEl.style.fontSize = '0.85rem';
             stationEl.style.color = '#666';
             stationEl.textContent = `${station.name} (${station.prov})`;
-            const grid = document.createElement('div');
-            grid.style.display = 'grid';
-            grid.style.gridTemplateColumns = '1fr 1fr';
-            grid.style.gap = '8px 12px';
-            const avgHigh = document.createElement('div');
-            avgHigh.textContent = `${I18n.t('ui.avgHigh')}: ${isNaN(data.avgHigh) ? '—' : Math.round(data.avgHigh)}°`;
-            const avgLow = document.createElement('div');
-            avgLow.textContent = `${I18n.t('ui.avgLow')}: ${isNaN(data.avgLow) ? '—' : Math.round(data.avgLow)}°`;
-            const recHigh = document.createElement('div');
-            recHigh.textContent = `${I18n.t('ui.recordHigh')}: ${isNaN(data.recHigh) ? '—' : Math.round(data.recHigh)}°`;
-            const recLow = document.createElement('div');
-            recLow.textContent = `${I18n.t('ui.recordLow')}: ${isNaN(data.recLow) ? '—' : Math.round(data.recLow)}°`;
-            grid.appendChild(avgHigh);
-            grid.appendChild(avgLow);
-            grid.appendChild(recHigh);
-            grid.appendChild(recLow);
+            // Only render grid if we have almanac data
+            let grid = null;
+            if (data) {
+                grid = document.createElement('div');
+                grid.style.display = 'grid';
+                grid.style.gridTemplateColumns = '1fr 1fr';
+                grid.style.gap = '8px 12px';
+                const avgHigh = document.createElement('div');
+                avgHigh.textContent = `${I18n.t('ui.avgHigh')}: ${isNaN(data.avgHigh) ? '—' : Math.round(data.avgHigh)}°`;
+                const avgLow = document.createElement('div');
+                avgLow.textContent = `${I18n.t('ui.avgLow')}: ${isNaN(data.avgLow) ? '—' : Math.round(data.avgLow)}°`;
+                const recHigh = document.createElement('div');
+                recHigh.textContent = `${I18n.t('ui.recordHigh')}: ${isNaN(data.recHigh) ? '—' : Math.round(data.recHigh)}°`;
+                const recLow = document.createElement('div');
+                recLow.textContent = `${I18n.t('ui.recordLow')}: ${isNaN(data.recLow) ? '—' : Math.round(data.recLow)}°`;
+                grid.appendChild(avgHigh);
+                grid.appendChild(avgLow);
+                grid.appendChild(recHigh);
+                grid.appendChild(recLow);
+            }
             const link = document.createElement('a');
             link.href = 'https://climate.weather.gc.ca/climate_data/almanac_selection_e.html';
             link.target = '_blank';
@@ -113,10 +117,43 @@ const UI = (() => {
             link.style.fontSize = '0.8rem';
             link.style.color = '#555';
             link.textContent = I18n.t('ui.sourceECCC');
+            // Add direct links to today's station data pages when station id is available
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            const linkWrap = document.createElement('div');
+            linkWrap.style.marginTop = '6px';
+            linkWrap.style.display = 'flex';
+            linkWrap.style.gap = '10px';
+            const histLink = document.createElement('a');
+            histLink.target = '_blank';
+            histLink.rel = 'noopener noreferrer';
+            histLink.style.fontSize = '0.8rem';
+            histLink.style.color = '#555';
+            histLink.textContent = I18n.t('ui.ecccHistoricalLink') || 'ECCC Historical Data (Today)';
+            const almLink = document.createElement('a');
+            almLink.target = '_blank';
+            almLink.rel = 'noopener noreferrer';
+            almLink.style.fontSize = '0.8rem';
+            almLink.style.color = '#555';
+            almLink.textContent = I18n.t('ui.ecccAlmanacLink') || 'ECCC Almanac';
+            // Build URLs with stationId and date params when possible
+            if (station && station.id) {
+                // Common patterns used by ECCC; if parameters change, links still land on base page
+                histLink.href = `https://climate.weather.gc.ca/historical_data/search_historic_data_e.html?stationID=${station.id}&year=${y}&month=${m}&day=${d}`;
+                almLink.href = `https://climate.weather.gc.ca/climate_data/almanac_selection_e.html?stationID=${station.id}&year=${y}&month=${m}&day=${d}`;
+            } else {
+                histLink.href = 'https://climate.weather.gc.ca/historical_data/search_historic_data_e.html';
+                almLink.href = 'https://climate.weather.gc.ca/climate_data/almanac_selection_e.html';
+            }
+            linkWrap.appendChild(histLink);
+            linkWrap.appendChild(almLink);
             container.appendChild(title);
             container.appendChild(stationEl);
-            container.appendChild(grid);
+            if (grid) container.appendChild(grid);
             container.appendChild(link);
+            container.appendChild(linkWrap);
             ELEMENTS.historicalNormalsContent.appendChild(container);
         },
         /**
