@@ -24,8 +24,8 @@ const Calculations = (() => {
             return 'rain-none';
         },
 
-        // Format table cell with probability and temperature
-        formatTableCell(probability, temperature) {
+        // Format table cell with probability and temperature (high/low)
+        formatTableCell(probability, tempMax, tempMin) {
             const pillClass = this.getRainPillClass(probability);
             let probTxt = '<span class="rain-pill rain-none">-</span>';
 
@@ -33,7 +33,9 @@ const Calculations = (() => {
                 probTxt = `<span class="rain-pill ${pillClass}">${probability}%</span>`;
             }
 
-            const tempTxt = `<span class="temp-val">${temperature !== null ? Math.round(temperature) + '°' : '--'}</span>`;
+            const highTxt = tempMax !== null ? Math.round(tempMax) + '°' : '--';
+            const lowTxt = tempMin !== null ? Math.round(tempMin) + '°' : '--';
+            const tempTxt = `<span class="temp-val">${highTxt}/${lowTxt}</span>`;
             return `${probTxt} ${tempTxt}`;
         },
 
@@ -184,6 +186,94 @@ const Calculations = (() => {
             }
             
             return parts.join(' ');
+        },
+
+        // Get weather icon based on WMO weather code
+        getWeatherIcon(code) {
+            if (code === null || code === undefined) return '☁️';
+            if (code === 0) return '☀️'; // Clear
+            if (code <= 3) return '⛅'; // Partly cloudy
+            if (code <= 48) return '🌫️'; // Fog
+            if (code <= 57) return '🌧️'; // Drizzle
+            if (code <= 67) return '🌧️'; // Rain
+            if (code <= 77) return '❄️'; // Snow
+            if (code <= 82) return '🌧️'; // Rain showers
+            if (code <= 86) return '🌨️'; // Snow showers
+            if (code <= 99) return '⛈️'; // Thunderstorm
+            return '☁️';
+        },
+
+        // Get weather description based on WMO weather code
+        getWeatherDescription(code) {
+            if (code === null || code === undefined) return 'Unknown';
+            if (code === 0) return 'Clear';
+            if (code === 1) return 'Mainly Clear';
+            if (code === 2) return 'Partly Cloudy';
+            if (code === 3) return 'Overcast';
+            if (code <= 48) return 'Foggy';
+            if (code <= 57) return 'Drizzle';
+            if (code <= 67) return 'Rain';
+            if (code <= 77) return 'Snow';
+            if (code <= 82) return 'Rain Showers';
+            if (code <= 86) return 'Snow Showers';
+            if (code <= 99) return 'Thunderstorm';
+            return 'Unknown';
+        },
+
+        // Check if wind speed is extreme
+        isExtremeWind(windSpeed, gusts) {
+            if (gusts !== null && gusts >= 75) return 'dangerous'; // Hurricane force
+            if (gusts !== null && gusts >= 50) return 'high'; // Damaging winds
+            if (windSpeed !== null && windSpeed >= 50) return 'high';
+            if (windSpeed !== null && windSpeed >= 30) return 'moderate';
+            return null;
+        },
+
+        // Check if temperature is extreme
+        isExtremeTemp(tempMax, tempMin) {
+            if (tempMax !== null && tempMax >= 40) return 'extreme-heat'; // Dangerous heat
+            if (tempMax !== null && tempMax >= 35) return 'high-heat'; // Very hot
+            if (tempMin !== null && tempMin <= -30) return 'extreme-cold'; // Dangerous cold
+            if (tempMin !== null && tempMin <= -20) return 'high-cold'; // Very cold
+            return null;
+        },
+
+        // Format snowfall amount
+        formatSnow(value) {
+            if (value === null || value === 0) return null;
+            if (value < 0.1) return null;
+            return `${value.toFixed(1)}cm`;
+        },
+
+        // Format wind speed
+        formatWind(speed, gusts = null) {
+            if (speed === null) return null;
+            if (speed < 5) return null; // Don't show calm winds
+            const speedText = `${Math.round(speed)} km/h`;
+            if (gusts && gusts > speed + 10) {
+                return `${speedText} (gusts ${Math.round(gusts)})`;
+            }
+            return speedText;
+        },
+
+        // Get extreme weather warning badge
+        getExtremeWeatherBadge(tempMax, tempMin, windSpeed, gusts, snow) {
+            const warnings = [];
+            
+            const tempWarning = this.isExtremeTemp(tempMax, tempMin);
+            if (tempWarning === 'extreme-heat') warnings.push('🔥 EXTREME HEAT');
+            else if (tempWarning === 'high-heat') warnings.push('🌡️ Very Hot');
+            else if (tempWarning === 'extreme-cold') warnings.push('🥶 EXTREME COLD');
+            else if (tempWarning === 'high-cold') warnings.push('❄️ Very Cold');
+            
+            const windWarning = this.isExtremeWind(windSpeed, gusts);
+            if (windWarning === 'dangerous') warnings.push('💨 DANGEROUS WINDS');
+            else if (windWarning === 'high') warnings.push('💨 High Winds');
+            
+            if (snow !== null && snow >= 25) warnings.push('❄️ HEAVY SNOW');
+            else if (snow !== null && snow >= 10) warnings.push('🌨️ Significant Snow');
+            
+            return warnings.length > 0 ? warnings.join(' • ') : null;
         }
     };
 })();

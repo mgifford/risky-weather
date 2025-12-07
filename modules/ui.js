@@ -38,7 +38,9 @@ const UI = (() => {
         lessonCounter: document.getElementById('lesson-counter'),
         lessonCycleBtn: document.getElementById('lesson-cycle-btn'),
         languageToggleBtn: document.getElementById('language-toggle-btn'),
-        shareBtn: document.getElementById('share-btn')
+        shareBtn: document.getElementById('share-btn'),
+        historySection: document.getElementById('history-section'),
+        historyContent: document.getElementById('history-content')
     };
 
     let currentLessonIndex = 0;
@@ -88,28 +90,57 @@ const UI = (() => {
         /**
          * Render today's forecast with uncertainty context
          */
-        renderToday(tempA, probA, tempB, probB) {
-            ELEMENTS.valA.innerText = Calculations.formatTemp(tempA);
-            ELEMENTS.rainA.innerText = Calculations.formatRain(probA);
-            ELEMENTS.valB.innerText = Calculations.formatTemp(tempB);
-            ELEMENTS.rainB.innerText = Calculations.formatRain(probB);
+        renderToday(data) {
+            // Weather icons
+            const iconA = Calculations.getWeatherIcon(data.codeA);
+            const iconB = Calculations.getWeatherIcon(data.codeB);
+            const descA = Calculations.getWeatherDescription(data.codeA);
+            const descB = Calculations.getWeatherDescription(data.codeB);
+
+            // Temperature with weather icon
+            ELEMENTS.valA.innerHTML = `${iconA} ${Calculations.formatTemp(data.tempMaxA)}<span style="font-size: 0.7em; color: #666;">/${Calculations.formatTemp(data.tempMinA)}</span>`;
+            ELEMENTS.valB.innerHTML = `${iconB} ${Calculations.formatTemp(data.tempMaxB)}<span style="font-size: 0.7em; color: #666;">/${Calculations.formatTemp(data.tempMinB)}</span>`;
+            
+            // Rain probability
+            ELEMENTS.rainA.innerText = Calculations.formatRain(data.probA);
+            ELEMENTS.rainB.innerText = Calculations.formatRain(data.probB);
 
             // Add tooltips for today's probabilities
             if (ELEMENTS.rainA) {
-                ELEMENTS.rainA.title = Calculations.getProbabilityTooltip(probA);
+                ELEMENTS.rainA.title = Calculations.getProbabilityTooltip(data.probA);
                 ELEMENTS.rainA.style.cursor = 'help';
             }
             if (ELEMENTS.rainB) {
-                ELEMENTS.rainB.title = Calculations.getProbabilityTooltip(probB);
+                ELEMENTS.rainB.title = Calculations.getProbabilityTooltip(data.probB);
                 ELEMENTS.rainB.style.cursor = 'help';
             }
 
+            // Add weather details below temps (snow, wind)
+            const detailsA = this.formatWeatherDetails(data.snowA, data.windA, data.gustA);
+            const detailsB = this.formatWeatherDetails(data.snowB, data.windB, data.gustB);
+            
+            if (detailsA) {
+                ELEMENTS.valA.innerHTML += `<div style="font-size: 0.75rem; color: #666; margin-top: 4px;">${detailsA}</div>`;
+            }
+            if (detailsB) {
+                ELEMENTS.valB.innerHTML += `<div style="font-size: 0.75rem; color: #666; margin-top: 4px;">${detailsB}</div>`;
+            }
+
+            // Check for extreme weather warnings
+            const extremeA = Calculations.getExtremeWeatherBadge(data.tempMaxA, data.tempMinA, data.windA, data.gustA, data.snowA);
+            const extremeB = Calculations.getExtremeWeatherBadge(data.tempMaxB, data.tempMinB, data.windB, data.gustB, data.snowB);
+            
+            if (extremeA || extremeB) {
+                const warningMsg = extremeA || extremeB;
+                this.setStatus(`⚠️ ${warningMsg}`, 'warning');
+            }
+
             // Calculate and display uncertainty for today if significant
-            const tempDiff = Calculations.calculateDisagreement(tempA, tempB);
-            const rainDiff = Calculations.calculateDisagreement(probA, probB);
+            const tempDiff = Calculations.calculateDisagreement(data.tempMaxA, data.tempMaxB);
+            const rainDiff = Calculations.calculateDisagreement(data.probA, data.probB);
             const uncertaintyLevel = Calculations.getUncertaintyLevel(tempDiff, rainDiff);
             
-            if (uncertaintyLevel === 'high') {
+            if (uncertaintyLevel === 'high' && !extremeA && !extremeB) {
                 const disagreementMsg = Calculations.getDisagreementTooltip(tempDiff, rainDiff);
                 this.setStatus(`⚠️ High uncertainty today: ${disagreementMsg}`);
             }
@@ -125,9 +156,20 @@ const UI = (() => {
             times.forEach((dateStr, index) => {
                 const dayName = Calculations.getDayName(dateStr, index === 0);
                 const maxA = Calculations.getSafeData(dailyData, modelA, 'temperature_2m_max', index);
+                const minA = Calculations.getSafeData(dailyData, modelA, 'temperature_2m_min', index);
                 const probA = Calculations.getSafeData(dailyData, modelA, 'precipitation_probability_max', index);
+                const snowA = Calculations.getSafeData(dailyData, modelA, 'snowfall_sum', index);
+                const windA = Calculations.getSafeData(dailyData, modelA, 'windspeed_10m_max', index);
+                const gustA = Calculations.getSafeData(dailyData, modelA, 'windgusts_10m_max', index);
+                const codeA = Calculations.getSafeData(dailyData, modelA, 'weather_code', index);
+                
                 const maxB = Calculations.getSafeData(dailyData, modelB, 'temperature_2m_max', index);
+                const minB = Calculations.getSafeData(dailyData, modelB, 'temperature_2m_min', index);
                 const probB = Calculations.getSafeData(dailyData, modelB, 'precipitation_probability_max', index);
+                const snowB = Calculations.getSafeData(dailyData, modelB, 'snowfall_sum', index);
+                const windB = Calculations.getSafeData(dailyData, modelB, 'windspeed_10m_max', index);
+                const gustB = Calculations.getSafeData(dailyData, modelB, 'windgusts_10m_max', index);
+                const codeB = Calculations.getSafeData(dailyData, modelB, 'weather_code', index);
 
                 // Calculate disagreement
                 const tempDiff = Calculations.calculateDisagreement(maxA, maxB);
@@ -136,21 +178,52 @@ const UI = (() => {
                 const uncertaintyIcon = Calculations.getUncertaintyIcon(uncertaintyLevel);
                 const disagreementTooltip = Calculations.getDisagreementTooltip(tempDiff, rainDiff);
 
-                const cellA = Calculations.formatTableCell(probA, maxA);
-                const cellB = Calculations.formatTableCell(probB, maxB);
+                // Weather icons
+                const iconA = Calculations.getWeatherIcon(codeA);
+                const iconB = Calculations.getWeatherIcon(codeB);
+
+                // Format main data
+                const cellA = Calculations.formatTableCell(probA, maxA, minA);
+                const cellB = Calculations.formatTableCell(probB, maxB, minB);
+
+                // Additional weather details (snow, wind)
+                const detailsA = this.formatWeatherDetails(snowA, windA, gustA);
+                const detailsB = this.formatWeatherDetails(snowB, windB, gustB);
+
+                // Check for extreme weather
+                const extremeA = Calculations.getExtremeWeatherBadge(maxA, minA, windA, gustA, snowA);
+                const extremeB = Calculations.getExtremeWeatherBadge(maxB, minB, windB, gustB, snowB);
+                const extremeBadge = extremeA ? `<div style="color: #d32f2f; font-size: 0.75rem; font-weight: bold; margin-top: 2px;">${extremeA}</div>` : '';
 
                 // Add uncertainty indicator if present
                 const uncertaintyBadge = uncertaintyIcon ? 
                     `<span class="uncertainty-badge" title="${disagreementTooltip}" style="cursor: help; margin-left: 4px;">${uncertaintyIcon}</span>` : '';
 
                 html += `<tr>
-                    <td class="col-day">${dayName}${uncertaintyBadge}</td>
-                    <td title="${Calculations.getProbabilityTooltip(probA)}" style="cursor: help;">${cellA}</td>
-                    <td title="${Calculations.getProbabilityTooltip(probB)}" style="cursor: help;">${cellB}</td>
+                    <td class="col-day">${dayName}${uncertaintyBadge}${extremeBadge}</td>
+                    <td title="${Calculations.getProbabilityTooltip(probA)}" style="cursor: help;">
+                        <div>${iconA} ${cellA}</div>
+                        ${detailsA ? `<div style="font-size: 0.75rem; color: #666; margin-top: 2px;">${detailsA}</div>` : ''}
+                    </td>
+                    <td title="${Calculations.getProbabilityTooltip(probB)}" style="cursor: help;">
+                        <div>${iconB} ${cellB}</div>
+                        ${detailsB ? `<div style="font-size: 0.75rem; color: #666; margin-top: 2px;">${detailsB}</div>` : ''}
+                    </td>
                 </tr>`;
             });
 
             ELEMENTS.forecastList.innerHTML = html;
+        },
+
+        formatWeatherDetails(snow, wind, gusts) {
+            const parts = [];
+            const snowText = Calculations.formatSnow(snow);
+            const windText = Calculations.formatWind(wind, gusts);
+            
+            if (snowText) parts.push(`❄️ ${snowText}`);
+            if (windText) parts.push(`💨 ${windText}`);
+            
+            return parts.join(' • ');
         },
 
         /**
@@ -477,6 +550,30 @@ const UI = (() => {
         onShare(callback) {
             if (ELEMENTS.shareBtn) {
                 ELEMENTS.shareBtn.addEventListener('click', callback);
+            }
+        },
+
+        /**
+         * Display today's historical climate event
+         */
+        renderHistoryEvent(formattedEvent) {
+            if (!formattedEvent || !ELEMENTS.historyContent) {
+                if (ELEMENTS.historySection) {
+                    ELEMENTS.historySection.classList.add('hidden');
+                }
+                return;
+            }
+
+            ELEMENTS.historyContent.innerHTML = `
+                <p style="margin: 0 0 12px 0; font-size: 0.95rem; line-height: 1.6;">${formattedEvent.event}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #718096; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf2f7;">
+                    <span>📅 ${formattedEvent.formattedDate}</span>
+                    ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: #3182ce; text-decoration: none;">🔗 Learn more →</a>` : ''}
+                </div>
+            `;
+
+            if (ELEMENTS.historySection) {
+                ELEMENTS.historySection.classList.remove('hidden');
             }
         },
 

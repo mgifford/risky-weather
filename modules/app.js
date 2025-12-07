@@ -27,6 +27,14 @@ const App = (() => {
         UI.setStatus(I18n.t('status.checkingHistory'));
         loadScoreboard();
 
+        // Load and display today's historical climate event
+        await History.loadEvents();
+        const todayEvent = History.getTodayEvent();
+        if (todayEvent) {
+            const formatted = History.formatEvent(todayEvent);
+            UI.renderHistoryEvent(formatted);
+        }
+
         // Display random education lesson on startup
         UI.initEducation();
 
@@ -156,13 +164,25 @@ const App = (() => {
     function renderForecast(data, config) {
         const daily = data.daily;
 
-        // Today's forecast
-        const tempA = Calculations.getSafeData(daily, config.modelA, 'temperature_2m_max', 0);
-        const probA = Calculations.getSafeData(daily, config.modelA, 'precipitation_probability_max', 0);
-        const tempB = Calculations.getSafeData(daily, config.modelB, 'temperature_2m_max', 0);
-        const probB = Calculations.getSafeData(daily, config.modelB, 'precipitation_probability_max', 0);
+        // Today's forecast - extract all weather data
+        const todayData = {
+            tempMaxA: Calculations.getSafeData(daily, config.modelA, 'temperature_2m_max', 0),
+            tempMinA: Calculations.getSafeData(daily, config.modelA, 'temperature_2m_min', 0),
+            probA: Calculations.getSafeData(daily, config.modelA, 'precipitation_probability_max', 0),
+            snowA: Calculations.getSafeData(daily, config.modelA, 'snowfall_sum', 0),
+            windA: Calculations.getSafeData(daily, config.modelA, 'windspeed_10m_max', 0),
+            gustA: Calculations.getSafeData(daily, config.modelA, 'windgusts_10m_max', 0),
+            codeA: Calculations.getSafeData(daily, config.modelA, 'weather_code', 0),
+            tempMaxB: Calculations.getSafeData(daily, config.modelB, 'temperature_2m_max', 0),
+            tempMinB: Calculations.getSafeData(daily, config.modelB, 'temperature_2m_min', 0),
+            probB: Calculations.getSafeData(daily, config.modelB, 'precipitation_probability_max', 0),
+            snowB: Calculations.getSafeData(daily, config.modelB, 'snowfall_sum', 0),
+            windB: Calculations.getSafeData(daily, config.modelB, 'windspeed_10m_max', 0),
+            gustB: Calculations.getSafeData(daily, config.modelB, 'windgusts_10m_max', 0),
+            codeB: Calculations.getSafeData(daily, config.modelB, 'weather_code', 0)
+        };
 
-        UI.renderToday(tempA, probA, tempB, probB);
+        UI.renderToday(todayData);
 
         // 7-day forecast
         UI.renderSevenDay(daily, config.modelA, config.modelB);

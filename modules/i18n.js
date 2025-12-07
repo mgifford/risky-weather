@@ -39,6 +39,7 @@ const I18n = (() => {
             'ui.climateContext': '🌍 Climate Context',
             'ui.education': 'Understanding Weather & Risk',
             'ui.loadingLesson': 'Loading lesson...',
+            'ui.historyTitle': '📜 On This Day in Climate History',
             'ui.uncertaintyTitle': '🎯 Understanding Model Disagreement',
             'ui.uncertaintyDescription': 'When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for ⚠️ (high uncertainty) or ⚡ (moderate uncertainty) icons next to days below.',
             'ui.resetLocation': 'Reset Location & History',
@@ -116,6 +117,34 @@ const I18n = (() => {
             'rain.highRisk': 'High Risk',
             'rain.veryHighRisk': 'Very High Risk',
 
+            // Weather conditions
+            'weather.clear': 'Clear',
+            'weather.mainlyClear': 'Mainly Clear',
+            'weather.partlyCloudy': 'Partly Cloudy',
+            'weather.overcast': 'Overcast',
+            'weather.foggy': 'Foggy',
+            'weather.drizzle': 'Drizzle',
+            'weather.rain': 'Rain',
+            'weather.snow': 'Snow',
+            'weather.rainShowers': 'Rain Showers',
+            'weather.snowShowers': 'Snow Showers',
+            'weather.thunderstorm': 'Thunderstorm',
+
+            // Extreme weather warnings
+            'warning.extremeHeat': 'EXTREME HEAT',
+            'warning.highHeat': 'Very Hot',
+            'warning.extremeCold': 'EXTREME COLD',
+            'warning.highCold': 'Very Cold',
+            'warning.dangerousWinds': 'DANGEROUS WINDS',
+            'warning.highWinds': 'High Winds',
+            'warning.heavySnow': 'HEAVY SNOW',
+            'warning.significantSnow': 'Significant Snow',
+
+            // Weather details
+            'weather.snowfall': 'Snow',
+            'weather.wind': 'Wind',
+            'weather.gusts': 'gusts',
+
             // Days of week
             'day.sunday': 'Sunday',
             'day.monday': 'Monday',
@@ -155,6 +184,7 @@ const I18n = (() => {
             'ui.climateContext': '🌍 Contexte climatique',
             'ui.education': 'Comprendre la météo et le risque',
             'ui.loadingLesson': 'Chargement de la leçon...',
+            'ui.historyTitle': '📜 Ce jour dans l’histoire du climat',
             'ui.uncertaintyTitle': '🎯 Comprendre le désaccord des modèles',
             'ui.uncertaintyDescription': 'Lorsque les modèles sont en désaccord significatif, l\'incertitude des prévisions est <strong>élevée</strong>. Recherchez les icônes ⚠️ (incertitude élevée) ou ⚡ (incertitude modérée) à côté des jours ci-dessous.',
             'ui.resetLocation': 'Réinitialiser l\'emplacement et l\'historique',
@@ -231,6 +261,34 @@ const I18n = (() => {
             'rain.moderateRisk': 'Risque modéré',
             'rain.highRisk': 'Risque élevé',
             'rain.veryHighRisk': 'Risque très élevé',
+
+            // Conditions météorologiques
+            'weather.clear': 'Dégagé',
+            'weather.mainlyClear': 'Principalement dégagé',
+            'weather.partlyCloudy': 'Partiellement nuageux',
+            'weather.overcast': 'Couvert',
+            'weather.foggy': 'Brouillard',
+            'weather.drizzle': 'Bruine',
+            'weather.rain': 'Pluie',
+            'weather.snow': 'Neige',
+            'weather.rainShowers': 'Averses',
+            'weather.snowShowers': 'Averses de neige',
+            'weather.thunderstorm': 'Orage',
+
+            // Avertissements météorologiques extrêmes
+            'warning.extremeHeat': 'CHALEUR EXTRÊME',
+            'warning.highHeat': 'Très chaud',
+            'warning.extremeCold': 'FROID EXTRÊME',
+            'warning.highCold': 'Très froid',
+            'warning.dangerousWinds': 'VENTS DANGEREUX',
+            'warning.highWinds': 'Vents forts',
+            'warning.heavySnow': 'NEIGE ABONDANTE',
+            'warning.significantSnow': 'Neige importante',
+
+            // Détails météorologiques
+            'weather.snowfall': 'Neige',
+            'weather.wind': 'Vent',
+            'weather.gusts': 'rafales',
 
             // Jours de la semaine
             'day.sunday': 'Dimanche',

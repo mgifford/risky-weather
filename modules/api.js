@@ -22,7 +22,7 @@ const API = (() => {
         const params = new URLSearchParams({
             latitude: lat,
             longitude: lon,
-            daily: 'temperature_2m_max,precipitation_probability_max',
+            daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,snowfall_sum,windspeed_10m_max,windgusts_10m_max,weather_code',
             models: `${modelA},${modelB}`,
             timezone: 'auto'
         });
@@ -58,7 +58,7 @@ const API = (() => {
             const params = new URLSearchParams({
                 latitude: lat,
                 longitude: lon,
-                daily: 'temperature_2m_max,precipitation_probability_max',
+                daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,snowfall_sum,windspeed_10m_max,windgusts_10m_max,weather_code',
                 models,
                 timezone: 'auto'
             });
@@ -127,38 +127,55 @@ const API = (() => {
         }
 
         // Keys we care about filling
-        const gemRegTempKey = `temperature_2m_max_gem_regional`;
-        const gemGlobTempKey = `temperature_2m_max_gem_global`;
-        const genericTempKey = `temperature_2m_max`;
-        const gemRegRainKey = `precipitation_probability_max_gem_regional`;
-        const gemGlobRainKey = `precipitation_probability_max_gem_global`;
-        const genericRainKey = `precipitation_probability_max`;
+        const keys = {
+            tempMax: { reg: 'temperature_2m_max_gem_regional', glob: 'temperature_2m_max_gem_global', gen: 'temperature_2m_max' },
+            tempMin: { reg: 'temperature_2m_min_gem_regional', glob: 'temperature_2m_min_gem_global', gen: 'temperature_2m_min' },
+            rain: { reg: 'precipitation_probability_max_gem_regional', glob: 'precipitation_probability_max_gem_global', gen: 'precipitation_probability_max' },
+            precip: { reg: 'precipitation_sum_gem_regional', glob: 'precipitation_sum_gem_global', gen: 'precipitation_sum' },
+            snow: { reg: 'snowfall_sum_gem_regional', glob: 'snowfall_sum_gem_global', gen: 'snowfall_sum' },
+            wind: { reg: 'windspeed_10m_max_gem_regional', glob: 'windspeed_10m_max_gem_global', gen: 'windspeed_10m_max' },
+            gust: { reg: 'windgusts_10m_max_gem_regional', glob: 'windgusts_10m_max_gem_global', gen: 'windgusts_10m_max' },
+            code: { reg: 'weather_code_gem_regional', glob: 'weather_code_gem_global', gen: 'weather_code' }
+        };
 
-        if (!blended.daily[gemRegTempKey]) blended.daily[gemRegTempKey] = new Array(globalDays).fill(null);
-        if (!blended.daily[gemRegRainKey]) blended.daily[gemRegRainKey] = new Array(globalDays).fill(null);
+        // Initialize arrays
+        Object.values(keys).forEach(k => {
+            if (!blended.daily[k.reg]) blended.daily[k.reg] = new Array(globalDays).fill(null);
+        });
 
-        const regionalTempArr = regionalData.daily?.[gemRegTempKey] || [];
-        const regionalRainArr = regionalData.daily?.[gemRegRainKey] || [];
+        // Get regional arrays
+        const regional = {
+            tempMax: regionalData.daily?.[keys.tempMax.reg] || [],
+            tempMin: regionalData.daily?.[keys.tempMin.reg] || [],
+            rain: regionalData.daily?.[keys.rain.reg] || [],
+            precip: regionalData.daily?.[keys.precip.reg] || [],
+            snow: regionalData.daily?.[keys.snow.reg] || [],
+            wind: regionalData.daily?.[keys.wind.reg] || [],
+            gust: regionalData.daily?.[keys.gust.reg] || [],
+            code: regionalData.daily?.[keys.code.reg] || []
+        };
 
+        // Fill each day, blending regional with global
         for (let i = 0; i < globalDays && i < 7; i++) {
-            // Fill temperature: prefer existing regional value, otherwise copy from global
-            if (regionalTempArr[i] != null) {
-                blended.daily[gemRegTempKey][i] = regionalTempArr[i];
-            } else if (globalData.daily?.[gemGlobTempKey] && globalData.daily[gemGlobTempKey][i] != null) {
-                blended.daily[gemRegTempKey][i] = globalData.daily[gemGlobTempKey][i];
-            } else if (globalData.daily?.[genericTempKey] && globalData.daily[genericTempKey][i] != null) {
-                // Some API responses provide generic keys (non-namespaced)
-                blended.daily[gemRegTempKey][i] = globalData.daily[genericTempKey][i];
-            }
+            // Helper to fill one key type
+            const fillKey = (keySet, regionalArr) => {
+                if (regionalArr[i] != null) {
+                    blended.daily[keySet.reg][i] = regionalArr[i];
+                } else if (globalData.daily?.[keySet.glob] && globalData.daily[keySet.glob][i] != null) {
+                    blended.daily[keySet.reg][i] = globalData.daily[keySet.glob][i];
+                } else if (globalData.daily?.[keySet.gen] && globalData.daily[keySet.gen][i] != null) {
+                    blended.daily[keySet.reg][i] = globalData.daily[keySet.gen][i];
+                }
+            };
 
-            // Fill rain probability similarly
-            if (regionalRainArr[i] != null) {
-                blended.daily[gemRegRainKey][i] = regionalRainArr[i];
-            } else if (globalData.daily?.[gemGlobRainKey] && globalData.daily[gemGlobRainKey][i] != null) {
-                blended.daily[gemRegRainKey][i] = globalData.daily[gemGlobRainKey][i];
-            } else if (globalData.daily?.[genericRainKey] && globalData.daily[genericRainKey][i] != null) {
-                blended.daily[gemRegRainKey][i] = globalData.daily[genericRainKey][i];
-            }
+            fillKey(keys.tempMax, regional.tempMax);
+            fillKey(keys.tempMin, regional.tempMin);
+            fillKey(keys.rain, regional.rain);
+            fillKey(keys.precip, regional.precip);
+            fillKey(keys.snow, regional.snow);
+            fillKey(keys.wind, regional.wind);
+            fillKey(keys.gust, regional.gust);
+            fillKey(keys.code, regional.code);
         }
 
         return blended;
@@ -242,6 +259,11 @@ const API = (() => {
             if (ipResp.ok) {
                 const ipData = await ipResp.json();
                 if (ipData && ipData.city) {
+                    // Add region/state if available (format: "City-Region")
+                    const region = ipData.region_code || ipData.region;
+                    if (region) {
+                        return `${ipData.city}-${region}`;
+                    }
                     return ipData.city;
                 }
             }
@@ -266,9 +288,16 @@ const API = (() => {
                 const response = await fetch(`${BASE_GEOCODING}?${params}`, { signal: controller.signal });
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.results?.[0]?.name) {
+                    if (data.results?.[0]) {
                         clearTimeout(timeoutId);
-                        return data.results[0].name;
+                        const result = data.results[0];
+                        const name = result.name;
+                        // Add region/admin1 if available (format: "City-Region")
+                        const region = result.admin1 || result.country_code;
+                        if (region && region !== name) {
+                            return `${name}-${region}`;
+                        }
+                        return name;
                     }
                 }
             } catch (error) {
@@ -291,6 +320,11 @@ const API = (() => {
                            data.address?.county ||
                            null;
                 if (name) {
+                    // Add state/region if available (format: "City-Region")
+                    const region = data.address?.state || data.address?.county || data.address?.country_code?.toUpperCase();
+                    if (region && region !== name) {
+                        return `${name}-${region}`;
+                    }
                     return name;
                 }
             }

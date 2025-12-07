@@ -81,8 +81,8 @@ const Storage = (() => {
             const params = new URLSearchParams();
             
             if (lat && lon && city) {
-                params.set('lat', lat.toFixed(4));
-                params.set('lon', lon.toFixed(4));
+                params.set('lat', lat.toFixed(2));
+                params.set('lon', lon.toFixed(2));
                 params.set('city', encodeURIComponent(city));
             }
             
@@ -128,8 +128,8 @@ const Storage = (() => {
             const params = new URLSearchParams();
             
             if (lat && lon && city) {
-                params.set('lat', lat.toFixed(4));
-                params.set('lon', lon.toFixed(4));
+                params.set('lat', lat.toFixed(2));
+                params.set('lon', lon.toFixed(2));
                 params.set('city', encodeURIComponent(city));
             }
             
