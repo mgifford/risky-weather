@@ -40,10 +40,15 @@ const UI = (() => {
         languageToggleBtn: document.getElementById('language-toggle-btn'),
         shareBtn: document.getElementById('share-btn'),
         historySection: document.getElementById('history-section'),
-        historyContent: document.getElementById('history-content')
+        historyContent: document.getElementById('history-content'),
+        citySearchInput: document.getElementById('city-search-input'),
+        citySearchResults: document.getElementById('city-search-results'),
+        historicalNormalsSection: document.getElementById('historical-normals-section'),
+        historicalNormalsContent: document.getElementById('historical-normals-content')
     };
 
     let currentLessonIndex = 0;
+    let searchTimeout = null;
 
     return {
         /**
@@ -142,7 +147,7 @@ const UI = (() => {
             
             if (uncertaintyLevel === 'high' && !extremeA && !extremeB) {
                 const disagreementMsg = Calculations.getDisagreementTooltip(tempDiff, rainDiff);
-                this.setStatus(`⚠️ High uncertainty today: ${disagreementMsg}`);
+                this.setStatus(`🤔 High uncertainty today: ${disagreementMsg}`);
             }
         },
 
@@ -245,18 +250,42 @@ const UI = (() => {
         /**
          * Render reality check (yesterday's forecast vs actual)
          */
-        renderRealityCheck(date, actuallyRained, rainfall, modelAProbability, modelBProbability, modelAName, modelBName) {
-            const rainLabel = actuallyRained ? `Rain (${rainfall}mm)` : 'Dry';
+        renderRealityCheck(date, actuallyRained, rainfall, modelAProbability, modelBProbability, modelAName, modelBName, tempData = null) {
+            const rainLabel = actuallyRained ? `Rain (${rainfall.toFixed(1)}mm)` : 'Dry';
 
-            ELEMENTS.realityContent.innerHTML = `
+            let html = `
                 <p><strong>Date:</strong> ${date}</p>
-                <p>Reality: <strong>${rainLabel}</strong></p>
+                <p><strong>Precipitation:</strong> ${rainLabel}</p>
                 <p style="font-size:0.85rem; color:#555;">
-                    ${modelAName}: ${modelAProbability}% Risk<br>
-                    ${modelBName}: ${modelBProbability}% Risk
+                    ${modelAName} forecast: ${modelAProbability}% Risk<br>
+                    ${modelBName} forecast: ${modelBProbability}% Risk
                 </p>
             `;
 
+            // Add temperature comparison if available
+            if (tempData && tempData.actualTempMax !== null) {
+                const formatTemp = (temp) => temp !== null ? `${Math.round(temp)}°C` : 'N/A';
+                const calcError = (forecast, actual) => {
+                    if (forecast === null || actual === null) return '';
+                    const diff = forecast - actual;
+                    const sign = diff > 0 ? '+' : '';
+                    return ` (${sign}${diff.toFixed(1)}°C)`;
+                };
+
+                html += `
+                    <p style="margin-top:12px;"><strong>Temperature:</strong></p>
+                    <p style="font-size:0.85rem; color:#555;">
+                        Actual High: <strong>${formatTemp(tempData.actualTempMax)}</strong>, 
+                        Low: <strong>${formatTemp(tempData.actualTempMin)}</strong>
+                    </p>
+                    <p style="font-size:0.85rem; color:#555;">
+                        ${modelAName}: ${formatTemp(tempData.forecastATempMax)}/${formatTemp(tempData.forecastATempMin)}${calcError(tempData.forecastATempMax, tempData.actualTempMax)}<br>
+                        ${modelBName}: ${formatTemp(tempData.forecastBTempMax)}/${formatTemp(tempData.forecastBTempMin)}${calcError(tempData.forecastBTempMax, tempData.actualTempMax)}
+                    </p>
+                `;
+            }
+
+            ELEMENTS.realityContent.innerHTML = html;
             ELEMENTS.realityCheck.classList.remove('hidden');
         },
 
@@ -352,7 +381,10 @@ const UI = (() => {
         /**
          * Initialize education section
          */
-        initEducation() {
+        async initEducation() {
+            // Load lessons from YAML
+            await Education.loadLessons();
+            
             const lesson = Education.getRandomLesson();
             currentLessonIndex = 0;
             this.displayLesson(lesson);
@@ -392,13 +424,18 @@ const UI = (() => {
             const modal = document.getElementById('cache-modal');
             const content = document.getElementById('cache-content');
             
-            // Collect all localStorage data
+            // Collect all localStorage data (only weather app keys)
+            const appKeyPrefixes = ['user_loc_v6', 'history_v6', 'scoreboard_v6', 'last_scored_date_v6'];
+            const allKeys = Object.keys(localStorage).filter(key => 
+                appKeyPrefixes.some(prefix => key.startsWith(prefix))
+            );
+            
             const cacheData = {
                 location: JSON.parse(localStorage.getItem('user_loc_v6') || 'null'),
                 historicalForecasts: JSON.parse(localStorage.getItem('history_v6_pending') || 'null'),
                 scoreboard: JSON.parse(localStorage.getItem('scoreboard_v6') || 'null'),
                 lastScoredDate: localStorage.getItem('last_scored_date_v6'),
-                allKeys: Object.keys(localStorage)
+                allKeys: allKeys
             };
             
             // Format display
@@ -420,10 +457,10 @@ const UI = (() => {
             // Scoreboard
             html += '<div style="margin-bottom: 15px;"><strong>🏆 Model Scores:</strong></div>';
             html += '<div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 15px;">';
-            if (cacheData.scoreboard) {
-                html += `GEM Regional Wins: ${cacheData.scoreboard.gemRegional || 0}<br>`;
-                html += `GEM Global Wins: ${cacheData.scoreboard.gemGlobal || 0}<br>`;
-                html += `ECMWF Wins: ${cacheData.scoreboard.ecmwf || 0}<br>`;
+            if (cacheData.scoreboard && (cacheData.scoreboard.a > 0 || cacheData.scoreboard.b > 0)) {
+                html += `Model A Wins: ${cacheData.scoreboard.a || 0}<br>`;
+                html += `Model B Wins: ${cacheData.scoreboard.b || 0}<br>`;
+                html += `Started: ${cacheData.scoreboard.start || 'N/A'}<br>`;
                 html += `Last Scored: ${cacheData.lastScoredDate || 'Never'}`;
             } else {
                 html += 'No scores saved yet';
@@ -436,9 +473,9 @@ const UI = (() => {
             if (cacheData.historicalForecasts) {
                 const forecast = cacheData.historicalForecasts;
                 html += `Date: ${forecast.date || 'N/A'}<br>`;
-                html += `Location: ${forecast.city || 'N/A'}<br>`;
-                html += `GEM Forecast: ${forecast.gem ? forecast.gem.temp + '°C' : 'N/A'}<br>`;
-                html += `ECMWF Forecast: ${forecast.ecmwf ? forecast.ecmwf.temp + '°C' : 'N/A'}`;
+                html += `Location: ${forecast.lat && forecast.lon ? `${forecast.lat.toFixed(2)}, ${forecast.lon.toFixed(2)}` : 'N/A'}<br>`;
+                html += `${forecast.modelA?.name || 'Model A'}: ${forecast.modelA?.prob !== undefined ? forecast.modelA.prob + '% rain' : 'N/A'}<br>`;
+                html += `${forecast.modelB?.name || 'Model B'}: ${forecast.modelB?.prob !== undefined ? forecast.modelB.prob + '% rain' : 'N/A'}`;
             } else {
                 html += 'No daily forecasts stored yet. Will save on next visit.';
             }
@@ -575,6 +612,144 @@ const UI = (() => {
             if (ELEMENTS.historySection) {
                 ELEMENTS.historySection.classList.remove('hidden');
             }
+        },
+
+        /**
+         * Render historical normals comparison
+         */
+        renderHistoricalNormals(normals, todayHigh, todayLow) {
+            if (!normals || !ELEMENTS.historicalNormalsContent) return;
+
+            const avgHigh = Math.round(normals.avgHigh);
+            const avgLow = Math.round(normals.avgLow);
+            const recordHigh = Math.round(normals.recordHigh);
+            const recordLow = Math.round(normals.recordLow);
+            
+            // Compare today's forecast to historical averages
+            const highDiff = todayHigh !== null ? Math.round(todayHigh - avgHigh) : null;
+            const lowDiff = todayLow !== null ? Math.round(todayLow - avgLow) : null;
+            
+            const highComparison = highDiff === null ? '' : 
+                highDiff > 0 ? `<span style="color: #e53e3e;">▲ ${highDiff}° above average</span>` :
+                highDiff < 0 ? `<span style="color: #3182ce;">▼ ${Math.abs(highDiff)}° below average</span>` :
+                `<span style="color: #718096;">at average</span>`;
+                
+            const lowComparison = lowDiff === null ? '' :
+                lowDiff > 0 ? `<span style="color: #e53e3e;">▲ ${lowDiff}° above average</span>` :
+                lowDiff < 0 ? `<span style="color: #3182ce;">▼ ${Math.abs(lowDiff)}° below average</span>` :
+                `<span style="color: #718096;">at average</span>`;
+
+            ELEMENTS.historicalNormalsContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.8rem; color: #718096; margin-bottom: 4px;">Average High</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #e53e3e;">${avgHigh}°</div>
+                        ${todayHigh !== null ? `<div style="font-size: 0.85rem; margin-top: 4px;">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
+                    </div>
+                    <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.8rem; color: #718096; margin-bottom: 4px;">Average Low</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #3182ce;">${avgLow}°</div>
+                        ${todayLow !== null ? `<div style="font-size: 0.85rem; margin-top: 4px;">Today: ${Math.round(todayLow)}° ${lowComparison}</div>` : ''}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.85rem;">
+                    <div>
+                        <span style="color: #718096;">Record High:</span> <strong style="color: #e53e3e;">${recordHigh}°</strong>
+                    </div>
+                    <div>
+                        <span style="color: #718096;">Record Low:</span> <strong style="color: #3182ce;">${recordLow}°</strong>
+                    </div>
+                </div>
+                <div style="font-size: 0.75rem; color: #a0aec0; margin-top: 12px; text-align: right;">
+                    Based on ${normals.yearsOfData} years of data
+                </div>
+            `;
+
+            ELEMENTS.historicalNormalsSection.classList.remove('hidden');
+        },
+
+        /**
+         * Initialize city search functionality
+         */
+        initCitySearch(onCitySelect) {
+            if (!ELEMENTS.citySearchInput || !ELEMENTS.citySearchResults) return;
+
+            // Handle input with debouncing
+            ELEMENTS.citySearchInput.addEventListener('input', async (e) => {
+                const query = e.target.value.trim();
+                
+                // Clear previous timeout
+                if (searchTimeout) clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    ELEMENTS.citySearchResults.style.display = 'none';
+                    return;
+                }
+
+                // Debounce search
+                searchTimeout = setTimeout(async () => {
+                    const results = await Geo.searchCities(query);
+                    this.displayCityResults(results, onCitySelect);
+                }, 300);
+            });
+
+            // Close results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!ELEMENTS.citySearchInput.contains(e.target) && !ELEMENTS.citySearchResults.contains(e.target)) {
+                    ELEMENTS.citySearchResults.style.display = 'none';
+                }
+            });
+
+            // Focus input on click
+            ELEMENTS.citySearchInput.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        },
+
+        /**
+         * Display city search results
+         */
+        displayCityResults(results, onCitySelect) {
+            if (!results || results.length === 0) {
+                ELEMENTS.citySearchResults.innerHTML = '<div style="padding: 12px; color: #a0aec0; font-size: 0.9rem;">No cities found</div>';
+                ELEMENTS.citySearchResults.style.display = 'block';
+                return;
+            }
+
+            let html = results.map(city => `
+                <div class="city-result-item" 
+                     data-lat="${city.lat}" 
+                     data-lon="${city.lon}" 
+                     data-name="${city.name}"
+                     data-region="${city.region}"
+                     style="padding: 12px; cursor: pointer; border-bottom: 1px solid #edf2f7; transition: background 0.2s;"
+                     onmouseover="this.style.background='#f7fafc'" 
+                     onmouseout="this.style.background='white'">
+                    <div style="font-weight: 600; color: #2d3748;">${city.name}</div>
+                    <div style="font-size: 0.85rem; color: #718096;">${city.region ? city.region + ', ' : ''}${city.country}</div>
+                </div>
+            `).join('');
+
+            ELEMENTS.citySearchResults.innerHTML = html;
+            ELEMENTS.citySearchResults.style.display = 'block';
+
+            // Add click handlers
+            ELEMENTS.citySearchResults.querySelectorAll('.city-result-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const lat = parseFloat(item.dataset.lat);
+                    const lon = parseFloat(item.dataset.lon);
+                    const name = item.dataset.name;
+                    const region = item.dataset.region;
+                    const cityName = region ? `${name}-${region}` : name;
+                    
+                    ELEMENTS.citySearchInput.value = item.querySelector('div').textContent;
+                    ELEMENTS.citySearchResults.style.display = 'none';
+                    
+                    if (onCitySelect) {
+                        onCitySelect(lat, lon, cityName);
+                    }
+                });
+            });
         },
 
         /**

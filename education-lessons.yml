@@ -1,0 +1,203 @@
+# Educational lessons about weather, climate, risk, and probability
+# Format: title, content, icon, language
+
+- title: "Risk vs Probability"
+  content: "Probability = the chance of something happening (e.g., 60% rain). Risk = what's at stake if it does. A 30% chance of rain might be low probability but HIGH risk if you're planning a wedding outdoors."
+  icon: "⚠️"
+  language: "en"
+
+- title: "Why Models Disagree"
+  content: "Each model uses different equations, start conditions, and computing power. When models agree, confidence is high. When they disagree, expect uncertainty. Good forecasts use multiple models (ensemble forecasting)."
+  icon: "🎯"
+  language: "en"
+
+- title: "Weather ≠ Climate"
+  content: "Weather = what happens next Tuesday (models good for ~10 days). Climate = the 30-year trend (different models, longer data). A cold winter doesn't disprove climate warming—but warming stripes show the trend clearly over decades."
+  icon: "🌍"
+  language: "en"
+
+- title: "Understanding Ensemble Forecasts"
+  content: "No single model is perfect. Weather agencies run 20+ different models and look for agreement. Your app compares 2-3 models to teach you this principle: uncertainty decreases when predictions converge."
+  icon: "🎪"
+  language: "en"
+
+- title: "Model Uncertainty Increases Over Time"
+  content: "A 3-day forecast is 90%+ accurate. A 7-day forecast is only 70% accurate. A 14-day forecast drops to 50%. This is why long-range forecasts should never be trusted—chaos theory limits predictability."
+  icon: "📉"
+  language: "en"
+
+- title: "What Temperature Disagreement Means"
+  content: "If both models predict 8°C, confidence is high. If one says 2°C and another says 15°C, that's huge uncertainty—plan for the range, not the average. Large disagreement = high risk."
+  icon: "🌡️"
+  language: "en"
+
+- title: "Precipitation Probability Explained"
+  content: "100% doesn't mean it will rain all day. It means 'rain is certain to occur somewhere in the forecast area.' 30% means 'chance of rain is low, most areas will stay dry.' Plan accordingly."
+  icon: "💧"
+  language: "en"
+
+- title: "Regional Models vs Global Models"
+  content: "Regional models (like GEM) zoom into smaller areas with more detail, but only work 2-3 days ahead. Global models (like ECMWF) cover the whole Earth for 10+ days. This is why we blend them."
+  icon: "🗺️"
+  language: "en"
+
+- title: "Climate Stripes Tell the Long-Term Story"
+  content: "The warming stripes show annual temperatures from 1950-2023. Blue = cooler than normal. Red = warmer. The color trend shows climate is changing—independent of any single year's weather."
+  icon: "📊"
+  language: "en"
+
+- title: "How Forecast Accuracy is Measured"
+  content: "Tomorrow's forecast is usually accurate. After 5 days, errors grow. The scoreboard tracks which model predicted rain correctly (did it actually rain?), building an accuracy record over time."
+  icon: "✓"
+  language: "en"
+
+- title: "What 'Chance of Rain' Actually Means"
+  content: "It's a combined metric: probability × coverage. 40% might mean '80% chance in 50% of the area' or '40% chance everywhere.' Meteorologists report this, but it's complex. Higher % = more certainty."
+  icon: "🌧️"
+  language: "en"
+
+- title: "Why Your Location Matters"
+  content: "A model trained in North America might struggle with UK mountains. Regional models like GEM/ECMWF are tuned to their regions. This is why having local official sources (BBC, Met Office) is crucial."
+  icon: "📍"
+  language: "en"
+
+- title: "Understanding Consensus"
+  content: "When multiple independent climate models all show warming, that's consensus. 97% of climate scientists agree on human-caused warming because the evidence is strong. This app teaches you to trust ensemble agreement."
+  icon: "🤝"
+  language: "en"
+
+- title: "The Butterfly Effect in Weather"
+  content: "Tiny differences in initial conditions lead to totally different forecasts after 2 weeks (chaos theory). This limits predictability. Climate models have longer 'predictability horizons' because we care about trends, not exact days."
+  icon: "🦋"
+  language: "en"
+
+- title: "Model Bias: What It Means"
+  content: "Some models consistently predict warmer/colder or wetter/drier than reality. 'Bias' doesn't mean wrong—it means systematic error. Meteorologists know this and adjust. Your scoreboard reveals bias over time."
+  icon: "📐"
+  language: "en"
+
+- title: "Why Ensemble Means Are Risky"
+  content: "Averaging 2 models that predict 5°C and 20°C gives 12.5°C—but neither model predicts 12.5°! This is why ensembles show the range, not just the mean. Spread = uncertainty."
+  icon: "⚗️"
+  language: "en"
+
+- title: "Climate Change Makes Extreme Weather Likelier"
+  content: "Warmer atmosphere = more energy = more extreme events. A 1-in-100-year flood might become 1-in-50-year with climate change. This shifts risk—not just average temps, but the tails."
+  icon: "⛈️"
+  language: "en"
+
+- title: "Model Skill Is Location-Dependent"
+  content: "Coastal areas are harder to forecast (ocean affects local weather). Mountains create complex flows. Deserts are predictable. No model is equally skilled everywhere. Local forecasts are always more accurate."
+  icon: "⛰️"
+  language: "en"
+
+- title: "Probabilities Compound"
+  content: "If today has 40% rain and tomorrow has 40% rain, the chance of rain BOTH days is only 16% (0.4 × 0.4). Probabilities multiply, not add. This is why longer forecasts seem pessimistic."
+  icon: "🔗"
+  language: "en"
+
+- title: "Climate Models Run for 100 Years"
+  content: "Weather models run 10-15 days. Climate models project 50-100 years into the future, accounting for greenhouse gases. Different tools for different questions. Both are valid within their scope."
+  icon: "🔮"
+  language: "en"
+
+# French translations
+- title: "Risque vs Probabilité"
+  content: "Probabilité = la chance que quelque chose se produise (ex : 60% de pluie). Risque = ce qui est en jeu si cela se produit. Une chance de 30% de pluie peut être une faible probabilité mais un RISQUE ÉLEVÉ si vous planifiez un mariage en plein air."
+  icon: "⚠️"
+  language: "fr"
+
+- title: "Pourquoi les modèles sont en désaccord"
+  content: "Chaque modèle utilise différentes équations, conditions de départ et puissance de calcul. Lorsque les modèles sont d'accord, la confiance est élevée. Lorsqu'ils sont en désaccord, attendez-vous à de l'incertitude. Les bonnes prévisions utilisent plusieurs modèles (prévision d'ensemble)."
+  icon: "🎯"
+  language: "fr"
+
+- title: "Météo ≠ Climat"
+  content: "Météo = ce qui se passe mardi prochain (modèles bons pour ~10 jours). Climat = la tendance sur 30 ans (modèles différents, données plus longues). Un hiver froid ne réfute pas le réchauffement climatique—mais les rayures de réchauffement montrent clairement la tendance sur des décennies."
+  icon: "🌍"
+  language: "fr"
+
+- title: "Comprendre les prévisions d'ensemble"
+  content: "Aucun modèle n'est parfait. Les agences météorologiques exécutent 20+ modèles différents et recherchent l'accord. Votre application compare 2-3 modèles pour vous enseigner ce principe : l'incertitude diminue lorsque les prédictions convergent."
+  icon: "🎪"
+  language: "fr"
+
+- title: "L'incertitude du modèle augmente avec le temps"
+  content: "Une prévision à 3 jours est précise à 90%+. Une prévision à 7 jours n'est précise qu'à 70%. Une prévision à 14 jours tombe à 50%. C'est pourquoi les prévisions à long terme ne doivent jamais être fiables—la théorie du chaos limite la prévisibilité."
+  icon: "📉"
+  language: "fr"
+
+- title: "Ce que signifie le désaccord de température"
+  content: "Si les deux modèles prédisent 8°C, la confiance est élevée. Si l'un dit 2°C et l'autre 15°C, c'est une énorme incertitude—planifiez pour la plage, pas la moyenne. Grand désaccord = risque élevé."
+  icon: "🌡️"
+  language: "fr"
+
+- title: "Explication de la probabilité de précipitations"
+  content: "100% ne signifie pas qu'il pleuvra toute la journée. Cela signifie 'la pluie est certaine de se produire quelque part dans la zone de prévision'. 30% signifie 'le risque de pluie est faible, la plupart des zones resteront sèches'. Planifiez en conséquence."
+  icon: "💧"
+  language: "fr"
+
+- title: "Modèles régionaux vs modèles mondiaux"
+  content: "Les modèles régionaux (comme GEM) zooment sur des zones plus petites avec plus de détails, mais ne fonctionnent que 2-3 jours à l'avance. Les modèles mondiaux (comme ECMWF) couvrent toute la Terre pendant 10+ jours. C'est pourquoi nous les mélangeons."
+  icon: "🗺️"
+  language: "fr"
+
+- title: "Les rayures climatiques racontent l'histoire à long terme"
+  content: "Les rayures de réchauffement montrent les températures annuelles de 1950 à 2023. Bleu = plus froid que la normale. Rouge = plus chaud. La tendance des couleurs montre que le climat change—indépendamment de la météo d'une année donnée."
+  icon: "📊"
+  language: "fr"
+
+- title: "Comment la précision des prévisions est mesurée"
+  content: "Les prévisions de demain sont généralement précises. Après 5 jours, les erreurs augmentent. Le tableau des scores suit quel modèle a correctement prédit la pluie (a-t-il vraiment plu?), construisant un enregistrement de précision au fil du temps."
+  icon: "✓"
+  language: "fr"
+
+- title: "Ce que signifie vraiment 'chance de pluie'"
+  content: "C'est une métrique combinée : probabilité × couverture. 40% pourrait signifier '80% de chance dans 50% de la zone' ou '40% de chance partout'. Les météorologues rapportent cela, mais c'est complexe. Un pourcentage plus élevé = plus de certitude."
+  icon: "🌧️"
+  language: "fr"
+
+- title: "Pourquoi votre emplacement compte"
+  content: "Un modèle formé en Amérique du Nord pourrait avoir des difficultés avec les montagnes du Royaume-Uni. Les modèles régionaux comme GEM/ECMWF sont réglés pour leurs régions. C'est pourquoi avoir des sources officielles locales (BBC, Met Office) est crucial."
+  icon: "📍"
+  language: "fr"
+
+- title: "Comprendre le consensus"
+  content: "Lorsque plusieurs modèles climatiques indépendants montrent tous un réchauffement, c'est un consensus. 97% des climatologues s'accordent sur le réchauffement d'origine humaine car les preuves sont solides. Cette application vous apprend à faire confiance à l'accord d'ensemble."
+  icon: "🤝"
+  language: "fr"
+
+- title: "L'effet papillon dans la météo"
+  content: "De minuscules différences dans les conditions initiales conduisent à des prévisions totalement différentes après 2 semaines (théorie du chaos). Cela limite la prévisibilité. Les modèles climatiques ont des 'horizons de prévisibilité' plus longs car nous nous soucions des tendances, pas des jours exacts."
+  icon: "🦋"
+  language: "fr"
+
+- title: "Biais du modèle : ce que cela signifie"
+  content: "Certains modèles prédisent systématiquement plus chaud/froid ou plus humide/sec que la réalité. 'Biais' ne signifie pas faux—cela signifie erreur systématique. Les météorologues le savent et ajustent. Votre tableau des scores révèle le biais au fil du temps."
+  icon: "📐"
+  language: "fr"
+
+- title: "Pourquoi les moyennes d'ensemble sont risquées"
+  content: "Faire la moyenne de 2 modèles qui prédisent 5°C et 20°C donne 12,5°C—mais aucun modèle ne prédit 12,5°! C'est pourquoi les ensembles montrent la plage, pas seulement la moyenne. Dispersion = incertitude."
+  icon: "⚗️"
+  language: "fr"
+
+- title: "Le changement climatique rend les événements météorologiques extrêmes plus probables"
+  content: "Atmosphère plus chaude = plus d'énergie = plus d'événements extrêmes. Une inondation centenaire pourrait devenir cinquantenaire avec le changement climatique. Cela modifie le risque—pas seulement les températures moyennes, mais les extrêmes."
+  icon: "⛈️"
+  language: "fr"
+
+- title: "La compétence du modèle dépend de l'emplacement"
+  content: "Les zones côtières sont plus difficiles à prévoir (l'océan affecte la météo locale). Les montagnes créent des flux complexes. Les déserts sont prévisibles. Aucun modèle n'est également compétent partout. Les prévisions locales sont toujours plus précises."
+  icon: "⛰️"
+  language: "fr"
+
+- title: "Les probabilités se composent"
+  content: "Si aujourd'hui a 40% de pluie et demain a 40% de pluie, la chance de pluie les DEUX jours n'est que de 16% (0,4 × 0,4). Les probabilités se multiplient, ne s'additionnent pas. C'est pourquoi les prévisions plus longues semblent pessimistes."
+  icon: "🔗"
+  language: "fr"
+
+- title: "Les modèles climatiques fonctionnent pendant 100 ans"
+  content: "Les modèles météorologiques fonctionnent pendant 10-15 jours. Les modèles climatiques projettent 50-100 ans dans le futur, en tenant compte des gaz à effet de serre. Différents outils pour différentes questions. Les deux sont valables dans leur portée."
+  icon: "🔮"
+  language: "fr"

@@ -23,6 +23,15 @@ const App = (() => {
         UI.updateLanguageToggle();
         UI.onLanguageToggle(toggleLanguage);
         UI.onShare(shareLocation);
+        
+        // Initialize city search
+        UI.initCitySearch((lat, lon, city) => {
+            console.log(`City selected from search: ${city} (${lat}, ${lon})`);
+            Storage.saveLocation(lat, lon, city);
+            Storage.updateUrl(lat, lon, city);
+            // Reload the page to fetch fresh weather data for the new city
+            window.location.reload();
+        });
 
         UI.setStatus(I18n.t('status.checkingHistory'));
         loadScoreboard();
@@ -35,8 +44,8 @@ const App = (() => {
             UI.renderHistoryEvent(formatted);
         }
 
-        // Display random education lesson on startup
-        UI.initEducation();
+        // Load and display random education lesson on startup
+        await UI.initEducation();
 
         // Check URL parameters first (highest priority for sharing)
         if (urlParams.location) {
@@ -116,7 +125,12 @@ const App = (() => {
             }
         }
 
-        // Check and display what's in localStorage
+    }
+
+    /**
+     * Update storage info display
+     */
+    function updateStorageDisplay() {
         const hasLocation = Storage.getLocation() !== null;
         const hasHistory = localStorage.getItem('history_v6_pending') !== null;
         const hasScoreboard = localStorage.getItem('scoreboard_v6') !== null;
@@ -132,6 +146,9 @@ const App = (() => {
 
         // Update URL with current location and language
         Storage.updateUrl(lat, lon, city);
+        
+        // Update storage display
+        updateStorageDisplay();
 
         const config = Geo.getModelConfig(lat, lon);
         currentConfig = { ...config, lat, lon, city };
@@ -146,9 +163,27 @@ const App = (() => {
         // Fetch weather data
         try {
             const forecastData = await API.fetchForecast(lat, lon, config.modelA, config.modelB, config.isCanada);
-            renderForecast(forecastData, config);
+            const todayData = renderForecast(forecastData, config);
             saveForecastForHistory(forecastData, config, lat, lon);
             checkHistory(lat, lon, config);
+            
+            // Fetch and display historical normals for today's date
+            const now = new Date();
+            const monthDay = String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            
+            try {
+                const normals = await API.fetchHistoricalNormals(lat, lon, monthDay, 10);
+                if (normals && !normals.rateLimited) {
+                    // Calculate average of today's forecast from both models
+                    const todayHigh = (todayData.tempMaxA + todayData.tempMaxB) / 2;
+                    const todayLow = (todayData.tempMinA + todayData.tempMinB) / 2;
+                    
+                    UI.renderHistoricalNormals(normals, todayHigh, todayLow);
+                }
+            } catch (histError) {
+                console.warn('Could not fetch historical normals:', histError);
+                // Don't show error to user - this is an enhancement feature
+            }
         } catch (error) {
             UI.setStatus(I18n.t('status.apiError', error.message));
             UI.getElement('forecastList').innerHTML = '<tr><td colspan="3">Error loading weather. Check Console.</td></tr>';
@@ -188,75 +223,185 @@ const App = (() => {
         UI.renderSevenDay(daily, config.modelA, config.modelB);
 
         UI.setStatus(I18n.t('status.weatherLoaded'));
+        
+        return todayData; // Return for historical normals comparison
     }
 
     /**
-     * Save current forecast for tomorrow's verification
+     * Save current 7-day forecast for future verification
      */
     function saveForecastForHistory(data, config, lat, lon) {
         const today = new Date().toISOString().split('T')[0];
+        const daily = data.daily;
+        const times = daily.time;
 
-        const probA = Calculations.getSafeData(data.daily, config.modelA, 'precipitation_probability_max', 0);
-        const probB = Calculations.getSafeData(data.daily, config.modelB, 'precipitation_probability_max', 0);
+        // Build 7-day forecast for Model A
+        const daysA = times.map((date, index) => ({
+            date,
+            tempMax: Calculations.getSafeData(daily, config.modelA, 'temperature_2m_max', index),
+            tempMin: Calculations.getSafeData(daily, config.modelA, 'temperature_2m_min', index),
+            precip: Calculations.getSafeData(daily, config.modelA, 'precipitation_probability_max', index)
+        }));
 
-        Storage.saveForecastRecord(today, lat, lon, { name: config.nameA, prob: probA }, { name: config.nameB, prob: probB });
+        // Build 7-day forecast for Model B
+        const daysB = times.map((date, index) => ({
+            date,
+            tempMax: Calculations.getSafeData(daily, config.modelB, 'temperature_2m_max', index),
+            tempMin: Calculations.getSafeData(daily, config.modelB, 'temperature_2m_min', index),
+            precip: Calculations.getSafeData(daily, config.modelB, 'precipitation_probability_max', index)
+        }));
+
+        const forecasts = {
+            modelA: { name: config.nameA, days: daysA },
+            modelB: { name: config.nameB, days: daysB }
+        };
+
+        Storage.saveForecastRecord(today, lat, lon, forecasts);
+        updateStorageDisplay();
     }
 
     /**
-     * Check yesterday's forecast vs actual weather
+     * Check stored forecasts vs actual weather for all past dates
      */
     async function checkHistory(lat, lon, config) {
         const pendingRecord = Storage.getPendingForecast();
         if (!pendingRecord) return;
 
         const today = new Date().toISOString().split('T')[0];
+        const savedDate = pendingRecord.savedDate;
 
-        // Only check if pendingRecord is from yesterday
-        if (pendingRecord.date === today) return;
+        // Don't check if we saved today (no actual data yet)
+        if (savedDate === today) return;
 
         UI.setStatus('Verifying History...');
 
         try {
-            const historyData = await API.fetchHistoricalDay(lat, lon, pendingRecord.date);
+            const forecasts = pendingRecord.forecasts;
+            if (!forecasts || !forecasts.modelA || !forecasts.modelB) {
+                // Old format - fall back to legacy check
+                await checkHistoryLegacy(pendingRecord, lat, lon);
+                return;
+            }
 
-            if (!historyData.daily || !historyData.daily.rain_sum) {
+            // Find dates that have passed and can be verified
+            const datesToCheck = forecasts.modelA.days.filter(day => day.date < today);
+            if (datesToCheck.length === 0) return;
+
+            // For now, check the first date that passed (yesterday)
+            const yesterdayForecast = datesToCheck[datesToCheck.length - 1];
+            const dateToCheck = yesterdayForecast.date;
+
+            // Fetch actual weather for that date
+            const historyData = await API.fetchHistoricalDay(lat, lon, dateToCheck);
+
+            if (!historyData.daily) {
                 throw new Error('No historical data');
             }
 
-            const rainfall = historyData.daily.rain_sum[0];
-            const actuallyRained = rainfall > 0.5;
+            const actualRainfall = historyData.daily.rain_sum ? historyData.daily.rain_sum[0] : 0;
+            const actualTempMax = historyData.daily.temperature_2m_max ? historyData.daily.temperature_2m_max[0] : null;
+            const actualTempMin = historyData.daily.temperature_2m_min ? historyData.daily.temperature_2m_min[0] : null;
+            const actuallyRained = actualRainfall > 0.5;
 
-            // Calculate accuracy for each model
-            const probA = pendingRecord.modelA.prob || 0;
-            const probB = pendingRecord.modelB.prob || 0;
-            const errorA = Calculations.calculateAccuracy(actuallyRained, probA);
-            const errorB = Calculations.calculateAccuracy(actuallyRained, probB);
+            // Find this date in both model forecasts
+            const forecastA = forecasts.modelA.days.find(d => d.date === dateToCheck);
+            const forecastB = forecasts.modelB.days.find(d => d.date === dateToCheck);
 
-            // Show result
+            if (!forecastA || !forecastB) return;
+
+            // Calculate accuracy for precipitation
+            const errorA = Calculations.calculateAccuracy(actuallyRained, forecastA.precip || 0);
+            const errorB = Calculations.calculateAccuracy(actuallyRained, forecastB.precip || 0);
+
+            // Calculate temperature errors if we have actual temps
+            let tempErrorA = 0;
+            let tempErrorB = 0;
+            if (actualTempMax !== null) {
+                tempErrorA += Math.abs((forecastA.tempMax || 0) - actualTempMax);
+                tempErrorB += Math.abs((forecastB.tempMax || 0) - actualTempMax);
+            }
+            if (actualTempMin !== null) {
+                tempErrorA += Math.abs((forecastA.tempMin || 0) - actualTempMin);
+                tempErrorB += Math.abs((forecastB.tempMin || 0) - actualTempMin);
+            }
+
+            // Combined score: precipitation accuracy (weighted 60%) + temp accuracy (weighted 40%)
+            const scoreA = errorA * 0.6 + (tempErrorA / 10) * 0.4; // Normalize temp error to 0-1 scale
+            const scoreB = errorB * 0.6 + (tempErrorB / 10) * 0.4;
+
+            // Show result with temperature details
             UI.renderRealityCheck(
-                pendingRecord.date,
+                dateToCheck,
                 actuallyRained,
-                rainfall,
-                probA,
-                probB,
-                pendingRecord.modelA.name,
-                pendingRecord.modelB.name
+                actualRainfall,
+                forecastA.precip,
+                forecastB.precip,
+                forecasts.modelA.name,
+                forecasts.modelB.name,
+                {
+                    actualTempMax,
+                    actualTempMin,
+                    forecastATempMax: forecastA.tempMax,
+                    forecastATempMin: forecastA.tempMin,
+                    forecastBTempMax: forecastB.tempMax,
+                    forecastBTempMin: forecastB.tempMin
+                }
             );
 
-            // Determine and show winner
-            const winner = Calculations.determineWinner(errorA, errorB);
+            // Determine winner based on combined score
+            const winner = scoreA < scoreB ? 'A' : scoreA > scoreB ? 'B' : 'tie';
             if (winner === 'A') {
-                UI.showWinner(pendingRecord.modelA.name);
-                updateScore('A', pendingRecord.date);
+                UI.showWinner(forecasts.modelA.name);
+                updateScore('A', dateToCheck);
             } else if (winner === 'B') {
-                UI.showWinner(pendingRecord.modelB.name);
-                updateScore('B', pendingRecord.date);
+                UI.showWinner(forecasts.modelB.name);
+                updateScore('B', dateToCheck);
             } else {
                 UI.showDraw();
             }
         } catch (error) {
             console.error('History check failed:', error);
             UI.setStatus(`History check failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Legacy check for old format records (rain only)
+     */
+    async function checkHistoryLegacy(pendingRecord, lat, lon) {
+        const historyData = await API.fetchHistoricalDay(lat, lon, pendingRecord.date);
+
+        if (!historyData.daily || !historyData.daily.rain_sum) {
+            throw new Error('No historical data');
+        }
+
+        const rainfall = historyData.daily.rain_sum[0];
+        const actuallyRained = rainfall > 0.5;
+
+        const probA = pendingRecord.modelA.prob || 0;
+        const probB = pendingRecord.modelB.prob || 0;
+        const errorA = Calculations.calculateAccuracy(actuallyRained, probA);
+        const errorB = Calculations.calculateAccuracy(actuallyRained, probB);
+
+        UI.renderRealityCheck(
+            pendingRecord.date,
+            actuallyRained,
+            rainfall,
+            probA,
+            probB,
+            pendingRecord.modelA.name,
+            pendingRecord.modelB.name
+        );
+
+        const winner = Calculations.determineWinner(errorA, errorB);
+        if (winner === 'A') {
+            UI.showWinner(pendingRecord.modelA.name);
+            updateScore('A', pendingRecord.date);
+        } else if (winner === 'B') {
+            UI.showWinner(pendingRecord.modelB.name);
+            updateScore('B', pendingRecord.date);
+        } else {
+            UI.showDraw();
         }
     }
 
@@ -278,6 +423,7 @@ const App = (() => {
     function loadScoreboard() {
         const scores = Storage.getScoreboard();
         UI.updateScoreboard(scores.a, scores.b, scores.start);
+        updateStorageDisplay();
     }
 
     /**

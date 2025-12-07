@@ -33,13 +33,13 @@ const Storage = (() => {
         },
 
         // Forecast History
-        saveForecastRecord(date, lat, lon, modelA, modelB) {
+        saveForecastRecord(date, lat, lon, forecasts) {
+            // forecasts: { modelA: { name, days: [{date, tempMax, tempMin, precip}] }, modelB: {...} }
             const record = {
-                date,
+                savedDate: date,
                 lat,
                 lon,
-                modelA,
-                modelB
+                forecasts
             };
             localStorage.setItem(KEYS.HISTORY_PENDING, JSON.stringify(record));
         },

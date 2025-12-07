@@ -210,10 +210,54 @@ const Geo = (() => {
         return '';
     }
 
+    /**
+     * Search for cities using Open-Meteo Geocoding API
+     */
+    async function searchCities(query) {
+        if (!query || query.length < 2) return [];
+
+        try {
+            const params = new URLSearchParams({
+                name: query,
+                count: 10,
+                language: 'en',
+                format: 'json'
+            });
+
+            const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`, {
+                signal: AbortSignal.timeout(5000)
+            });
+
+            if (!response.ok) throw new Error(`Geocoding API returned ${response.status}`);
+            const data = await response.json();
+
+            if (!data.results) return [];
+
+            // Format results with city, region, country
+            return data.results.map(result => ({
+                name: result.name,
+                region: result.admin1 || '',
+                country: result.country,
+                countryCode: result.country_code,
+                lat: result.latitude,
+                lon: result.longitude,
+                displayName: [
+                    result.name,
+                    result.admin1,
+                    result.country
+                ].filter(Boolean).join(', ')
+            }));
+        } catch (error) {
+            console.error('City search failed:', error);
+            return [];
+        }
+    }
+
     return {
         getCurrentPosition,
         getModelConfig,
         getOfficialLinks,
+        searchCities,
         DEFAULT_LAT: 45.42,
         DEFAULT_LON: -75.69,
         DEFAULT_CITY: 'Ottawa (Default)'

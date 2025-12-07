@@ -1,142 +1,109 @@
 /**
  * Education Module
- * Provides lessons and awareness content about risk, probability, and climate
+ * Loads lessons from YAML and provides language-filtered access
  */
 
 const Education = (() => {
-    const LESSONS = [
-        {
-            title: "Risk vs Probability",
-            content: "Probability = the chance of something happening (e.g., 60% rain). Risk = what's at stake if it does. A 30% chance of rain might be low probability but HIGH risk if you're planning a wedding outdoors.",
-            icon: "⚠️"
-        },
-        {
-            title: "Why Models Disagree",
-            content: "Each model uses different equations, start conditions, and computing power. When models agree, confidence is high. When they disagree, expect uncertainty. Good forecasts use multiple models (ensemble forecasting).",
-            icon: "🎯"
-        },
-        {
-            title: "Weather ≠ Climate",
-            content: "Weather = what happens next Tuesday (models good for ~10 days). Climate = the 30-year trend (different models, longer data). A cold winter doesn't disprove climate warming—but warming stripes show the trend clearly over decades.",
-            icon: "🌍"
-        },
-        {
-            title: "Understanding Ensemble Forecasts",
-            content: "No single model is perfect. Weather agencies run 20+ different models and look for agreement. Your app compares 2-3 models to teach you this principle: uncertainty decreases when predictions converge.",
-            icon: "🎪"
-        },
-        {
-            title: "Model Uncertainty Increases Over Time",
-            content: "A 3-day forecast is 90%+ accurate. A 7-day forecast is only 70% accurate. A 14-day forecast drops to 50%. This is why long-range forecasts should never be trusted—chaos theory limits predictability.",
-            icon: "📉"
-        },
-        {
-            title: "What Temperature Disagreement Means",
-            content: "If both models predict 8°C, confidence is high. If one says 2°C and another says 15°C, that's huge uncertainty—plan for the range, not the average. Large disagreement = high risk.",
-            icon: "🌡️"
-        },
-        {
-            title: "Precipitation Probability Explained",
-            content: "100% doesn't mean it will rain all day. It means 'rain is certain to occur somewhere in the forecast area.' 30% means 'chance of rain is low, most areas will stay dry.' Plan accordingly.",
-            icon: "💧"
-        },
-        {
-            title: "Regional Models vs Global Models",
-            content: "Regional models (like GEM) zoom into smaller areas with more detail, but only work 2-3 days ahead. Global models (like ECMWF) cover the whole Earth for 10+ days. This is why we blend them.",
-            icon: "🗺️"
-        },
-        {
-            title: "Climate Stripes Tell the Long-Term Story",
-            content: "The warming stripes show annual temperatures from 1950-2023. Blue = cooler than normal. Red = warmer. The color trend shows climate is changing—independent of any single year's weather.",
-            icon: "📊"
-        },
-        {
-            title: "How Forecast Accuracy is Measured",
-            content: "Tomorrow's forecast is usually accurate. After 5 days, errors grow. The scoreboard tracks which model predicted rain correctly (did it actually rain?), building an accuracy record over time.",
-            icon: "✓"
-        },
-        {
-            title: "What 'Chance of Rain' Actually Means",
-            content: "It's a combined metric: probability × coverage. 40% might mean '80% chance in 50% of the area' or '40% chance everywhere.' Meteorologists report this, but it's complex. Higher % = more certainty.",
-            icon: "🌧️"
-        },
-        {
-            title: "Why Your Location Matters",
-            content: "A model trained in North America might struggle with UK mountains. Regional models like GEM/ECMWF are tuned to their regions. This is why having local official sources (BBC, Met Office) is crucial.",
-            icon: "📍"
-        },
-        {
-            title: "Understanding Consensus",
-            content: "When multiple independent climate models all show warming, that's consensus. 97% of climate scientists agree on human-caused warming because the evidence is strong. This app teaches you to trust ensemble agreement.",
-            icon: "🤝"
-        },
-        {
-            title: "The Butterfly Effect in Weather",
-            content: "Tiny differences in initial conditions lead to totally different forecasts after 2 weeks (chaos theory). This limits predictability. Climate models have longer 'predictability horizons' because we care about trends, not exact days.",
-            icon: "🦋"
-        },
-        {
-            title: "Model Bias: What It Means",
-            content: "Some models consistently predict warmer/colder or wetter/drier than reality. 'Bias' doesn't mean wrong—it means systematic error. Meteorologists know this and adjust. Your scoreboard reveals bias over time.",
-            icon: "📐"
-        },
-        {
-            title: "Why Ensemble Means Are Risky",
-            content: "Averaging 2 models that predict 5°C and 20°C gives 12.5°C—but neither model predicts 12.5°! This is why ensembles show the range, not just the mean. Spread = uncertainty.",
-            icon: "⚗️"
-        },
-        {
-            title: "Climate Change Makes Extreme Weather Likelier",
-            content: "Warmer atmosphere = more energy = more extreme events. A 1-in-100-year flood might become 1-in-50-year with climate change. This shifts risk—not just average temps, but the tails.",
-            icon: "⛈️"
-        },
-        {
-            title: "Model Skill Is Location-Dependent",
-            content: "Coastal areas are harder to forecast (ocean affects local weather). Mountains create complex flows. Deserts are predictable. No model is equally skilled everywhere. Local forecasts are always more accurate.",
-            icon: "⛰️"
-        },
-        {
-            title: "Probabilities Compound",
-            content: "If today has 40% rain and tomorrow has 40% rain, the chance of rain BOTH days is only 16% (0.4 × 0.4). Probabilities multiply, not add. This is why longer forecasts seem pessimistic.",
-            icon: "🔗"
-        },
-        {
-            title: "Climate Models Run for 100 Years",
-            content: "Weather models run 10-15 days. Climate models project 50-100 years into the future, accounting for greenhouse gases. Different tools for different questions. Both are valid within their scope.",
-            icon: "🔮"
+    let allLessons = [];
+    let lessonsCache = {}; // Cache by language
+
+    /**
+     * Simple YAML parser for lesson format
+     */
+    function parseYaml(text) {
+        const lessons = [];
+        const lines = text.split('\n');
+        let current = null;
+
+        for (const line of lines) {
+            if (line.trim().startsWith('#') || line.trim() === '') continue;
+
+            if (line.startsWith('- title:')) {
+                if (current) lessons.push(current);
+                current = { title: line.substring(8).trim().replace(/^["']|["']$/g, '') };
+            } else if (current) {
+                if (line.trim().startsWith('content:')) {
+                    current.content = line.substring(line.indexOf('content:') + 8).trim().replace(/^["']|["']$/g, '');
+                } else if (line.trim().startsWith('icon:')) {
+                    current.icon = line.substring(line.indexOf('icon:') + 5).trim().replace(/^["']|["']$/g, '');
+                } else if (line.trim().startsWith('language:')) {
+                    current.language = line.substring(line.indexOf('language:') + 9).trim().replace(/^["']|["']$/g, '');
+                }
+            }
         }
-    ];
-
-    /**
-     * Get a random lesson
-     */
-    function getRandomLesson() {
-        const index = Math.floor(Math.random() * LESSONS.length);
-        return LESSONS[index];
+        if (current) lessons.push(current);
+        return lessons;
     }
 
     /**
-     * Get all lessons (for cycling through)
+     * Load lessons from YAML file
      */
-    function getAllLessons() {
-        return [...LESSONS];
+    async function loadLessons() {
+        try {
+            const response = await fetch('education-lessons.yml');
+            const text = await response.text();
+            allLessons = parseYaml(text);
+            
+            // Build language cache
+            allLessons.forEach(lesson => {
+                const lang = lesson.language || 'en';
+                if (!lessonsCache[lang]) lessonsCache[lang] = [];
+                lessonsCache[lang].push(lesson);
+            });
+            
+            return allLessons;
+        } catch (error) {
+            console.error('Failed to load education lessons:', error);
+            return [];
+        }
     }
 
     /**
-     * Get lesson by index
+     * Get lessons for current language
      */
-    function getLessonByIndex(index) {
-        return LESSONS[index % LESSONS.length];
+    function getLessonsForLanguage(lang = 'en') {
+        return lessonsCache[lang] || lessonsCache['en'] || [];
     }
 
     /**
-     * Get total number of lessons
+     * Get a random lesson for current language
      */
-    function getLessonCount() {
-        return LESSONS.length;
+    function getRandomLesson(lang = null) {
+        const currentLang = lang || I18n.getCurrentLanguage();
+        const lessons = getLessonsForLanguage(currentLang);
+        if (lessons.length === 0) return null;
+        const index = Math.floor(Math.random() * lessons.length);
+        return lessons[index];
+    }
+
+    /**
+     * Get all lessons for current language
+     */
+    function getAllLessons(lang = null) {
+        const currentLang = lang || I18n.getCurrentLanguage();
+        return [...getLessonsForLanguage(currentLang)];
+    }
+
+    /**
+     * Get lesson by index for current language
+     */
+    function getLessonByIndex(index, lang = null) {
+        const currentLang = lang || I18n.getCurrentLanguage();
+        const lessons = getLessonsForLanguage(currentLang);
+        if (lessons.length === 0) return null;
+        return lessons[index % lessons.length];
+    }
+
+    /**
+     * Get total number of lessons for current language
+     */
+    function getLessonCount(lang = null) {
+        const currentLang = lang || I18n.getCurrentLanguage();
+        return getLessonsForLanguage(currentLang).length;
     }
 
     return {
+        loadLessons,
         getRandomLesson,
         getAllLessons,
         getLessonByIndex,

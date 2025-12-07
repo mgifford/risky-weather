@@ -276,6 +276,20 @@
             <button id="language-toggle-btn" class="language-toggle" title="Toggle language"></button>
         </div>
         <div class="location-badge" id="location-display">Initializing...</div>
+        
+        <!-- City Search -->
+        <div style="margin: 15px auto; max-width: 50%; position: relative;">
+            <input 
+                type="text" 
+                id="city-search-input" 
+                placeholder="Search for a city..."
+                data-i18n-placeholder="ui.searchCity"
+                style="width: 100%; padding: 10px 40px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem;"
+            />
+            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #a0aec0; pointer-events: none;">🔍</span>
+            <div id="city-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+        </div>
+        
         <div class="debug-info">
             <div class="debug-info-line">
                 <span class="debug-label">IP:</span> <span id="ip-display">—</span>
@@ -338,18 +352,6 @@
         </section>
 
         <section class="card">
-            <div class="info-box">
-                <div class="info-box-title" data-i18n="ui.uncertaintyTitle">🎯 Understanding Model Disagreement</div>
-                <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for ⚠️ (high uncertainty) or ⚡ (moderate uncertainty) icons next to days below.</p>
-                <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #555;">
-                    • <strong>Temperature difference &gt;5°C:</strong> Plan for a wide range<br>
-                    • <strong>Rain difference &gt;30%:</strong> One model sees rain, another doesn't<br>
-                    • <strong>Models agree closely:</strong> High confidence forecast
-                </p>
-            </div>
-        </section>
-
-        <section class="card">
             <div class="card-title">
                 <span data-i18n="ui.sevenDay">📅 7-Day Competition</span>
             </div>
@@ -383,6 +385,29 @@
                     <span data-i18n="rain.veryHighRisk">Very High Risk</span>
                 </div>
             </div>
+        </section>
+
+        <section class="card">
+            <details>
+                <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">
+                    <span data-i18n="ui.uncertaintyTitle">🎯 Understanding Model Disagreement</span>
+                </summary>
+                <div style="margin-top: 12px;">
+                    <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.</p>
+                    <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #555;">
+                        • <strong>Temperature difference &gt;5°C:</strong> Plan for a wide range<br>
+                        • <strong>Rain difference &gt;30%:</strong> One model sees rain, another doesn't<br>
+                        • <strong>Models agree closely:</strong> High confidence forecast
+                    </p>
+                </div>
+            </details>
+        </section>
+
+        <section id="historical-normals-section" class="card hidden">
+            <div class="card-title">
+                <span data-i18n="ui.historicalNormals">📈 Historical Averages (Last 10 Years)</span>
+            </div>
+            <div id="historical-normals-content" style="font-size: 0.9rem; line-height: 1.6;"></div>
         </section>
 
         <section id="history-section" class="card hidden">

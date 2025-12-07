@@ -41,7 +41,7 @@ const I18n = (() => {
             'ui.loadingLesson': 'Loading lesson...',
             'ui.historyTitle': '📜 On This Day in Climate History',
             'ui.uncertaintyTitle': '🎯 Understanding Model Disagreement',
-            'ui.uncertaintyDescription': 'When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for ⚠️ (high uncertainty) or ⚡ (moderate uncertainty) icons next to days below.',
+            'ui.uncertaintyDescription': 'When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.',
             'ui.resetLocation': 'Reset Location & History',
             'ui.refreshLocation': '🔄 Refresh Location',
             'ui.viewCache': '📋 View Cache',
@@ -49,6 +49,7 @@ const I18n = (() => {
             'ui.toggleLanguage': '🌍 {0}',
             'ui.linkCopied': 'Link copied to clipboard!',
             'ui.linkCopyFailed': 'Could not copy link. URL: {0}',
+            'ui.searchCity': 'Search for a city...',
 
             // Model names
             'model.gem': 'GEM',
@@ -186,7 +187,7 @@ const I18n = (() => {
             'ui.loadingLesson': 'Chargement de la leçon...',
             'ui.historyTitle': '📜 Ce jour dans l’histoire du climat',
             'ui.uncertaintyTitle': '🎯 Comprendre le désaccord des modèles',
-            'ui.uncertaintyDescription': 'Lorsque les modèles sont en désaccord significatif, l\'incertitude des prévisions est <strong>élevée</strong>. Recherchez les icônes ⚠️ (incertitude élevée) ou ⚡ (incertitude modérée) à côté des jours ci-dessous.',
+            'ui.uncertaintyDescription': 'Lorsque les modèles sont en désaccord significatif, l\'incertitude des prévisions est <strong>élevée</strong>. Recherchez les icônes 🤔 (incertitude élevée) ou 🔀 (incertitude modérée) à côté des jours ci-dessous.',
             'ui.resetLocation': 'Réinitialiser l\'emplacement et l\'historique',
             'ui.refreshLocation': '🔄 Rafraîchir l\'emplacement',
             'ui.viewCache': '📋 Afficher le cache',
@@ -194,6 +195,7 @@ const I18n = (() => {
             'ui.toggleLanguage': '🌍 {0}',
             'ui.linkCopied': 'Lien copié dans le presse-papiers!',
             'ui.linkCopyFailed': 'Impossible de copier le lien. URL: {0}',
+            'ui.searchCity': 'Rechercher une ville...',
 
             // Noms des modèles
             'model.gem': 'GEM',

@@ -150,8 +150,8 @@ const Calculations = (() => {
 
         // Get uncertainty indicator emoji/icon
         getUncertaintyIcon(level) {
-            if (level === 'high') return '⚠️';
-            if (level === 'medium') return '⚡';
+            if (level === 'high') return '🤔';
+            if (level === 'medium') return '🔀';
             return ''; // No icon for low uncertainty (consensus)
         },
 

@@ -245,6 +245,60 @@ const API = (() => {
     }
 
     /**
+     * Fetch historical highs/lows for today's date across past years
+     * Returns average, record high, and record low for comparison
+     */
+    async function fetchHistoricalNormals(lat, lon, monthDay, yearsBack = 10) {
+        const currentYear = new Date().getFullYear();
+        const startYear = currentYear - yearsBack;
+        
+        // Fetch data for this day across multiple years
+        const params = new URLSearchParams({
+            latitude: lat,
+            longitude: lon,
+            start_date: `${startYear}-${monthDay}`,
+            end_date: `${currentYear - 1}-${monthDay}`,
+            daily: 'temperature_2m_max,temperature_2m_min',
+            timezone: 'auto'
+        });
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.ARCHIVE_TIMEOUT);
+
+        try {
+            const response = await fetch(`${BASE_ARCHIVE}?${params}`, { signal: controller.signal });
+            if (!response.ok) {
+                if (response.status === 429) {
+                    console.warn('Historical normals fetch rate limited (429)');
+                    return { rateLimited: true };
+                }
+                throw new Error(`API returned ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Calculate statistics
+            const highs = data.daily?.temperature_2m_max?.filter(v => v !== null) || [];
+            const lows = data.daily?.temperature_2m_min?.filter(v => v !== null) || [];
+            
+            if (highs.length === 0 || lows.length === 0) return null;
+            
+            return {
+                avgHigh: highs.reduce((a, b) => a + b, 0) / highs.length,
+                avgLow: lows.reduce((a, b) => a + b, 0) / lows.length,
+                recordHigh: Math.max(...highs),
+                recordLow: Math.min(...lows),
+                yearsOfData: highs.length
+            };
+        } catch (error) {
+            console.error(`Historical normals fetch failed: ${error.message}`);
+            return null;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    /**
      * Reverse geocode to get city name from coordinates
      * Uses Open-Meteo primary, falls back to Nominatim if needed
      */
@@ -344,6 +398,7 @@ const API = (() => {
         fetchForecast,
         fetchHistoricalDay,
         fetchHistoricalYears,
+        fetchHistoricalNormals,
         getCityName
     };
 })();
