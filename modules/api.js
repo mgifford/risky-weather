@@ -251,13 +251,13 @@ const API = (() => {
     async function fetchHistoricalNormals(lat, lon, monthDay, yearsBack = 10) {
         const currentYear = new Date().getFullYear();
         const startYear = currentYear - yearsBack;
-        
-        // Fetch data for this day across multiple years
+
+        // Fetch a date range covering the last N years, then filter to the target month-day
         const params = new URLSearchParams({
             latitude: lat,
             longitude: lon,
-            start_date: `${startYear}-${monthDay}`,
-            end_date: `${currentYear - 1}-${monthDay}`,
+            start_date: `${startYear}-01-01`,
+            end_date: `${currentYear - 1}-12-31`,
             daily: 'temperature_2m_max,temperature_2m_min',
             timezone: 'auto'
         });
@@ -274,15 +274,24 @@ const API = (() => {
                 }
                 throw new Error(`API returned ${response.status}`);
             }
-            
+
             const data = await response.json();
-            
-            // Calculate statistics
-            const highs = data.daily?.temperature_2m_max?.filter(v => v !== null) || [];
-            const lows = data.daily?.temperature_2m_min?.filter(v => v !== null) || [];
-            
+            const times = data.daily?.time || [];
+            const highsAll = data.daily?.temperature_2m_max || [];
+            const lowsAll = data.daily?.temperature_2m_min || [];
+
+            // Filter entries matching the requested month-day (MM-DD)
+            const targetMD = monthDay; // already MM-DD
+            const idxs = times
+                .map((t, i) => ({ t, i }))
+                .filter(({ t }) => t.slice(5) === targetMD)
+                .map(({ i }) => i);
+
+            const highs = idxs.map(i => highsAll[i]).filter(v => v != null);
+            const lows = idxs.map(i => lowsAll[i]).filter(v => v != null);
+
             if (highs.length === 0 || lows.length === 0) return null;
-            
+
             return {
                 avgHigh: highs.reduce((a, b) => a + b, 0) / highs.length,
                 avgLow: lows.reduce((a, b) => a + b, 0) / lows.length,
@@ -295,6 +304,34 @@ const API = (() => {
             return null;
         } finally {
             clearTimeout(timeoutId);
+        }
+    }
+
+    /**
+     * Fetch Environment Canada (ECCC) Almanac averages/extremes for a station and month-day.
+     * Placeholder implementation using a CSV pattern; returns null if unavailable.
+     */
+    async function fetchECCCAlmanac(stationId, month, day) {
+        try {
+            const url = `https://climate.weather.gc.ca/climate_data/bulk_data_e.html?format=csv&stationID=${stationId}&timeframe=3`;
+            const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
+            if (!resp.ok) throw new Error(`ECCC almanac fetch failed: ${resp.status}`);
+            const text = await resp.text();
+            const lines = text.split(/\r?\n/);
+            const md = `${month}-${String(day).padStart(2,'0')}`;
+            const target = lines.find(l => l.includes(md));
+            if (!target) return null;
+            const cols = target.split(',');
+            return {
+                date: md,
+                avgHigh: parseFloat(cols[5] || 'NaN'),
+                avgLow: parseFloat(cols[6] || 'NaN'),
+                recHigh: parseFloat(cols[7] || 'NaN'),
+                recLow: parseFloat(cols[8] || 'NaN')
+            };
+        } catch (e) {
+            console.warn('ECCC almanac unavailable or endpoint changed:', e.message);
+            return null;
         }
     }
 
@@ -399,6 +436,7 @@ const API = (() => {
         fetchHistoricalDay,
         fetchHistoricalYears,
         fetchHistoricalNormals,
-        getCityName
+        getCityName,
+        fetchECCCAlmanac
     };
 })();

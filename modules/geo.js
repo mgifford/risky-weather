@@ -254,13 +254,32 @@ const Geo = (() => {
             const attempts = [];
             const normalized = normalize(query);
             const tokens = splitTokens(query);
+            // Map common province codes to full names for better matching
+            const provMap = {
+                'BC': 'British Columbia', 'AB': 'Alberta', 'SK': 'Saskatchewan', 'MB': 'Manitoba',
+                'ON': 'Ontario', 'QC': 'Quebec', 'NB': 'New Brunswick', 'NS': 'Nova Scotia',
+                'PE': 'Prince Edward Island', 'NL': 'Newfoundland and Labrador', 'YT': 'Yukon',
+                'NT': 'Northwest Territories', 'NU': 'Nunavut'
+            };
+            let enhanced = normalized;
+            // If query contains "City-XX" or "City, XX", convert to "City, FullProvince"
+            const codeMatch = query.match(/[-,]\s*([A-Z]{2})\b/);
+            if (codeMatch && provMap[codeMatch[1]]) {
+                const cityOnly = tokens[0];
+                enhanced = `${cityOnly}, ${provMap[codeMatch[1]]}`;
+            }
 
             // Attempt 1: normalized (handles City-Region -> City, Region)
             attempts.push(normalized);
+            // Attempt 1b: province full name substituted when available
+            if (enhanced && enhanced !== normalized) attempts.push(enhanced);
             // Attempt 2: raw query (as-is)
             attempts.push(query);
             // Attempt 3: city-only (first token)
             if (tokens.length > 0) attempts.push(tokens[0]);
+            // Attempt 4: append ", Canada" for Canadian queries
+            if (enhanced) attempts.push(`${enhanced}, Canada`);
+            if (tokens.length > 0) attempts.push(`${tokens[0]}, Canada`);
 
             // Deduplicate attempts
             const uniqueAttempts = [...new Set(attempts)].filter(a => a && a.length >= 2);
@@ -291,11 +310,47 @@ const Geo = (() => {
         }
     }
 
+    /**
+     * Find nearest Canadian climate station with almanac coverage.
+     * Minimal seeded list; expand as needed.
+     */
+    function findNearestCanadianStation(lat, lon, provinceCode = null) {
+        const stations = [
+            { id: 49568, name: 'Ottawa CDA', prov: 'ON', lat: 45.317, lon: -75.667 },
+            { id: 51459, name: 'Toronto City', prov: 'ON', lat: 43.655, lon: -79.383 },
+            { id: 888, name: 'Vancouver Intl', prov: 'BC', lat: 49.194, lon: -123.184 },
+            { id: 6158355, name: 'Montreal', prov: 'QC', lat: 45.5, lon: -73.567 }
+        ];
+        // If province code provided, prefer stations within that province
+        const pool = provinceCode ? stations.filter(s => s.prov === provinceCode) : stations;
+        const toRad = d => d * Math.PI / 180;
+        const earthR = 6371;
+        const distance = (aLat, aLon, bLat, bLon) => {
+            const dLat = toRad(bLat - aLat);
+            const dLon = toRad(bLon - aLon);
+            const sLat = toRad(aLat);
+            const sLat2 = toRad(bLat);
+            const h = Math.sin(dLat/2)**2 + Math.cos(sLat)*Math.cos(sLat2)*Math.sin(dLon/2)**2;
+            return 2 * earthR * Math.asin(Math.sqrt(h));
+        };
+        let best = null;
+        let bestDist = Infinity;
+        for (const st of pool.length ? pool : stations) {
+            const d = distance(lat, lon, st.lat, st.lon);
+            if (d < bestDist) { best = st; bestDist = d; }
+        }
+        // If the nearest seeded station is too far, return null to avoid misleading matches
+        const result = best ? { ...best, distanceKm: Math.round(bestDist) } : null;
+        if (result && result.distanceKm > 300) return null;
+        return result;
+    }
+
     return {
         getCurrentPosition,
         getModelConfig,
         getOfficialLinks,
         searchCities,
+        findNearestCanadianStation,
         DEFAULT_LAT: 45.42,
         DEFAULT_LON: -75.69,
         DEFAULT_CITY: 'Ottawa (Default)'

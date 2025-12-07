@@ -58,9 +58,9 @@ const App = (() => {
             // If city is present, geocode and use its coordinates; ignore mismatched lat/lon
             try {
                 if (urlCity) {
-                    const normalizedCity = urlCity.replace(/-/g, ' ').trim();
-                    console.log(`Geocoding city from URL: "${normalizedCity}"`);
-                    const results = await Geo.searchCities(normalizedCity);
+                    // Pass the raw city string to geocoder; it will normalize/expand province names
+                    console.log(`Geocoding city from URL: "${urlCity}"`);
+                    const results = await Geo.searchCities(urlCity);
                     if (results && results.length) {
                         const best = results[0];
                         console.log(`Using geocoded city: ${best.displayName} (${best.lat}, ${best.lon})`);
@@ -227,6 +227,48 @@ const App = (() => {
 
         // Generate stripes in background
         generateStripes(lat, lon);
+
+        // Lazy-load ECCC almanac after main content for Canada only
+        try {
+            let debugInfo = { isCanada: !!config.isCanada, station: null, almanac: null, almanacError: null, city, lat, lon, provCode: null };
+            if (config.isCanada) {
+                // Try to infer province from the city display name (supports formats like "City-XX" or "City, Province")
+                let provCode = null;
+                if (city) {
+                    const dashMatch = city.match(/-([A-Z]{2})\b/);
+                    if (dashMatch) provCode = dashMatch[1];
+                    if (!provCode) {
+                        const provMap = {
+                            'British Columbia': 'BC', 'Alberta': 'AB', 'Saskatchewan': 'SK', 'Manitoba': 'MB',
+                            'Ontario': 'ON', 'Quebec': 'QC', 'New Brunswick': 'NB', 'Nova Scotia': 'NS',
+                            'Prince Edward Island': 'PE', 'Newfoundland and Labrador': 'NL', 'Yukon': 'YT',
+                            'Northwest Territories': 'NT', 'Nunavut': 'NU'
+                        };
+                        for (const [name, code] of Object.entries(provMap)) {
+                            if (city.includes(name)) { provCode = code; break; }
+                        }
+                    }
+                }
+                debugInfo.provCode = provCode;
+                const station = Geo.findNearestCanadianStation(lat, lon, provCode);
+                debugInfo.station = station || null;
+                if (station) {
+                    const now = new Date();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const eccc = await API.fetchECCCAlmanac(station.id, month, day);
+                    if (eccc) {
+                        debugInfo.almanac = eccc;
+                        UI.renderECCCAlmanac(eccc, station);
+                    }
+                }
+            }
+            // Always show debug banner for now (can make conditional later)
+            UI.renderDebugBanner(debugInfo);
+        } catch (e) {
+            console.warn('ECCC almanac load skipped:', e.message);
+            UI.renderDebugBanner({ isCanada: !!config.isCanada, station: null, almanac: null, almanacError: e.message });
+        }
     }
 
     /**

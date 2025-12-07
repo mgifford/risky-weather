@@ -52,6 +52,74 @@ const UI = (() => {
 
     return {
         /**
+         * Debug banner for almanac gating and status
+         */
+        renderDebugBanner(info) {
+            const banner = document.createElement('div');
+            banner.style.position = 'fixed';
+            banner.style.bottom = '40px';
+            banner.style.right = '10px';
+            banner.style.background = 'rgba(0,0,0,0.6)';
+            banner.style.color = '#fff';
+            banner.style.padding = '6px 8px';
+            banner.style.borderRadius = '6px';
+            banner.style.fontSize = '0.75rem';
+            banner.style.zIndex = '9999';
+            const stText = info.station ? `${info.station.prov}:${info.station.name}${info.station.distanceKm ? ' ('+info.station.distanceKm+'km)' : ''}` : 'none';
+            const locText = info.city ? `${info.city}` : 'unknown-city';
+            const provText = info.provCode || '—';
+            const coordsText = (info.lat != null && info.lon != null) ? `${Number(info.lat).toFixed(2)},${Number(info.lon).toFixed(2)}` : '?,?';
+            banner.textContent = `CA:${info.isCanada ? 'Y' : 'N'} | LOC:${locText} [${coordsText}] | PROV:${provText} | ST:${stText} | AL:${info.almanac ? 'ok' : (info.almanacError || 'none')}`;
+            document.body.appendChild(banner);
+        },
+        /**
+         * Render ECCC Almanac card
+         */
+        renderECCCAlmanac(data, station) {
+            if (!ELEMENTS.historicalNormalsSection || !ELEMENTS.historicalNormalsContent) return;
+            const container = document.createElement('div');
+            container.style.marginTop = '10px';
+            container.style.padding = '10px';
+            container.style.border = '1px solid #eee';
+            container.style.borderRadius = '6px';
+            const title = document.createElement('div');
+            title.style.fontWeight = '600';
+            title.style.marginBottom = '6px';
+            title.textContent = I18n.t('ui.ecccAlmanacTitle');
+            const stationEl = document.createElement('div');
+            stationEl.style.fontSize = '0.85rem';
+            stationEl.style.color = '#666';
+            stationEl.textContent = `${station.name} (${station.prov})`;
+            const grid = document.createElement('div');
+            grid.style.display = 'grid';
+            grid.style.gridTemplateColumns = '1fr 1fr';
+            grid.style.gap = '8px 12px';
+            const avgHigh = document.createElement('div');
+            avgHigh.textContent = `${I18n.t('ui.avgHigh')}: ${isNaN(data.avgHigh) ? '—' : Math.round(data.avgHigh)}°`;
+            const avgLow = document.createElement('div');
+            avgLow.textContent = `${I18n.t('ui.avgLow')}: ${isNaN(data.avgLow) ? '—' : Math.round(data.avgLow)}°`;
+            const recHigh = document.createElement('div');
+            recHigh.textContent = `${I18n.t('ui.recordHigh')}: ${isNaN(data.recHigh) ? '—' : Math.round(data.recHigh)}°`;
+            const recLow = document.createElement('div');
+            recLow.textContent = `${I18n.t('ui.recordLow')}: ${isNaN(data.recLow) ? '—' : Math.round(data.recLow)}°`;
+            grid.appendChild(avgHigh);
+            grid.appendChild(avgLow);
+            grid.appendChild(recHigh);
+            grid.appendChild(recLow);
+            const link = document.createElement('a');
+            link.href = 'https://climate.weather.gc.ca/climate_data/almanac_selection_e.html';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.style.fontSize = '0.8rem';
+            link.style.color = '#555';
+            link.textContent = I18n.t('ui.sourceECCC');
+            container.appendChild(title);
+            container.appendChild(stationEl);
+            container.appendChild(grid);
+            container.appendChild(link);
+            ELEMENTS.historicalNormalsContent.appendChild(container);
+        },
+        /**
          * Update location display
          */
         setLocation(city) {
