@@ -1,0 +1,85 @@
+:root {
+    --bg: #eef2f5;
+    --card: #ffffff;
+    --text: #2c3e50;
+    --accent: #2980b9;
+    --can-red: #c0392b; 
+    --avg-grey: #95a5a6;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.6;
+}
+
+/* ... Keep previous Header/Card styles ... */
+
+.card {
+    background: var(--card);
+    width: 100%;
+    max-width: 480px;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+    margin-bottom: 20px;
+}
+
+/* STRIPES STYLING */
+.stripes-container {
+    display: flex;
+    width: 100%;
+    height: 60px;
+    margin: 20px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #eee;
+    align-items: center;
+    justify-content: center;
+}
+
+.stripe {
+    flex: 1;
+    height: 100%;
+    transition: transform 0.1s;
+}
+
+.stripe:hover {
+    transform: scaleY(1.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    z-index: 2;
+    position: relative;
+}
+
+.legend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 5px;
+}
+
+.gradient-bar {
+    flex-grow: 1;
+    height: 4px;
+    background: linear-gradient(to right, #08306b, #c6dbef, #f7f7f7, #fee0d2, #a50f15);
+    margin: 8px 10px 0 10px;
+    border-radius: 2px;
+}
+
+.credit {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #999;
+    margin-top: 15px;
+}
+
+.credit a { color: #999; }
+
+.loading-spinner { font-size: 0.8rem; color: #aaa; }
