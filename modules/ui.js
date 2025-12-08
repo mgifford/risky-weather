@@ -727,9 +727,9 @@ const UI = (() => {
 
             ELEMENTS.historyContent.innerHTML = `
                 <p style="margin: 0 0 12px 0; font-size: 0.95rem; line-height: 1.6;">${formattedEvent.event}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #718096; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf2f7;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #4a5568; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf2f7;">
                     <span>📅 ${formattedEvent.formattedDate}</span>
-                    ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: #3182ce; text-decoration: none;">🔗 Learn more →</a>` : ''}
+                    ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: #1e3a8a; text-decoration: underline;">🔗 Learn more →</a>` : ''}
                 </div>
             `;
 
@@ -755,38 +755,38 @@ const UI = (() => {
             
             const highComparison = highDiff === null ? '' : 
                 highDiff > 0 ? `<span style="color: #e53e3e;">▲ ${highDiff}° above average</span>` :
-                highDiff < 0 ? `<span style="color: #3182ce;">▼ ${Math.abs(highDiff)}° below average</span>` :
-                `<span style="color: #718096;">at average</span>`;
+                highDiff < 0 ? `<span style="color: #1e3a8a;">▼ ${Math.abs(highDiff)}° below average</span>` :
+                `<span style="color: #2d3748;">at average</span>`;
                 
             const lowComparison = lowDiff === null ? '' :
                 lowDiff > 0 ? `<span style="color: #e53e3e;">▲ ${lowDiff}° above average</span>` :
-                lowDiff < 0 ? `<span style="color: #3182ce;">▼ ${Math.abs(lowDiff)}° below average</span>` :
-                `<span style="color: #718096;">at average</span>`;
+                lowDiff < 0 ? `<span style="color: #1e3a8a;">▼ ${Math.abs(lowDiff)}° below average</span>` :
+                `<span style="color: #2d3748;">at average</span>`;
 
             ELEMENTS.historicalNormalsContent.innerHTML = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
-                        <div style="font-size: 0.8rem; color: #718096; margin-bottom: 4px;">Average High</div>
+                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Average High</div>
                         <div style="font-size: 1.5rem; font-weight: 700; color: #e53e3e;">${avgHigh}°</div>
-                        ${todayHigh !== null ? `<div style="font-size: 0.85rem; margin-top: 4px;">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
+                        ${todayHigh !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: #2d3748;">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
                     </div>
                     <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
-                        <div style="font-size: 0.8rem; color: #718096; margin-bottom: 4px;">Average Low</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: #3182ce;">${avgLow}°</div>
-                        ${todayLow !== null ? `<div style="font-size: 0.85rem; margin-top: 4px;">Today: ${Math.round(todayLow)}° ${lowComparison}</div>` : ''}
+                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Average Low</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a;">${avgLow}°</div>
+                        ${todayLow !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: #2d3748;">Today: ${Math.round(todayLow)}° ${lowComparison}</div>` : ''}
                     </div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.85rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; color: #2d3748;">
                     <div>
-                        <span style="color: #718096;">Record High:</span> <strong style="color: #e53e3e;">${recordHigh}°</strong>
+                        <span>Record High:</span> <strong style="color: #b91c1c;">${recordHigh}°</strong>
                     </div>
                     <div>
-                        <span style="color: #718096;">Record Low:</span> <strong style="color: #3182ce;">${recordLow}°</strong>
+                        <span>Record Low:</span> <strong style="color: #1e3a8a;">${recordLow}°</strong>
                     </div>
                 </div>
-                <div style="font-size: 0.75rem; color: #a0aec0; margin-top: 12px; text-align: right;">
+                <div style="font-size: 0.8rem; color: #4a5568; margin-top: 12px; text-align: right;">
                     Based on ${normals.yearsOfData} years of data • 
-                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: #3182ce; text-decoration: none;">Data: Open-Meteo Archive API</a>
+                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">Data: Open-Meteo Archive API</a>
                 </div>
             `;
 

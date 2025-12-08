@@ -10,8 +10,8 @@
             --bg: #f4f6f8;
             --card: #ffffff;
             --text: #2d3748;
-            --subtext: #718096;
-            --highlight: #3182ce;
+            --subtext: #4a5568; /* Darker for AA contrast */
+            --highlight: #1e3a8a; /* Darker for AA contrast */
             --accent: #e53e3e;
             --gem-color: #c53030; /* Canadian Red */
             --euro-color: #2b6cb0; /* Euro Blue */
@@ -100,7 +100,7 @@
         
         /* 7-DAY TABLE */
         .forecast-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .forecast-table th { text-align: left; color: var(--subtext); padding: 8px 4px; border-bottom: 2px solid #edf2f7; font-size: 0.8rem; text-transform: uppercase;}
+        .forecast-table th { text-align: left; color: var(--subtext); padding: 8px 4px; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase;}
         .forecast-table td { padding: 10px 4px; border-bottom: 1px solid #f7fafc; vertical-align: middle; }
         .col-day { width: 15%; font-weight: 600; color: #4a5568; }
         .col-model { width: 42%; }
@@ -115,10 +115,11 @@
             min-width: 35px;
             text-align: center;
         }
-        .rain-none { background: #f7fafc; color: #718096; font-weight: 600; }
-        .rain-low { background: #ebf8ff; color: #2b6cb0; }
-        .rain-med { background: #bee3f8; color: #2c5282; }
-        .rain-high { background: #fed7d7; color: #c53030; }
+        /* Improve pill contrast combinations */
+        .rain-none { background: #e2e8f0; color: #2d3748; font-weight: 700; }
+        .rain-low { background: #dbeafe; color: #1e3a8a; }
+        .rain-med { background: #bfdbfe; color: #1e40af; }
+        .rain-high { background: #fecaca; color: #7f1d1d; }
 
         /* LINKS */
         .official-link {
@@ -171,13 +172,13 @@
         /* STRIPES */
         .stripes-wrap { height: 40px; display: flex; width: 100%; border-radius: 6px; overflow: hidden; margin: 10px 0; }
         .stripe { flex: 1; height: 100%; }
-        .legend { display: flex; justify-content: space-between; font-size: 0.75rem; color: #a0aec0; }
+        .legend { display: flex; justify-content: space-between; font-size: 0.85rem; color: #4a5568; }
 
         .hidden { display: none; }
         .secondary-btn {
             background: none;
             border: none;
-            color: #a0aec0;
+            color: #2d3748;
             text-decoration: underline;
             cursor: pointer;
             font-size: 0.85rem;
@@ -200,12 +201,14 @@
         /* DEBUG INFO */
         .debug-info {
             font-size: 0.75rem;
-            color: #718096;
+            color: #4a5568;
             margin-top: 8px;
             padding-top: 8px;
             border-top: 1px solid #edf2f7;
             text-align: center;
         }
+        /* Ensure storage display meets contrast */
+        #storage-display { color: #2d3748; }
         .debug-info-line {
             margin: 2px 0;
         }
@@ -284,6 +287,7 @@
         
         <!-- City Search -->
         <div style="margin: 15px auto; max-width: 50%; position: relative;">
+            <label for="city-search-input" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">Search for a city</label>
             <input 
                 type="text" 
                 id="city-search-input" 
@@ -334,8 +338,8 @@
 
         <section class="card">
             <div class="card-title">
-                <span data-i18n="ui.today">📊 Today's Forecast</span>
-                <span style="font-size: 0.8rem; color: #a0aec0;" data-i18n="ui.highTemp">High Temp</span>
+                <h2 style="margin:0;" data-i18n="ui.today">📊 Today's Forecast</h2>
+                <span style="font-size: 0.85rem; color: var(--subtext);" data-i18n="ui.highTemp">High Temp</span>
             </div>
 
             <div class="model-battle">
@@ -359,7 +363,7 @@
 
         <section class="card">
             <div class="card-title">
-                <span data-i18n="ui.sevenDay">📅 7-Day Competition</span>
+                <h2 style="margin:0;" data-i18n="ui.sevenDay">📅 7-Day Competition</h2>
             </div>
             <table class="forecast-table">
                 <thead>
@@ -433,14 +437,14 @@
                 <button id="lesson-cycle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;" data-i18n-title="education.nextLesson" title="Show next lesson">→</button>
             </div>
             <p id="lesson-content" style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0;" data-i18n="ui.loadingLesson">Loading lesson...</p>
-            <div style="font-size: 0.75rem; color: #a0aec0; margin-top: 12px; text-align: right;">
+            <div style="font-size: 0.8rem; color: #4a5568; margin-top: 12px; text-align: right;">
                 <span id="lesson-counter">1 / 20</span>
             </div>
         </section>
 
         <section class="card">
-            <div class="card-title"><span data-i18n="ui.climateContext">🌍 Climate Context</span></div>
-            <p style="font-size: 0.85rem; color: #555;" data-i18n="stripes.description">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
+            <div class="card-title"><h2 style="margin:0;" data-i18n="ui.climateContext">🌍 Climate Context</h2></div>
+            <p style="font-size: 0.9rem; color: #2d3748;" data-i18n="stripes.description">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
             <div id="stripes" class="stripes-wrap"></div>
             <div class="legend"><span data-i18n="stripes.start">1950</span><span data-i18n="stripes.end">2023</span></div>
             <button id="load-stripes-btn" class="secondary-btn" style="margin-top: 10px;">Load Stripes</button>
@@ -452,13 +456,13 @@
         <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
         
         <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid #e2e8f0;">
-            <p style="font-size: 0.85rem; color: #718096; margin: 0 0 8px 0;">
-                <strong>Data Sources:</strong> 
-                <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: #3182ce; text-decoration: none;">Open-Meteo API</a> • 
-                <a href="https://ipwho.is/" target="_blank" rel="noopener" style="color: #3182ce; text-decoration: none;">IPWho.is</a>
+            <p style="font-size: 0.85rem; color: #4a5568; margin: 0 0 8px 0;">
+                <strong style="color:#2d3748;">Data Sources:</strong> 
+                <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">Open-Meteo API</a> • 
+                <a href="https://ipwho.is/" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">IPWho.is</a>
             </p>
-            <p style="font-size: 0.85rem; color: #718096; margin: 8px 0 0 0;">
-                <a href="https://github.com/mgifford/risky-weather" target="_blank" rel="noopener" style="color: #3182ce; text-decoration: none;">
+            <p style="font-size: 0.85rem; color: #4a5568; margin: 8px 0 0 0;">
+                <a href="https://github.com/mgifford/risky-weather" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">
                     <svg style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                     </svg>
@@ -482,6 +486,10 @@
     </div>
     
     <div id="status-log" role="status" aria-live="polite">Status: Init</div>
+    <style>
+        /* Prevent focus being obscured by status log */
+        body { padding-bottom: 28px; }
+    </style>
 
     <!-- Module Scripts (load in dependency order) -->
     <script src="modules/i18n.js"></script>
