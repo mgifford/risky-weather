@@ -34,6 +34,23 @@ This repository contains a client-side, single-page web app that helps people le
 
 ---
 
+## Weather Models 
+
+- From [Open-Meteo](https://open-meteo.com/en/docs) 
+- [Global Environmental Multiscale Model (GEM)](https://en.wikipedia.org/wiki/Global_Environmental_Multiscale_Model) - [Environment Canada Models](https://weather.gc.ca/mainmenu/modelling_menu_e.html)
+- [Regional Deterministic Prediction System (RDPS)](https://open.canada.ca/data/en/dataset/a9f2828c-0d78-5eb6-a4c7-1fc1219f1e3d) 
+- [European Centre for Medium-Range Weather Forecasts (ECMWF)](https://en.wikipedia.org/wiki/European_Centre_for_Medium-Range_Weather_Forecasts) - [European Model](https://www.ecmwf.int/en/forecasts)
+- [Global Forecast System (GFS)](https://en.wikipedia.org/wiki/Global_Forecast_System) - [NOAA USA](https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast)
+- CONUS Swiss HD 4x4
+- [North American Ensemble Forecast System (NAEFS)](https://en.wikipedia.org/wiki/North_American_Ensemble_Forecast_System)
+- [High Resolution Deterministic Prediction System (HRDPS)](https://open.canada.ca/data/en/dataset/5b401fa0-6c29-57f0-b3d5-749f301d829d)
+- [ICON (Icosahedral Nonhydrostatic)](https://windy.app/blog/what-is-icon-weather-model-forecast.html) - [DWD Info](https://www.dwd.de/EN/research/weatherforecasting/num_modelling/01_num_weather_prediction_modells/icon_description.html)
+- [UKMO, also known as UKMET (United Kingdom Met Office)](https://en.wikipedia.org/wiki/Met_Office)
+- [BBC Weather](https://www.bbc.com/weather) Uses the [MeteoGroup's Model](https://en.wikipedia.org/wiki/MeteoGroup)
+
+
+---
+
 ## Modules
 The app is split into focused modules under `modules/`:
 - `storage.js` — LocalStorage helpers and URL param helpers
