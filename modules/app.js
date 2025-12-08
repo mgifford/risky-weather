@@ -10,18 +10,14 @@ const App = (() => {
      * Initialize application
      */
     async function init() {
-        // Initialize internationalization first
+        // Initialize internationalization using browser defaults only
         I18n.init();
-        
-        // Check for language in URL parameters
         const urlParams = Storage.getUrlParams();
-        if (urlParams.language) {
-            I18n.setLanguage(urlParams.language);
-            document.getElementById('html-root').lang = urlParams.language;
-        }
+        // Ignore explicit lang overrides for now; rely on browser default
+        document.getElementById('html-root').lang = I18n.getCurrentLanguage();
         
-        UI.updateLanguageToggle();
-        UI.onLanguageToggle(toggleLanguage);
+        // Hide language toggle until localization is ready
+        UI.updateLanguageToggle(true);
         UI.onShare(shareLocation);
         
         // Initialize city search
@@ -254,17 +250,9 @@ const App = (() => {
                 const station = Geo.findNearestCanadianStation(lat, lon, provCode);
                 debugInfo.station = station || null;
                 if (station) {
-                    const now = new Date();
-                    const month = String(now.getMonth() + 1).padStart(2, '0');
-                    const day = String(now.getDate()).padStart(2, '0');
-                    const eccc = await API.fetchECCCAlmanac(station.id, month, day);
-                    if (eccc) {
-                        debugInfo.almanac = eccc;
-                        UI.renderECCCAlmanac(eccc, station);
-                    } else {
-                        // Render station card with links even when almanac data isn't available
-                        UI.renderECCCAlmanac(null, station);
-                    }
+                    // On static hosting (GitHub Pages), ECCC CSV fetch is blocked by CORS.
+                    // Render station card with links only; skip data fetch.
+                    UI.renderECCCAlmanac(null, station);
                 }
             }
             if (debugMode) {
@@ -277,6 +265,8 @@ const App = (() => {
                 UI.renderDebugBanner({ isCanada: !!config.isCanada, station: null, almanac: null, almanacError: e.message });
             }
         }
+
+        // GDACS integration removed.
     }
 
     /**

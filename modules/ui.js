@@ -156,6 +156,8 @@ const UI = (() => {
             container.appendChild(linkWrap);
             ELEMENTS.historicalNormalsContent.appendChild(container);
         },
+
+        // GDACS integration removed.
         /**
          * Update location display
          */
@@ -664,17 +666,22 @@ const UI = (() => {
         /**
          * Update language toggle button text
          */
-        updateLanguageToggle() {
+        updateLanguageToggle(hide = false) {
+            const btn = ELEMENTS.languageToggleBtn;
+            if (!btn) {
+                console.warn('Language toggle button element not found');
+                return;
+            }
+            if (hide) {
+                btn.style.display = 'none';
+                return;
+            }
             const currentLang = I18n.getCurrentLanguage();
             const nextLang = currentLang === 'en' ? 'fr' : 'en';
             const nextLangName = I18n.getLanguageName(nextLang);
-            if (ELEMENTS.languageToggleBtn) {
-                const buttonText = I18n.t('ui.toggleLanguage', nextLangName);
-                console.log(`Setting language toggle button text: "${buttonText}" (current: ${currentLang}, next: ${nextLang})`);
-                ELEMENTS.languageToggleBtn.textContent = buttonText;
-            } else {
-                console.warn('Language toggle button element not found');
-            }
+            const buttonText = I18n.t('ui.toggleLanguage', nextLangName);
+            console.log(`Setting language toggle button text: "${buttonText}" (current: ${currentLang}, next: ${nextLang})`);
+            btn.textContent = buttonText;
         },
 
         /**
@@ -695,9 +702,7 @@ const UI = (() => {
          * Register language toggle handler
          */
         onLanguageToggle(callback) {
-            if (ELEMENTS.languageToggleBtn) {
-                ELEMENTS.languageToggleBtn.addEventListener('click', callback);
-            }
+            // Disabled: language toggle hidden until localization is ready
         },
 
         /**

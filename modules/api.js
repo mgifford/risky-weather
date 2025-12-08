@@ -335,6 +335,8 @@ const API = (() => {
         }
     }
 
+    // GDACS integration removed.
+
     /**
      * Reverse geocode to get city name from coordinates
      * Uses Open-Meteo primary, falls back to Nominatim if needed

@@ -135,23 +135,28 @@ const Storage = (() => {
          */
         updateUrl(lat, lon, city, lang = null) {
             const currentLang = lang || I18n.getCurrentLanguage();
-            const params = new URLSearchParams();
-            
-            // Prefer human-readable city-only URLs when city is known
+            // Start from existing params to preserve non-core keys like `debug`
+            const params = new URLSearchParams(window.location.search);
+
+            // Normalize core location params
             if (city) {
-                // Set raw string; URLSearchParams encodes for us
                 params.set('city', city);
+                // Clear lat/lon if city is authoritative to avoid conflicting state
+                params.delete('lat');
+                params.delete('lon');
             } else if (lat && lon) {
-                // Fall back to coordinates-only when city not available
                 params.set('lat', Number(lat).toFixed(2));
                 params.set('lon', Number(lon).toFixed(2));
+                // If no city provided, ensure any stale city is removed
+                params.delete('city');
             }
-            
+
             if (currentLang) {
                 params.set('lang', currentLang);
             }
-            
-            const newUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+            const query = params.toString();
+            const newUrl = `${window.location.origin}${window.location.pathname}${query ? `?${query}` : ''}`;
             window.history.replaceState({ lat, lon, city, lang: currentLang }, '', newUrl);
         },
 
