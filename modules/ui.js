@@ -808,6 +808,7 @@ const UI = (() => {
                 
                 if (query.length < 2) {
                     ELEMENTS.citySearchResults.style.display = 'none';
+                    ELEMENTS.citySearchInput.setAttribute('aria-expanded', 'false');
                     return;
                 }
 
@@ -822,12 +823,36 @@ const UI = (() => {
             document.addEventListener('click', (e) => {
                 if (!ELEMENTS.citySearchInput.contains(e.target) && !ELEMENTS.citySearchResults.contains(e.target)) {
                     ELEMENTS.citySearchResults.style.display = 'none';
+                    ELEMENTS.citySearchInput.setAttribute('aria-expanded', 'false');
                 }
             });
 
             // Focus input on click
             ELEMENTS.citySearchInput.addEventListener('click', (e) => {
                 e.stopPropagation();
+            });
+
+            // Keyboard navigation for listbox
+            ELEMENTS.citySearchInput.addEventListener('keydown', (e) => {
+                const items = Array.from(ELEMENTS.citySearchResults.querySelectorAll('[role="option"]'));
+                const activeIndex = items.findIndex(el => el === document.activeElement);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (items.length) {
+                        const next = items[Math.max(0, activeIndex + 1) % items.length];
+                        next.focus();
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (items.length) {
+                        const prev = items[(activeIndex - 1 + items.length) % items.length];
+                        prev.focus();
+                    }
+                } else if (e.key === 'Escape') {
+                    ELEMENTS.citySearchResults.style.display = 'none';
+                    ELEMENTS.citySearchInput.setAttribute('aria-expanded', 'false');
+                    ELEMENTS.citySearchInput.focus();
+                }
             });
         },
 
@@ -842,7 +867,7 @@ const UI = (() => {
             }
 
             let html = results.map(city => `
-                <div class="city-result-item" 
+                <li class="city-result-item" role="option" tabindex="-1"
                      data-lat="${city.lat}" 
                      data-lon="${city.lon}" 
                      data-name="${city.name}"
@@ -852,11 +877,12 @@ const UI = (() => {
                      onmouseout="this.style.background='white'">
                     <div style="font-weight: 600; color: #2d3748;">${city.name}</div>
                     <div style="font-size: 0.85rem; color: #718096;">${city.region ? city.region + ', ' : ''}${city.country}</div>
-                </div>
+                </li>
             `).join('');
 
             ELEMENTS.citySearchResults.innerHTML = html;
             ELEMENTS.citySearchResults.style.display = 'block';
+            ELEMENTS.citySearchInput.setAttribute('aria-expanded', 'true');
 
             // Add click handlers
             ELEMENTS.citySearchResults.querySelectorAll('.city-result-item').forEach(item => {
@@ -869,9 +895,20 @@ const UI = (() => {
                     
                     ELEMENTS.citySearchInput.value = item.querySelector('div').textContent;
                     ELEMENTS.citySearchResults.style.display = 'none';
+                    ELEMENTS.citySearchInput.setAttribute('aria-expanded', 'false');
                     
                     if (onCitySelect) {
                         onCitySelect(lat, lon, cityName);
+                    }
+                });
+
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        item.click();
+                    } else if (e.key === 'Escape') {
+                        ELEMENTS.citySearchResults.style.display = 'none';
+                        ELEMENTS.citySearchInput.setAttribute('aria-expanded', 'false');
+                        ELEMENTS.citySearchInput.focus();
                     }
                 });
             });

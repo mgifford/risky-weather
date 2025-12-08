@@ -221,8 +221,41 @@ const App = (() => {
             UI.getElement('forecastList').innerHTML = '<tr><td colspan="3">Error loading weather. Check Console.</td></tr>';
         }
 
-        // Generate stripes in background
-        generateStripes(lat, lon);
+        // Stripes: load on demand unless lowdata mode is off
+        const params = new URLSearchParams(window.location.search);
+        const lowdata = params.get('lowdata') === '1';
+        const loadBtn = document.getElementById('load-stripes-btn');
+        if (loadBtn) {
+            loadBtn.addEventListener('click', async () => {
+                UI.setStatus('Loading climate stripes…');
+                const years = await API.fetchHistoricalYears(lat, lon, 1971, 2023);
+                if (years && !years.rateLimited) {
+                    // Aggregate annual means and render
+                    const temps = years.daily?.temperature_2m_mean || [];
+                    const dates = years.daily?.time || [];
+                    const yearly = {};
+                    dates.forEach((d, i) => {
+                        const y = d.slice(0,4);
+                        const t = temps[i];
+                        if (t != null) {
+                            if (!yearly[y]) yearly[y] = { sum: 0, count: 0 };
+                            yearly[y].sum += t;
+                            yearly[y].count++;
+                        }
+                    });
+                    const annualMeans = Object.keys(yearly).sort().map(y => ({ year: y, mean: yearly[y].sum / yearly[y].count }));
+                    // Baseline 1971-2000
+                    const baselineVals = annualMeans.filter(a => a.year >= '1971' && a.year <= '2000').map(a => a.mean);
+                    const baseline = baselineVals.length ? (baselineVals.reduce((a,b)=>a+b,0)/baselineVals.length) : 0;
+                    UI.renderStripes(annualMeans, baseline);
+                    UI.setStatus('Stripes loaded');
+                } else {
+                    UI.setStatus('Could not load stripes (rate limited or error)');
+                }
+            });
+        }
+        // Auto-load stripes only when not in lowdata mode
+        if (!lowdata && loadBtn) loadBtn.click();
 
         // Lazy-load ECCC almanac after main content for Canada only
         try {
