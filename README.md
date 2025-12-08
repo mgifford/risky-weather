@@ -108,9 +108,3 @@ Notes:
 
 ## Contributing
 Open a PR or file an issue with a clear reproduction case. If you are testing geocoding behavior, run the app from `http://localhost:8000` to avoid file:// CORS problems.
-
----
-
-**Last Updated:** December 6, 2025
-
-```
