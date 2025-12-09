@@ -14,7 +14,7 @@ Here is a comprehensive `README.md` that you can include in your repository. It 
 The codebase is organized into 6 independent modules:
 - `storage.js` - LocalStorage operations
 - `calculations.js` - Business logic & data processing  
-```markdown
+
 # Weather vs. Risk: A Climate Literacy Project
 
 This repository contains a client-side, single-page web app that helps people learn probabilistic thinking, model uncertainty, and climate context by comparing competing weather forecast models and local observations.
