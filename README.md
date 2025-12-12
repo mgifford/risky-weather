@@ -108,3 +108,8 @@ Notes:
 
 ## Contributing
 Open a PR or file an issue with a clear reproduction case. If you are testing geocoding behavior, run the app from `http://localhost:8000` to avoid file:// CORS problems.
+
+## AI Disclosure
+
+Yes. AI was used in creating this tool. There be dragons! 
+
