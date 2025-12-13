@@ -164,9 +164,10 @@ const App = (() => {
      */
     function updateStorageDisplay() {
         const hasLocation = Storage.getLocation() !== null;
-        const hasHistory = localStorage.getItem('history_v6_pending') !== null;
+        const historyCount = Storage.getHistoryCount ? Storage.getHistoryCount() : 0;
+        const hasHistory = historyCount > 0;
         const hasScoreboard = localStorage.getItem('scoreboard_v6') !== null;
-        UI.setStorageInfo(hasLocation, hasHistory, hasScoreboard);
+        UI.setStorageInfo(hasLocation, hasHistory, hasScoreboard, historyCount);
     }
 
     /**

@@ -175,10 +175,12 @@ const UI = (() => {
         /**
          * Display storage information
          */
-        setStorageInfo(hasLocation, hasHistory, hasScoreboard) {
+        setStorageInfo(hasLocation, hasHistory, hasScoreboard, historyCount = 0) {
             const items = [];
             if (hasLocation) items.push('Location');
-            if (hasHistory) items.push('History');
+            if (hasHistory) {
+                items.push(historyCount > 1 ? `History (${historyCount} days)` : 'History');
+            }
             if (hasScoreboard) items.push('Scores');
             
             const text = items.length > 0 ? items.join(', ') : 'Empty';
@@ -549,7 +551,7 @@ const UI = (() => {
             
             const cacheData = {
                 location: JSON.parse(localStorage.getItem('user_loc_v6') || 'null'),
-                historicalForecasts: JSON.parse(localStorage.getItem('history_v6_pending') || 'null'),
+                historicalForecasts: JSON.parse(localStorage.getItem('history_v6') || 'null'),
                 scoreboard: JSON.parse(localStorage.getItem('scoreboard_v6') || 'null'),
                 lastScoredDate: localStorage.getItem('last_scored_date_v6'),
                 allKeys: allKeys
@@ -564,8 +566,10 @@ const UI = (() => {
             if (cacheData.location) {
                 html += `City: ${cacheData.location.city || 'N/A'}<br>`;
                 html += `Lat: ${cacheData.location.lat || 'N/A'}<br>`;
-                html += `Lon: ${cacheData.location.lon || 'N/A'}<br>`;
-                html += `IP: ${cacheData.location.ip || 'N/A'}`;
+                html += `Lon: ${cacheData.location.lon || 'N/A'}`;
+                if (cacheData.location.ip) {
+                    html += `<br>IP: ${cacheData.location.ip}`;
+                }
             } else {
                 html += 'No location saved';
             }
@@ -585,16 +589,60 @@ const UI = (() => {
             html += '</div>';
             
             // Historical Forecasts
-            html += '<div style="margin-bottom: 15px;"><strong>📅 Daily Forecasts Stored:</strong></div>';
-            html += '<div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 15px;">';
-            if (cacheData.historicalForecasts) {
+            html += '<div style="margin-bottom: 15px;"><strong>📅 Historical Forecasts (Last 31 Days):</strong></div>';
+            html += '<div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 15px; max-height: 400px; overflow-y: auto;">';
+            if (cacheData.historicalForecasts && Array.isArray(cacheData.historicalForecasts) && cacheData.historicalForecasts.length > 0) {
+                // Filter out today's forecast - only show past dates
+                const today = new Date().toISOString().split('T')[0];
+                const pastForecasts = cacheData.historicalForecasts.filter(f => f.savedDate < today);
+                
+                if (pastForecasts.length === 0) {
+                    html += '<div style="color: #718096; font-style: italic;">No past forecasts yet. Today\'s forecast will become historical tomorrow!</div>';
+                } else {
+                    html += `<div style="margin-bottom: 10px;"><strong>Past Forecasts: ${pastForecasts.length}</strong> (excludes today)</div>`;
+                    pastForecasts.forEach((forecast, index) => {
+                        const isYesterday = index === 0;
+                        html += `<div style="padding: 8px; margin-bottom: 8px; background: ${isYesterday ? '#fff3cd' : 'white'}; border: 1px solid #ddd; border-radius: 4px;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 4px;">${isYesterday ? '⏮️ ' : ''}${forecast.savedDate || 'N/A'}</div>`;
+                    if (forecast.lat && forecast.lon) {
+                        html += `<div style="font-size: 0.85rem; color: #666;">Location: ${forecast.lat.toFixed(2)}, ${forecast.lon.toFixed(2)}</div>`;
+                    }
+                    if (forecast.forecasts) {
+                        const modelA = forecast.forecasts.modelA;
+                        const modelB = forecast.forecasts.modelB;
+                        if (modelA && modelA.days && modelA.days.length > 0) {
+                            const day0 = modelA.days[0];
+                            html += `<div style="font-size: 0.85rem; margin-top: 4px;">${modelA.name || 'Model A'}: ${day0.precip !== undefined ? day0.precip + '% rain' : 'N/A'}`;
+                            if (day0.tempMax !== undefined || day0.tempMin !== undefined) {
+                                html += ` | Temp: ${day0.tempMax !== undefined ? Math.round(day0.tempMax) : '?'}°/${day0.tempMin !== undefined ? Math.round(day0.tempMin) : '?'}°`;
+                            }
+                            html += `</div>`;
+                        }
+                        if (modelB && modelB.days && modelB.days.length > 0) {
+                            const day0 = modelB.days[0];
+                            html += `<div style="font-size: 0.85rem;">${modelB.name || 'Model B'}: ${day0.precip !== undefined ? day0.precip + '% rain' : 'N/A'}`;
+                            if (day0.tempMax !== undefined || day0.tempMin !== undefined) {
+                                html += ` | Temp: ${day0.tempMax !== undefined ? Math.round(day0.tempMax) : '?'}°/${day0.tempMin !== undefined ? Math.round(day0.tempMin) : '?'}°`;
+                            }
+                            html += `</div>`;
+                        }
+                    }
+                        html += `</div>`;
+                    });
+                }
+            } else if (cacheData.historicalForecasts && !Array.isArray(cacheData.historicalForecasts)) {
+                // Old single-record format (backward compatibility)
                 const forecast = cacheData.historicalForecasts;
-                html += `Date: ${forecast.date || 'N/A'}<br>`;
+                html += `<div style="padding: 8px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; margin-bottom: 8px;">`;
+                html += `<div style="font-weight: 600; margin-bottom: 4px;">⚠️ Legacy Format (Single Record)</div>`;
+                html += `Date: ${forecast.date || forecast.savedDate || 'N/A'}<br>`;
                 html += `Location: ${forecast.lat && forecast.lon ? `${forecast.lat.toFixed(2)}, ${forecast.lon.toFixed(2)}` : 'N/A'}<br>`;
                 html += `${forecast.modelA?.name || 'Model A'}: ${forecast.modelA?.prob !== undefined ? forecast.modelA.prob + '% rain' : 'N/A'}<br>`;
                 html += `${forecast.modelB?.name || 'Model B'}: ${forecast.modelB?.prob !== undefined ? forecast.modelB.prob + '% rain' : 'N/A'}`;
+                html += `</div>`;
+                html += `<div style="margin-top: 8px; font-size: 0.85rem; color: #666;">Note: Revisit the page to migrate to new multi-day format.</div>`;
             } else {
-                html += 'No daily forecasts stored yet. Will save on next visit.';
+                html += 'No historical forecasts stored yet. Will save on next visit.';
             }
             html += '</div>';
             
@@ -602,7 +650,16 @@ const UI = (() => {
             html += '<div style="margin-bottom: 15px;"><strong>🔑 All Stored Keys:</strong></div>';
             html += '<div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 15px; overflow-x: auto;">';
             if (cacheData.allKeys.length > 0) {
-                html += cacheData.allKeys.map(k => `<div>• ${k}</div>`).join('');
+                const keyDescriptions = {
+                    'user_loc_v6': 'Your saved location (city, lat/lon, IP)',
+                    'history_v6': 'Up to 31 days of daily forecast snapshots',
+                    'scoreboard_v6': 'Model battle wins counter',
+                    'last_scored_date_v6': 'Last date a winner was determined'
+                };
+                html += cacheData.allKeys.map(k => {
+                    const desc = keyDescriptions[k] || 'Unknown key';
+                    return `<div style="margin-bottom: 4px;">• <strong>${k}</strong><br><span style="font-size: 0.85rem; color: #718096; margin-left: 12px;">${desc}</span></div>`;
+                }).join('');
             } else {
                 html += 'No data stored';
             }
@@ -919,6 +976,168 @@ const UI = (() => {
          */
         getElement(id) {
             return ELEMENTS[id];
+        },
+
+        /**
+         * Display battle history with accuracy trends
+         */
+        async renderBattleHistory() {
+            const container = document.getElementById('battle-history-section');
+            if (!container) return;
+
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: #718096;">⏳ Analyzing historical battles...</div>';
+            container.style.display = 'block';
+
+            try {
+                const battles = await Battles.analyzeAllBattles();
+                
+                if (!battles || battles.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 30px; color: #718096;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No Battle History Yet</div>
+                            <div style="font-size: 0.9rem;">Visit the page daily to build up your forecast accuracy history!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const trends = Battles.calculateTrends(battles);
+                
+                // Build HTML
+                let html = '<div style="padding: 20px;">';
+                
+                // Header and stats
+                html += '<div style="margin-bottom: 25px;">';
+                html += '<h3 style="margin: 0 0 15px 0; font-size: 1.5rem; color: #2d3748;">⚔️ Battle History</h3>';
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">';
+                
+                const modelAName = battles[0]?.modelA || 'Model A';
+                const modelBName = battles[0]?.modelB || 'Model B';
+                
+                html += `
+                    <div style="background: #edf2f7; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.85rem; color: #718096; margin-bottom: 5px;">Total Battles</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #2d3748;">${trends.totalBattles}</div>
+                    </div>
+                    <div style="background: #bee3f8; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.85rem; color: #2c5282; margin-bottom: 5px;">${modelAName} Wins</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #2c5282;">${trends.winsA}</div>
+                    </div>
+                    <div style="background: #fbd38d; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.85rem; color: #7c2d12; margin-bottom: 5px;">${modelBName} Wins</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #7c2d12;">${trends.winsB}</div>
+                    </div>
+                    <div style="background: #e2e8f0; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 5px;">Ties</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #4a5568;">${trends.ties}</div>
+                    </div>
+                `;
+                html += '</div>';
+                
+                // Average errors comparison
+                html += '<div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">';
+                html += '<div style="font-weight: 600; margin-bottom: 10px; color: #2d3748;">📈 Average Prediction Errors</div>';
+                html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">';
+                html += `
+                    <div>
+                        <div style="color: #2c5282; font-weight: 600; margin-bottom: 5px;">${modelAName}</div>
+                        <div>Temp Max: ±${trends.avgErrorA.tempMax.toFixed(1)}°C</div>
+                        <div>Temp Min: ±${trends.avgErrorA.tempMin.toFixed(1)}°C</div>
+                        <div>Precip: ±${trends.avgErrorA.precip.toFixed(1)}mm</div>
+                    </div>
+                    <div>
+                        <div style="color: #7c2d12; font-weight: 600; margin-bottom: 5px;">${modelBName}</div>
+                        <div>Temp Max: ±${trends.avgErrorB.tempMax.toFixed(1)}°C</div>
+                        <div>Temp Min: ±${trends.avgErrorB.tempMin.toFixed(1)}°C</div>
+                        <div>Precip: ±${trends.avgErrorB.precip.toFixed(1)}mm</div>
+                    </div>
+                `;
+                html += '</div>';
+                html += '</div>';
+                
+                html += '</div>';
+                
+                // Timeline of battles
+                html += '<div style="margin-bottom: 15px; font-weight: 600; color: #2d3748;">📅 Battle Timeline</div>';
+                html += '<div style="max-height: 500px; overflow-y: auto;">';
+                
+                battles.forEach((battle, index) => {
+                    const bgColor = battle.overallWinner === 'A' ? '#bee3f8' : 
+                                   battle.overallWinner === 'B' ? '#fbd38d' : '#e2e8f0';
+                    const borderColor = battle.overallWinner === 'A' ? '#3182ce' : 
+                                       battle.overallWinner === 'B' ? '#dd6b20' : '#718096';
+                    
+                    html += `<div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 12px; margin-bottom: 10px; border-radius: 6px;">`;
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">`;
+                    html += `<div style="font-weight: 600; color: #2d3748;">${battle.date}</div>`;
+                    html += `<div style="font-size: 0.9rem; color: #4a5568;">`;
+                    if (battle.overallWinner === 'A') html += `🏆 ${battle.modelA}`;
+                    else if (battle.overallWinner === 'B') html += `🏆 ${battle.modelB}`;
+                    else html += '🤝 Tie';
+                    html += `</div>`;
+                    html += `</div>`;
+                    
+                    // Actual weather
+                    html += `<div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 8px;">`;
+                    html += `<strong>Actual:</strong> ${battle.actual.tempMax?.toFixed(1) || '?'}° / ${battle.actual.tempMin?.toFixed(1) || '?'}° | ${battle.actual.precip?.toFixed(1) || '0'}mm rain`;
+                    html += `</div>`;
+                    
+                    // Predictions and errors
+                    html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem;">`;
+                    
+                    html += `<div style="background: rgba(255,255,255,0.5); padding: 8px; border-radius: 4px;">`;
+                    html += `<div style="color: #2c5282; font-weight: 600; margin-bottom: 4px;">${battle.modelA}</div>`;
+                    html += `<div>Predicted: ${battle.predicted.modelA.tempMax?.toFixed(1) || '?'}° / ${battle.predicted.modelA.tempMin?.toFixed(1) || '?'}° | ${battle.predicted.modelA.precip?.toFixed(1) || '0'}mm</div>`;
+                    html += `<div style="color: #718096; font-size: 0.8rem;">`;
+                    html += `Error: ${battle.errors.modelA.tempMax !== null ? '±' + battle.errors.modelA.tempMax.toFixed(1) + '°' : '—'} / `;
+                    html += `${battle.errors.modelA.tempMin !== null ? '±' + battle.errors.modelA.tempMin.toFixed(1) + '°' : '—'} | `;
+                    html += `${battle.errors.modelA.precip !== null ? '±' + battle.errors.modelA.precip.toFixed(1) + 'mm' : '—'}`;
+                    html += `</div>`;
+                    html += `</div>`;
+                    
+                    html += `<div style="background: rgba(255,255,255,0.5); padding: 8px; border-radius: 4px;">`;
+                    html += `<div style="color: #7c2d12; font-weight: 600; margin-bottom: 4px;">${battle.modelB}</div>`;
+                    html += `<div>Predicted: ${battle.predicted.modelB.tempMax?.toFixed(1) || '?'}° / ${battle.predicted.modelB.tempMin?.toFixed(1) || '?'}° | ${battle.predicted.modelB.precip?.toFixed(1) || '0'}mm</div>`;
+                    html += `<div style="color: #718096; font-size: 0.8rem;">`;
+                    html += `Error: ${battle.errors.modelB.tempMax !== null ? '±' + battle.errors.modelB.tempMax.toFixed(1) + '°' : '—'} / `;
+                    html += `${battle.errors.modelB.tempMin !== null ? '±' + battle.errors.modelB.tempMin.toFixed(1) + '°' : '—'} | `;
+                    html += `${battle.errors.modelB.precip !== null ? '±' + battle.errors.modelB.precip.toFixed(1) + 'mm' : '—'}`;
+                    html += `</div>`;
+                    html += `</div>`;
+                    
+                    html += `</div>`;
+                    html += `</div>`;
+                });
+                
+                html += '</div>';
+                html += '</div>';
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Failed to render battle history:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #e53e3e;">
+                        <div style="font-size: 1.5rem; margin-bottom: 10px;">⚠️</div>
+                        <div>Failed to load battle history</div>
+                        <div style="font-size: 0.85rem; margin-top: 8px; color: #718096;">${error.message}</div>
+                    </div>
+                `;
+            }
+        },
+
+        /**
+         * Show/hide battle history section
+         */
+        toggleBattleHistory() {
+            const container = document.getElementById('battle-history-section');
+            if (!container) return;
+            
+            if (container.style.display === 'none' || !container.style.display) {
+                this.renderBattleHistory();
+            } else {
+                container.style.display = 'none';
+            }
         }
     };
 })();

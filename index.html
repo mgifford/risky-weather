@@ -450,9 +450,15 @@
             <button id="load-stripes-btn" class="secondary-btn" style="margin-top: 10px;">Load Stripes</button>
         </section>
 
+        <!-- Battle History Section -->
+        <section id="battle-history-section" class="card" style="display: none;">
+            <!-- Content will be dynamically generated -->
+        </section>
+
         <button id="reset-btn" class="secondary-btn" data-i18n="ui.resetLocation">Reset Location & History</button>
         <button id="refresh-location-btn" class="secondary-btn" data-i18n="ui.refreshLocation" style="margin-left: 10px;">🔄 Refresh Location</button>
         <button id="view-cache-btn" class="secondary-btn" data-i18n="ui.viewCache" style="margin-left: 10px;">📋 View Cache</button>
+        <button id="view-battles-btn" class="secondary-btn" style="margin-left: 10px;">⚔️ Battle History</button>
         <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
         
         <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid #e2e8f0;">
@@ -510,6 +516,7 @@
     <script src="modules/storage.js"></script>
     <script src="modules/calculations.js"></script>
     <script src="modules/api.js"></script>
+    <script src="modules/battles.js"></script>
     <script src="modules/ui.js"></script>
     <script src="modules/geo.js"></script>
     <script src="modules/education.js"></script>
@@ -530,6 +537,14 @@
         UI.onCacheInspector(() => {
             console.log('Cache Inspector opened');
         });
+
+        // Battle History Button
+        const viewBattlesBtn = document.getElementById('view-battles-btn');
+        if (viewBattlesBtn) {
+            viewBattlesBtn.addEventListener('click', () => {
+                UI.toggleBattleHistory();
+            });
+        }
 
         App.init();
     </script>

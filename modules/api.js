@@ -433,12 +433,43 @@ const API = (() => {
         return `${absLat}°${latDir} ${absLon}°${lonDir}`;
     }
 
+    /**
+     * Fetch actual weather data for a specific date range
+     * Used to verify forecast accuracy against what actually happened
+     */
+    async function fetchActualWeather(lat, lon, startDate, endDate = null) {
+        const end = endDate || startDate;
+        const params = new URLSearchParams({
+            latitude: lat,
+            longitude: lon,
+            start_date: startDate,
+            end_date: end,
+            daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max',
+            timezone: 'auto'
+        });
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.ARCHIVE_TIMEOUT);
+
+        try {
+            const response = await fetch(`${BASE_ARCHIVE}?${params}`, { signal: controller.signal });
+            if (!response.ok) throw new Error(`API returned ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.warn(`Actual weather fetch failed for ${startDate}: ${error.message}`);
+            return null;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
     return {
         fetchForecast,
         fetchHistoricalDay,
         fetchHistoricalYears,
         fetchHistoricalNormals,
         getCityName,
-        fetchECCCAlmanac
+        fetchECCCAlmanac,
+        fetchActualWeather
     };
 })();

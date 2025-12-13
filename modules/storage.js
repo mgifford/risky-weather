@@ -7,10 +7,11 @@ const Storage = (() => {
     const VERSION = 'v6';
     const KEYS = {
         LOCATION: `user_loc_${VERSION}`,
-        HISTORY_PENDING: `history_${VERSION}_pending`,
+        HISTORY: `history_${VERSION}`,
         SCOREBOARD: `scoreboard_${VERSION}`,
         LAST_SCORED: `last_scored_date_${VERSION}`
     };
+    const MAX_HISTORY_DAYS = 31;
 
     return {
         // Location Storage
@@ -41,12 +42,52 @@ const Storage = (() => {
                 lon,
                 forecasts
             };
-            localStorage.setItem(KEYS.HISTORY_PENDING, JSON.stringify(record));
+            
+            // Get existing history array or create new one
+            let history = this.getHistoricalForecasts();
+            
+            // Check if we already have a record for this date
+            const existingIndex = history.findIndex(r => r.savedDate === date);
+            if (existingIndex >= 0) {
+                // Update existing record
+                history[existingIndex] = record;
+            } else {
+                // Add new record
+                history.push(record);
+            }
+            
+            // Sort by date (most recent first)
+            history.sort((a, b) => new Date(b.savedDate) - new Date(a.savedDate));
+            
+            // Keep only the last 31 days
+            if (history.length > MAX_HISTORY_DAYS) {
+                history = history.slice(0, MAX_HISTORY_DAYS);
+            }
+            
+            localStorage.setItem(KEYS.HISTORY, JSON.stringify(history));
         },
 
         getPendingForecast() {
-            const saved = localStorage.getItem(KEYS.HISTORY_PENDING);
-            return saved ? JSON.parse(saved) : null;
+            // Get the most recent forecast (for backward compatibility)
+            const history = this.getHistoricalForecasts();
+            return history.length > 0 ? history[0] : null;
+        },
+
+        // Get all historical forecasts (up to 31 days)
+        getHistoricalForecasts() {
+            const saved = localStorage.getItem(KEYS.HISTORY);
+            return saved ? JSON.parse(saved) : [];
+        },
+
+        // Get forecast for a specific date
+        getForecastByDate(date) {
+            const history = this.getHistoricalForecasts();
+            return history.find(r => r.savedDate === date) || null;
+        },
+
+        // Get number of historical forecast days stored
+        getHistoryCount() {
+            return this.getHistoricalForecasts().length;
         },
 
         // Scoreboard
