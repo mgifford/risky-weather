@@ -460,7 +460,22 @@
         <button id="view-cache-btn" class="secondary-btn" data-i18n="ui.viewCache" style="margin-left: 10px;">📋 View Cache</button>
         <button id="view-battles-btn" class="secondary-btn" style="margin-left: 10px;">⚔️ Battle History</button>
         <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
+    
         
+<div class="footer-widgets">
+    <hr>
+    <div id="risky-weather-global-counter">
+        <div id="counter-label">Loading Climate Data...</div>
+        <div id="counter-value">...</div>
+        <div id="counter-unit"></div>
+        <div class="reference">
+            Reference: <a id="counter-reference" target="_blank">View Scientific Source</a>
+        </div>
+    </div>
+</div>
+
+
+
         <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid #e2e8f0;">
             <p style="font-size: 0.85rem; color: #4a5568; margin: 0 0 8px 0;">
                 <strong style="color:#2d3748;">Data Sources:</strong> 
@@ -522,6 +537,9 @@
     <script src="modules/education.js"></script>
     <script src="modules/history.js"></script>
     <script src="modules/app.js"></script>
+
+    <script src="/live-counter/data.js"></script>
+    <script src="/live-counter/global-counter.js" defer></script>
 
     <!-- Application Entry Point -->
     <script>
