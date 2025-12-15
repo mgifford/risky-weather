@@ -1,0 +1,36 @@
+/* --- New Clock Banner Styles --- */
+
+/* 1. Container Styles */
+#clock-container {
+    width: 100%; /* Ensure it spans the container */
+    text-align: center; /* Center the text */
+    padding: 20px 0; /* Add vertical space */
+}
+
+/* 2. Main Time Display Styles */
+#time {
+    font-size: 4em; /* Make the time big and prominent */
+    font-weight: 900; /* Make it extra bold (Black) */
+    display: block;
+    margin: 10px 0;
+}
+
+/* 3. Title Styles */
+#clock-container h1 {
+    font-weight: 700; /* Bold title */
+    font-size: 1.5em;
+    margin-bottom: 0;
+}
+
+/* 4. Reference Link Styles */
+#clock-container p a {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Keep the color consistent */
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+/* Optional: Clean up old elements if they still exist */
+#labels {
+    display: none; /* Hide the old YRS:DAYS:HRS:MIN:SEC labels */
+}
