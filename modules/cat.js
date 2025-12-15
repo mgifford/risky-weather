@@ -121,9 +121,9 @@ const CAT = (() => {
         const r = rating.toUpperCase();
         if (r.includes('CRITICALLY')) return '#000000'; // Black/Grey
         if (r.includes('HIGHLY INSUFFICIENT')) return '#c53030'; // Red
-        if (r.includes('INSUFFICIENT')) return '#dd6b20'; // Orange
-        if (r.includes('ALMOST')) return '#d69e2e'; // Yellow
-        if (r.includes('COMPATIBLE')) return '#38a169'; // Green
+        if (r.includes('INSUFFICIENT')) return '#c05621'; // Dark Orange (AA Compliant)
+        if (r.includes('ALMOST')) return '#975a16'; // Dark Gold (AA Compliant)
+        if (r.includes('COMPATIBLE')) return '#276749'; // Dark Green (AA Compliant)
         return '#718096';
     }
 
@@ -157,7 +157,7 @@ const CAT = (() => {
 
                 <a href="${url}" target="_blank" style="
                     display: inline-block;
-                    background-color: #3182ce;
+                    background-color: #1e3a8a;
                     color: white;
                     padding: 12px 24px;
                     border-radius: 6px;
@@ -165,7 +165,7 @@ const CAT = (() => {
                     font-weight: 600;
                     transition: background-color 0.2s;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                " onmouseover="this.style.backgroundColor='#2c5282'" onmouseout="this.style.backgroundColor='#3182ce'">
+                " onmouseover="this.style.backgroundColor='#1a365d'" onmouseout="this.style.backgroundColor='#1e3a8a'">
                     View Full Analysis
                 </a>
                 <div style="margin-top: 15px; font-size: 0.85rem; color: #718096;">

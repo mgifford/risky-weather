@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Add sr-only class",
+			"type": "shell",
+			"command": "echo \".sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }\" >> style.css",
+			"args": [],
+			"group": "build"
+		}
+	]
+}

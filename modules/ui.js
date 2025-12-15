@@ -44,13 +44,27 @@ const UI = (() => {
         citySearchInput: document.getElementById('city-search-input'),
         citySearchResults: document.getElementById('city-search-results'),
         historicalNormalsSection: document.getElementById('historical-normals-section'),
-        historicalNormalsContent: document.getElementById('historical-normals-content')
+        historicalNormalsContent: document.getElementById('historical-normals-content'),
+        srAnnouncer: document.getElementById('sr-announcer')
     };
 
     let currentLessonIndex = 0;
     let searchTimeout = null;
 
     return {
+        /**
+         * Announce message to screen readers
+         */
+        announce(message) {
+            if (ELEMENTS.srAnnouncer) {
+                ELEMENTS.srAnnouncer.textContent = message;
+                // Clear it after a delay so the same message can be announced again if needed
+                setTimeout(() => {
+                    ELEMENTS.srAnnouncer.textContent = '';
+                }, 3000);
+            }
+        },
+
         /**
          * Debug banner for almanac gating and status
          */
@@ -811,12 +825,12 @@ const UI = (() => {
             const lowDiff = todayLow !== null ? Math.round(todayLow - avgLow) : null;
             
             const highComparison = highDiff === null ? '' : 
-                highDiff > 0 ? `<span style="color: #e53e3e;">▲ ${highDiff}° above average</span>` :
+                highDiff > 0 ? `<span style="color: #c53030;">▲ ${highDiff}° above average</span>` :
                 highDiff < 0 ? `<span style="color: #1e3a8a;">▼ ${Math.abs(highDiff)}° below average</span>` :
                 `<span style="color: #2d3748;">at average</span>`;
                 
             const lowComparison = lowDiff === null ? '' :
-                lowDiff > 0 ? `<span style="color: #e53e3e;">▲ ${lowDiff}° above average</span>` :
+                lowDiff > 0 ? `<span style="color: #c53030;">▲ ${lowDiff}° above average</span>` :
                 lowDiff < 0 ? `<span style="color: #1e3a8a;">▼ ${Math.abs(lowDiff)}° below average</span>` :
                 `<span style="color: #2d3748;">at average</span>`;
 
@@ -824,7 +838,7 @@ const UI = (() => {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
                         <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Average High</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: #e53e3e;">${avgHigh}°</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #c53030;">${avgHigh}°</div>
                         ${todayHigh !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: #2d3748;">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
                     </div>
                     <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
@@ -1117,7 +1131,7 @@ const UI = (() => {
             } catch (error) {
                 console.error('Failed to render battle history:', error);
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: #e53e3e;">
+                    <div style="text-align: center; padding: 30px; color: #c53030;">
                         <div style="font-size: 1.5rem; margin-bottom: 10px;">⚠️</div>
                         <div>Failed to load battle history</div>
                         <div style="font-size: 0.85rem; margin-top: 8px; color: #718096;">${error.message}</div>

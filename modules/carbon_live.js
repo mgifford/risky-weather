@@ -19,7 +19,7 @@ const CarbonLive = (() => {
                     Loading...
                 </div>
                 <div style="margin-top: 15px; font-size: 0.85rem;">
-                    <a href="https://climateclock.net/" target="_blank" style="color: #3182ce; text-decoration: none;">Source: Climate Clock (MCC/IPCC 2025)</a>
+                    <a href="https://climateclock.net/" target="_blank" style="color: #1e3a8a; text-decoration: none;">Source: Climate Clock (MCC/IPCC 2025)</a>
                 </div>
             </div>
         `;

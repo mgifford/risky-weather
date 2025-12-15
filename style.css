@@ -4,7 +4,7 @@
     --text: #2d3748;
     --subtext: #4a5568; /* Darker for AA contrast */
     --highlight: #1e3a8a; /* Darker for AA contrast */
-    --accent: #e53e3e;
+    --accent: #c53030; /* Darker for AA contrast */
     --gem-color: #c53030; /* Canadian Red */
     --euro-color: #2b6cb0; /* Euro Blue */
     --gfs-color: #805ad5; /* US Purple */
@@ -324,3 +324,4 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
 .social-media-links {
     text-align: center;
 }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }

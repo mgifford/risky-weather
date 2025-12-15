@@ -15,7 +15,7 @@
                 <h1 data-i18n="ui.title">Risky <span style="color:var(--gem-color)">Weather</span></h1>
                 <p class="subtitle" data-i18n="ui.subtitle">Comparing Models & Assessing Uncertainty</p>
             </div>
-            <button id="language-toggle-btn" class="language-toggle" title="Toggle language"></button>
+            <button id="language-toggle-btn" class="language-toggle" title="Toggle language" aria-label="Toggle language"></button>
         </div>
         <div class="location-badge" id="location-display">Initializing...</div>
         
@@ -31,7 +31,7 @@
                 style="width: 100%; padding: 10px 40px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem;"
             />
             <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #a0aec0; pointer-events: none;">🔍</span>
-            <ul id="city-search-results" role="listbox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+            <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
         </div>
         
         <div class="debug-info">
@@ -48,7 +48,7 @@
         
         <section id="scoreboard-section" class="card hidden">
             <div class="card-title">
-                <span data-i18n="ui.scoreboard">🏆 Model Scoreboard</span>
+                <h2 style="margin:0; font-size:1.1rem;" data-i18n="ui.scoreboard">🏆 Model Scoreboard</h2>
                 <span style="font-size:0.75rem; font-weight:400; color:#718096;"><span data-i18n="ui.winsSince">Wins since</span> <span id="start-date">--</span></span>
             </div>
             <div class="scoreboard">
@@ -65,7 +65,7 @@
         </section>
 
         <section id="reality-check" class="card hidden">
-            <div class="card-title"><span data-i18n="ui.yesterday">🔍 Yesterday's Result</span></div>
+            <div class="card-title"><h2 style="margin:0; font-size:1.1rem;" data-i18n="ui.yesterday">🔍 Yesterday's Result</h2></div>
             <div id="reality-content" style="font-size: 0.95rem; line-height: 1.6;"></div>
             <div id="winner-display"></div>
         </section>
@@ -192,6 +192,9 @@
                     View on GitHub
                 </a>
             </p>
+            <p style="font-size: 0.85rem; color: #4a5568; margin: 8px 0 0 0;">
+                <a href="ACCESSIBILITY.md" target="_blank" style="color: #1e3a8a; text-decoration: underline;">Accessibility Statement</a>
+            </p>
 
             <!-- Bluesky Footer -->
 <meta data-bsky-post-id="33m7scihdvzc2l" />
@@ -223,6 +226,7 @@
     </div>
     
     <div id="status-log" role="status" aria-live="polite">Status: Init</div>
+    <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
     <style>
         /* Prevent focus being obscured by status log */
         body { padding-bottom: 28px; }

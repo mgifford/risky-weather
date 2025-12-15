@@ -322,7 +322,9 @@ const App = (() => {
      */
     async function runApp(lat, lon, city, country) {
         UI.setLocation(city);
-        UI.setStatus(I18n.t('status.loadingWeather', city));
+        const loadingMsg = I18n.t('status.loadingWeather', city);
+        UI.setStatus(loadingMsg);
+        UI.announce(loadingMsg);
 
         // Render random sections
         await renderRandomSections(lat, lon, country);
@@ -368,7 +370,9 @@ const App = (() => {
                 // Don't show error to user - this is an enhancement feature
             }
         } catch (error) {
-            UI.setStatus(I18n.t('status.apiError', error.message));
+            const errorMsg = I18n.t('status.apiError', error.message);
+            UI.setStatus(errorMsg);
+            UI.announce(errorMsg);
             UI.getElement('forecastList').innerHTML = '<tr><td colspan="3">Error loading weather. Check Console.</td></tr>';
         }
 
@@ -447,7 +451,9 @@ const App = (() => {
         // 7-day forecast
         UI.renderSevenDay(daily, config.modelA, config.modelB);
 
-        UI.setStatus(I18n.t('status.weatherLoaded'));
+        const loadedMsg = I18n.t('status.weatherLoaded');
+        UI.setStatus(loadedMsg);
+        UI.announce(loadedMsg + " for " + config.city);
         
         return todayData; // Return for historical normals comparison
     }

@@ -96,7 +96,7 @@ const RSS = (() => {
         const contentDiv = container.querySelector('#rss-content');
 
         if (!xml) {
-            contentDiv.innerHTML = `<div style="text-align: center; color: #e53e3e;">Unable to load news feed.</div>`;
+            contentDiv.innerHTML = `<div style="text-align: center; color: #c53030;">Unable to load news feed.</div>`;
             return;
         }
 
@@ -115,7 +115,7 @@ const RSS = (() => {
                         ${item.title}
                     </a>
                     <div style="font-size: 0.75rem; color: #718096;">
-                        ${item.date} • <a href="${item.link}" target="_blank" style="color: #3182ce;">Read more &rarr;</a>
+                        ${item.date} • <a href="${item.link}" target="_blank" style="color: #1e3a8a;">Read more &rarr;</a>
                     </div>
                 </li>
             `;
