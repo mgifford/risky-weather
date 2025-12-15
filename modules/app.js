@@ -40,9 +40,6 @@ const App = (() => {
             UI.renderHistoryEvent(formatted);
         }
 
-        // Load and display random education lesson on startup
-        await UI.initEducation();
-
         // Check URL parameters first (highest priority for sharing)
         if (urlParams.location) {
             let startedFromUrl = false;
@@ -60,10 +57,10 @@ const App = (() => {
                     if (results && results.length) {
                         const best = results[0];
                         console.log(`Using geocoded city: ${best.displayName} (${best.lat}, ${best.lon})`);
-                        Storage.saveLocation(best.lat, best.lon, best.displayName);
+                        Storage.saveLocation(best.lat, best.lon, best.displayName, best.country);
                         // Ensure URL is city-only for clarity
                         Storage.updateUrl(best.lat, best.lon, best.displayName);
-                        await runApp(best.lat, best.lon, best.displayName);
+                        await runApp(best.lat, best.lon, best.displayName, best.country);
                         startedFromUrl = true;
                     } else {
                         console.warn('No geocode results for city. Falling back to coordinates if present.');
@@ -103,6 +100,7 @@ const App = (() => {
                         lat: data.latitude,
                         lon: data.longitude,
                         city: data.city,
+                        country: data.country,
                         ip: data.ip
                     };
                     console.log(`IP location: ${data.city} (${data.latitude}, ${data.longitude})`);
@@ -118,13 +116,13 @@ const App = (() => {
         if (savedLocation) {
             UI.setStatus(I18n.t('status.savedLocation'));
             console.log(`Using saved: ${savedLocation.city} (${savedLocation.lat}, ${savedLocation.lon})`);
-            runApp(savedLocation.lat, savedLocation.lon, savedLocation.city);
+            runApp(savedLocation.lat, savedLocation.lon, savedLocation.city, savedLocation.country);
         } else if (ipGeoData) {
             // Prefer IP geolocation over browser geolocation (more reliable, works with VPNs)
             UI.setStatus(I18n.t('status.ipGeolocation'));
             console.log(`Using IP location: ${ipGeoData.city} (${ipGeoData.lat}, ${ipGeoData.lon})`);
-            Storage.saveLocation(ipGeoData.lat, ipGeoData.lon, ipGeoData.city, ipGeoData.ip);
-            runApp(ipGeoData.lat, ipGeoData.lon, ipGeoData.city);
+            Storage.saveLocation(ipGeoData.lat, ipGeoData.lon, ipGeoData.city, ipGeoData.country);
+            runApp(ipGeoData.lat, ipGeoData.lon, ipGeoData.city, ipGeoData.country);
         } else {
             // Fallback to browser geolocation if IP geolocation unavailable
             UI.setStatus(I18n.t('status.requestingGeolocation'));
@@ -147,8 +145,8 @@ const App = (() => {
                     console.log(`Using city from geolocation source: ${city}`);
                 }
                 
-                Storage.saveLocation(position.lat, position.lon, city);
-                runApp(position.lat, position.lon, city);
+                Storage.saveLocation(position.lat, position.lon, city, position.country);
+                runApp(position.lat, position.lon, city, position.country);
             } catch (error) {
                 console.error('Geolocation/city lookup failed:', error);
                 UI.setStatus(I18n.t('status.defaultLocation', error.message));
@@ -171,11 +169,163 @@ const App = (() => {
     }
 
     /**
+     * Dynamically load a script file
+     */
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+        });
+    }
+
+    /**
+     * Dynamically load a CSS file
+     */
+    function loadCSS(href) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+    }
+
+    /**
+     * Render random sections (Education, Stripes, Carbon, RSS, CAT)
+     * Supports URL override via ?blocks=...
+     * Supports weighted random selection
+     * Loads only ONE block and lazy loads its assets
+     */
+    async function renderRandomSections(lat, lon, country) {
+        const container = document.getElementById('random-sections');
+        if (!container) return;
+        
+        container.innerHTML = ''; // Clear existing
+
+        // Define available sections with weights (higher = more likely)
+        const availableSections = [
+            {
+                id: 'education-section',
+                weight: 1.0,
+                script: 'modules/education.js',
+                init: () => Education.render('education-section')
+            },
+            {
+                id: 'stripes-section',
+                weight: 0.5, // Lower weight due to heavy API call
+                script: 'modules/stripes.js',
+                css: 'modules/stripes.css',
+                init: () => Stripes.render('stripes-section', lat, lon)
+            },
+            {
+                id: 'carbon-section',
+                weight: 1.0,
+                script: 'modules/carbon.js',
+                init: () => Carbon.render('carbon-section')
+            },
+            {
+                id: 'carbon-live-section',
+                weight: 1.0,
+                script: 'modules/carbon_live.js',
+                init: () => CarbonLive.render('carbon-live-section')
+            },
+            {
+                id: 'warming-section',
+                weight: 1.0,
+                script: 'modules/warming.js',
+                init: () => Warming.render('warming-section')
+            },
+            {
+                id: 'emissions-section',
+                weight: 1.0,
+                script: 'modules/emissions.js',
+                init: () => Emissions.render('emissions-section')
+            },
+            {
+                id: 'rss-section',
+                weight: 1.0,
+                script: 'modules/rss.js',
+                init: () => RSS.render('rss-section')
+            },
+            {
+                id: 'cat-section',
+                weight: 1.0,
+                script: 'modules/cat.js',
+                init: () => CAT.render('cat-section', country)
+            }
+        ];
+
+        // Check for URL override
+        const params = new URLSearchParams(window.location.search);
+        const blocksParam = params.get('blocks');
+        
+        let selectedSection = null;
+
+        if (blocksParam) {
+            // URL Override Mode - Pick the first valid one
+            const requestedId = blocksParam.split(',')[0].trim().toLowerCase();
+            selectedSection = availableSections.find(s => 
+                s.id.replace('-section', '') === requestedId || s.id === requestedId
+            );
+        } else {
+            // Weighted Random Selection
+            // 1. Filter out sections based on probability (if weight < 1)
+            // 2. Pick one from the remaining
+            
+            // Algorithm:
+            // Calculate total weight of all candidates
+            // Pick random number between 0 and total
+            // Find corresponding section
+            
+            const totalWeight = availableSections.reduce((sum, s) => sum + s.weight, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (const section of availableSections) {
+                if (random < section.weight) {
+                    selectedSection = section;
+                    break;
+                }
+                random -= section.weight;
+            }
+        }
+
+        if (selectedSection) {
+            console.log(`Loading random section: ${selectedSection.id}`);
+            
+            // Create container
+            const sectionEl = document.createElement('section');
+            sectionEl.id = selectedSection.id;
+            sectionEl.className = 'card';
+            container.appendChild(sectionEl);
+
+            // Load assets
+            if (selectedSection.css) {
+                loadCSS(selectedSection.css);
+            }
+
+            try {
+                await loadScript(selectedSection.script);
+                // Initialize
+                if (selectedSection.init) {
+                    selectedSection.init();
+                }
+            } catch (e) {
+                console.error(`Failed to load section ${selectedSection.id}:`, e);
+                sectionEl.innerHTML = '<p style="color:red; text-align:center;">Error loading content.</p>';
+            }
+        }
+    }
+
+    /**
      * Main application flow
      */
-    async function runApp(lat, lon, city) {
+    async function runApp(lat, lon, city, country) {
         UI.setLocation(city);
         UI.setStatus(I18n.t('status.loadingWeather', city));
+
+        // Render random sections
+        await renderRandomSections(lat, lon, country);
 
         // Update URL with current location and language
         Storage.updateUrl(lat, lon, city);
@@ -222,41 +372,6 @@ const App = (() => {
             UI.getElement('forecastList').innerHTML = '<tr><td colspan="3">Error loading weather. Check Console.</td></tr>';
         }
 
-        // Stripes: load on demand unless lowdata mode is off
-        const params = new URLSearchParams(window.location.search);
-        const lowdata = params.get('lowdata') === '1';
-        const loadBtn = document.getElementById('load-stripes-btn');
-        if (loadBtn) {
-            loadBtn.addEventListener('click', async () => {
-                UI.setStatus('Loading climate stripes…');
-                const years = await API.fetchHistoricalYears(lat, lon, 1971, 2023);
-                if (years && !years.rateLimited) {
-                    // Aggregate annual means and render
-                    const temps = years.daily?.temperature_2m_mean || [];
-                    const dates = years.daily?.time || [];
-                    const yearly = {};
-                    dates.forEach((d, i) => {
-                        const y = d.slice(0,4);
-                        const t = temps[i];
-                        if (t != null) {
-                            if (!yearly[y]) yearly[y] = { sum: 0, count: 0 };
-                            yearly[y].sum += t;
-                            yearly[y].count++;
-                        }
-                    });
-                    const annualMeans = Object.keys(yearly).sort().map(y => ({ year: y, mean: yearly[y].sum / yearly[y].count }));
-                    // Baseline 1971-2000
-                    const baselineVals = annualMeans.filter(a => a.year >= '1971' && a.year <= '2000').map(a => a.mean);
-                    const baseline = baselineVals.length ? (baselineVals.reduce((a,b)=>a+b,0)/baselineVals.length) : 0;
-                    UI.renderStripes(annualMeans, baseline);
-                    UI.setStatus('Stripes loaded');
-                } else {
-                    UI.setStatus('Could not load stripes (rate limited or error)');
-                }
-            });
-        }
-        // Auto-load stripes only when not in lowdata mode
-        if (!lowdata && loadBtn) loadBtn.click();
 
         // Lazy-load ECCC almanac after main content for Canada only
         try {

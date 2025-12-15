@@ -61,6 +61,22 @@ The app is split into focused modules under `modules/`:
 - `i18n.js` — Translations and language management
 - `education.js` — Small lesson system and educational copy
 - `app.js` — App orchestration and initialization
+- `rss.js` — Fetches and displays climate news from various RSS feeds
+- `carbon.js` — Displays the Carbon Budget countdown
+- `stripes.js` — Warming stripes visualization
+
+## Random Blocks
+The application displays one of the following blocks at random on each load. You can force a specific block using the `?blocks=` URL parameter:
+- `education` - Educational lessons about weather and risk
+- `stripes` - Warming stripes visualization (rate-limited)
+- `carbon` - Carbon Budget countdown (Static Target: July 2029)
+- `carbon-live` - Carbon Budget countdown (Dynamic: Based on 130Gt budget from Jan 2025)
+- `warming` - Global Warming since 1880 (Live counter)
+- `emissions` - Global CO2 Emissions since Jan 1, 2025 (Live counter)
+- `rss` - Climate news feed
+- `cat` - Climate Action Tracker (Country-specific ratings)
+
+Example: `http://localhost:8000/?blocks=carbon-live`
 
 ---
 

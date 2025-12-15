@@ -1,0 +1,31 @@
+/* STRIPES STYLING */
+.stripes-wrap { height: 40px; display: flex; width: 100%; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+.stripe { flex: 1; height: 100%; }
+.legend { display: flex; justify-content: space-between; font-size: 0.85rem; color: #4a5568; }
+
+.stripes-container {
+    display: flex;
+    width: 100%;
+    height: 60px;
+    margin: 20px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #eee;
+    align-items: center;
+    justify-content: center;
+}
+
+.stripe:hover {
+    transform: scaleY(1.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    z-index: 2;
+    position: relative;
+}
+
+.gradient-bar {
+    flex-grow: 1;
+    height: 4px;
+    background: linear-gradient(to right, #08306b, #c6dbef, #f7f7f7, #fee0d2, #a50f15);
+    margin: 8px 10px 0 10px;
+    border-radius: 2px;
+}

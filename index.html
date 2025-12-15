@@ -4,275 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risky Weather: Model Comparison</title>
-    <link rel="stylesheet" href="live-counter/global-counter.css">
+    <link rel="stylesheet" href="style.css">
     <!-- Use system font stack for performance and sustainability -->
-    <style>
-        :root {
-            --bg: #f4f6f8;
-            --card: #ffffff;
-            --text: #2d3748;
-            --subtext: #4a5568; /* Darker for AA contrast */
-            --highlight: #1e3a8a; /* Darker for AA contrast */
-            --accent: #e53e3e;
-            --gem-color: #c53030; /* Canadian Red */
-            --euro-color: #2b6cb0; /* Euro Blue */
-            --gfs-color: #805ad5; /* US Purple */
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            line-height: 1.5;
-        }
-
-        /* HEADER */
-        header { text-align: center; margin-bottom: 25px; width: 100%; max-width: 600px; }
-        h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
-        .subtitle { color: var(--subtext); font-size: 0.9em; margin-top: 5px; }
-
-        .language-toggle {
-            background: none;
-            border: 1px solid #cbd5e0;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            color: var(--text);
-            transition: all 0.2s;
-            min-width: 50px;
-        }
-        .language-toggle:hover {
-            background: #edf2f7;
-            border-color: #a0aec0;
-        }
-
-        .location-badge {
-            background: #e2e8f0;
-            padding: 6px 16px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #2d3748;
-            border: 1px solid #cbd5e0;
-        }
-
-        /* CARDS */
-        .card {
-            background: var(--card);
-            width: 100%;
-            max-width: 550px;
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            margin-bottom: 24px;
-        }
-
-        .card-title {
-            font-weight: 700;
-            margin-bottom: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #edf2f7;
-            padding-bottom: 12px;
-            font-size: 1.1rem;
-        }
-
-        /* TODAY'S BATTLE */
-        .model-battle {
-            display: grid;
-            grid-template-columns: 1fr 1px 1fr;
-            gap: 10px;
-            text-align: center;
-        }
-        .divider { width: 1px; background: #e2e8f0; height: 100%; }
-        
-        .model-col h3 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px; color: var(--subtext); letter-spacing: 0.5px; }
-        .model-val { font-size: 2.5rem; font-weight: 800; line-height: 1; }
-        .model-rain { font-size: 0.9rem; font-weight: 600; margin-top: 8px; color: var(--highlight); }
-        
-        /* 7-DAY TABLE */
-        .forecast-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .forecast-table th { text-align: left; color: var(--subtext); padding: 8px 4px; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase;}
-        .forecast-table td { padding: 10px 4px; border-bottom: 1px solid #f7fafc; vertical-align: middle; }
-        .col-day { width: 15%; font-weight: 600; color: #4a5568; }
-        .col-model { width: 42%; }
-
-        .temp-val { font-weight: 700; color: #2d3748; margin-left: 6px; }
-        .rain-pill {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            min-width: 35px;
-            text-align: center;
-        }
-        /* Improve pill contrast combinations */
-        .rain-none { background: #e2e8f0; color: #2d3748; font-weight: 700; }
-        .rain-low { background: #dbeafe; color: #1e3a8a; }
-        .rain-med { background: #bfdbfe; color: #1e40af; }
-        .rain-high { background: #fecaca; color: #7f1d1d; }
-
-        /* LINKS */
-        .official-link {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #fff;
-            background-color: var(--gem-color);
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid var(--gem-color);
-            padding: 10px;
-            border-radius: 8px;
-            transition: opacity 0.2s;
-        }
-        .official-link:hover { opacity: 0.9; }
-        /* Accessible focus styles */
-        a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
-            outline: 3px solid #3182ce;
-            outline-offset: 2px;
-        }
-
-        /* REALITY CHECK */
-        .winner-banner {
-            background: #c6f6d5;
-            color: #22543d;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 700;
-            margin-top: 10px;
-            border: 1px solid #9ae6b4;
-        }
-
-        /* SCOREBOARD */
-        .scoreboard {
-            display: flex;
-            justify-content: space-around;
-            background: #2d3748;
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        .score-box { text-align: center; }
-        .score-val { font-size: 1.8rem; font-weight: 800; }
-        .score-label { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; }
-
-        /* STRIPES */
-        .stripes-wrap { height: 40px; display: flex; width: 100%; border-radius: 6px; overflow: hidden; margin: 10px 0; }
-        .stripe { flex: 1; height: 100%; }
-        .legend { display: flex; justify-content: space-between; font-size: 0.85rem; color: #4a5568; }
-
-        .hidden { display: none; }
-        .secondary-btn {
-            background: none;
-            border: none;
-            color: #2d3748;
-            text-decoration: underline;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 20px;
-        }
-
-        /* STATUS LOG (Debug) */
-        #status-log {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            font-size: 0.7rem;
-            padding: 4px 8px;
-            font-family: monospace;
-            z-index: 999;
-        }
-
-        /* DEBUG INFO */
-        .debug-info {
-            font-size: 0.75rem;
-            color: #4a5568;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #edf2f7;
-            text-align: center;
-        }
-        /* Ensure storage display meets contrast */
-        #storage-display { color: #2d3748; }
-        .debug-info-line {
-            margin: 2px 0;
-        }
-        .debug-label {
-            font-weight: 600;
-            color: #4a5568;
-        }
-
-        /* UNCERTAINTY INDICATORS */
-        .uncertainty-badge {
-            display: inline-block;
-            font-size: 1rem;
-            margin-left: 4px;
-            vertical-align: middle;
-        }
-
-        .info-box {
-            background: #edf2f7;
-            border-left: 4px solid #3182ce;
-            padding: 12px 16px;
-            margin: 16px 0;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        .info-box-warning {
-            background: #fffaf0;
-            border-left-color: #ed8936;
-        }
-
-        .info-box-title {
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: #2d3748;
-        }
-
-        /* RAIN PROBABILITY LEGEND */
-        .rain-legend {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            font-size: 0.8rem;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #edf2f7;
-            justify-content: center;
-        }
-        .rain-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .rain-legend-pill {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.7rem;
-            min-width: 30px;
-            text-align: center;
-        }
-    </style>
 </head>
 <body>
 
@@ -431,25 +164,8 @@
             <div id="history-content" style="font-size: 0.9rem; color: #2d3748;"></div>
         </section>
 
-        <section class="card">
-            <div class="card-title">
-                <span id="lesson-icon">💡</span>
-                <span id="lesson-title" style="flex: 1; margin-left: 10px;" data-i18n="ui.education">Understanding Weather & Risk</span>
-                <button id="lesson-cycle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;" data-i18n-title="education.nextLesson" title="Show next lesson">→</button>
-            </div>
-            <p id="lesson-content" style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0;" data-i18n="ui.loadingLesson">Loading lesson...</p>
-            <div style="font-size: 0.8rem; color: #4a5568; margin-top: 12px; text-align: right;">
-                <span id="lesson-counter">1 / 20</span>
-            </div>
-        </section>
-
-        <section class="card">
-            <div class="card-title"><h2 style="margin:0;" data-i18n="ui.climateContext">🌍 Climate Context</h2></div>
-            <p style="font-size: 0.9rem; color: #2d3748;" data-i18n="stripes.description">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
-            <div id="stripes" class="stripes-wrap"></div>
-            <div class="legend"><span data-i18n="stripes.start">1950</span><span data-i18n="stripes.end">2023</span></div>
-            <button id="load-stripes-btn" class="secondary-btn" style="margin-top: 10px;">Load Stripes</button>
-        </section>
+        <!-- Random Sections Container -->
+        <div id="random-sections"></div>
 
         <!-- Battle History Section -->
         <section id="battle-history-section" class="card" style="display: none;">
@@ -462,21 +178,6 @@
         <button id="view-battles-btn" class="secondary-btn" style="margin-left: 10px;">⚔️ Battle History</button>
         <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
     
-        
-<div class="footer-widgets">
-    <hr>
-    <div id="risky-weather-global-counter">
-        <div id="counter-label">Loading Climate Data...</div>
-        <div id="counter-value">...</div>
-        <div id="counter-unit"></div>
-        <div class="reference">
-        <p><a id="counter-reference" href="#">— Reference</a></p>
-        </div>
-    </div>
-</div>
-
-
-
         <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid #e2e8f0;">
             <p style="font-size: 0.85rem; color: #4a5568; margin: 0 0 8px 0;">
                 <strong style="color:#2d3748;">Data Sources:</strong> 
@@ -535,13 +236,9 @@
     <script src="modules/battles.js"></script>
     <script src="modules/ui.js"></script>
     <script src="modules/geo.js"></script>
-    <script src="modules/education.js"></script>
     <script src="modules/history.js"></script>
+    <script src="modules/climate_data.js"></script>
     <script src="modules/app.js"></script>
-
-    <!-- Live Global Counter -->
-    <script src="live-counter/data.js"></script>
-    <script src="live-counter/global-counter.js" defer></script>
 
     <!-- Application Entry Point -->
     <script>

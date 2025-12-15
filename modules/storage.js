@@ -15,8 +15,8 @@ const Storage = (() => {
 
     return {
         // Location Storage
-        saveLocation(lat, lon, city) {
-            localStorage.setItem(KEYS.LOCATION, JSON.stringify({ lat, lon, city }));
+        saveLocation(lat, lon, city, country = null) {
+            localStorage.setItem(KEYS.LOCATION, JSON.stringify({ lat, lon, city, country }));
         },
 
         getLocation() {

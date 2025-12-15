@@ -102,11 +102,61 @@ const Education = (() => {
         return getLessonsForLanguage(currentLang).length;
     }
 
+    /**
+     * Render the Education section
+     */
+    async function render(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Initial HTML
+        container.innerHTML = `
+            <div class="card-title">
+                <span id="lesson-icon">💡</span>
+                <span id="lesson-title" style="flex: 1; margin-left: 10px;" data-i18n="ui.education">Understanding Weather & Risk</span>
+                <button id="lesson-cycle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;" data-i18n-title="education.nextLesson" title="Show next lesson">→</button>
+            </div>
+            <p id="lesson-content" style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0;" data-i18n="ui.loadingLesson">Loading lesson...</p>
+            <div style="font-size: 0.8rem; color: #4a5568; margin-top: 12px; text-align: right;">
+                <span id="lesson-counter">-- / --</span>
+            </div>
+        `;
+
+        await loadLessons();
+        
+        let currentIndex = Math.floor(Math.random() * getLessonCount());
+        updateLessonDisplay(currentIndex);
+
+        const btn = container.querySelector('#lesson-cycle-btn');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % getLessonCount();
+                updateLessonDisplay(currentIndex);
+            });
+        }
+
+        function updateLessonDisplay(index) {
+            const lesson = getLessonByIndex(index);
+            if (!lesson) return;
+
+            const iconEl = container.querySelector('#lesson-icon');
+            const titleEl = container.querySelector('#lesson-title');
+            const contentEl = container.querySelector('#lesson-content');
+            const counterEl = container.querySelector('#lesson-counter');
+
+            if (iconEl) iconEl.textContent = lesson.icon || '💡';
+            if (titleEl) titleEl.textContent = lesson.title;
+            if (contentEl) contentEl.innerHTML = lesson.content; // Allow HTML in content
+            if (counterEl) counterEl.textContent = `${index + 1} / ${getLessonCount()}`;
+        }
+    }
+
     return {
         loadLessons,
         getRandomLesson,
         getAllLessons,
         getLessonByIndex,
-        getLessonCount
+        getLessonCount,
+        render
     };
 })();
