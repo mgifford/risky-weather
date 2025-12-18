@@ -452,9 +452,13 @@ const API = (() => {
         const timeoutId = setTimeout(() => controller.abort(), CONFIG.ARCHIVE_TIMEOUT);
 
         try {
-            const response = await fetch(`${BASE_ARCHIVE}?${params}`, { signal: controller.signal });
+            const url = `${BASE_ARCHIVE}?${params}`;
+            console.log(`Fetching actual weather: ${url}`);
+            const response = await fetch(url, { signal: controller.signal });
             if (!response.ok) throw new Error(`API returned ${response.status}`);
-            return await response.json();
+            const data = await response.json();
+            console.log(`Got actual weather for ${startDate}:`, data);
+            return data;
         } catch (error) {
             console.warn(`Actual weather fetch failed for ${startDate}: ${error.message}`);
             return null;

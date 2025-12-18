@@ -1003,14 +1003,37 @@ const UI = (() => {
             container.style.display = 'block';
 
             try {
+                const history = Storage.getHistoricalForecasts();
+                const historyCount = history ? history.length : 0;
+                console.log(`renderBattleHistory: Found ${historyCount} historical forecasts in storage`);
+                
                 const battles = await Battles.analyzeAllBattles();
+                console.log(`renderBattleHistory: Analysis returned ${battles ? battles.length : 0} battles`);
                 
                 if (!battles || battles.length === 0) {
+                    const today = new Date().toISOString().split('T')[0];
+                    let diagInfo = '';
+                    
+                    if (history && history.length > 0) {
+                        diagInfo = `<div style="font-size: 0.8rem; color: #4a5568; margin-top: 15px; padding: 10px; background: #f7fafc; border-radius: 4px;">
+                            <strong>Debug Info:</strong><br/>
+                            Forecasts in storage: ${historyCount}<br/>
+                            Today's date: ${today}<br/>
+                            Forecast dates: ${history.map(h => h.savedDate).join(', ')}<br/>
+                            <em>Check browser console for detailed analysis logs</em>
+                        </div>`;
+                    }
+                    
                     container.innerHTML = `
                         <div style="text-align: center; padding: 30px; color: #718096;">
                             <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
-                            <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No Battle History Yet</div>
-                            <div style="font-size: 0.9rem;">Visit the page daily to build up your forecast accuracy history!</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No Battle Results Yet</div>
+                            <div style="font-size: 0.9rem;">
+                                ${historyCount === 0 
+                                    ? 'Visit the page daily to build up your forecast accuracy history!' 
+                                    : 'Battles are being analyzed. Check back in a moment!'}
+                            </div>
+                            ${diagInfo}
                         </div>
                     `;
                     return;
