@@ -70,9 +70,11 @@
             <div id="winner-display"></div>
         </section>
 
-        <section class="card">
+        <section class="card" id="todays-forecast">
             <div class="card-title">
-                <h2 style="margin:0;" data-i18n="ui.today">📊 Today's Forecast</h2>
+                <a href="#todays-forecast" style="text-decoration: none; color: inherit;">
+                    <h2 style="margin:0;" data-i18n="ui.today">📊 Today's Forecast</h2>
+                </a>
                 <span style="font-size: 0.85rem; color: var(--subtext);" data-i18n="ui.highTemp">High Temp</span>
             </div>
 
@@ -95,9 +97,11 @@
             <a id="link-primary" href="#" target="_blank" class="official-link hidden">View Official Environment Canada Report &rarr;</a>
         </section>
 
-        <section class="card">
+        <section class="card" id="seven-day">
             <div class="card-title">
-                <h2 style="margin:0;" data-i18n="ui.sevenDay">📅 7-Day Competition</h2>
+                <a href="#seven-day" style="text-decoration: none; color: inherit;">
+                    <h2 style="margin:0;" data-i18n="ui.sevenDay">📅 7-Day Competition</h2>
+                </a>
             </div>
             <table class="forecast-table">
                 <thead>
@@ -134,10 +138,12 @@
             </div>
         </section>
 
-        <section class="card">
+        <section class="card" id="model-disagreement">
             <details>
                 <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">
-                    <span data-i18n="ui.uncertaintyTitle">🎯 Understanding Model Disagreement</span>
+                    <a href="#model-disagreement" style="text-decoration: none; color: inherit;">
+                        <span data-i18n="ui.uncertaintyTitle">🎯 Understanding Model Disagreement</span>
+                    </a>
                 </summary>
                 <div style="margin-top: 12px;">
                     <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.</p>
@@ -152,14 +158,28 @@
 
         <section id="historical-normals-section" class="card hidden">
             <div class="card-title">
-                <span data-i18n="ui.historicalNormals">📈 Historical Averages (Last 10 Years)</span>
+                <a href="#historical-averages" style="text-decoration: none; color: inherit;" id="historical-averages">
+                    <span data-i18n="ui.historicalNormals">📈 Historical Averages (Last 10 Years)</span>
+                </a>
             </div>
             <div id="historical-normals-content" style="font-size: 0.9rem; line-height: 1.6;"></div>
         </section>
 
+        <!-- Battle History Section -->
+        <section id="battle-history-section" class="card" style="display: none;">
+            <div class="card-title">
+                <a href="#weather-model-battles" style="text-decoration: none; color: inherit;" id="weather-model-battles">
+                    <span>⚔️ Weather Model Battles</span>
+                </a>
+            </div>
+            <!-- Content will be dynamically generated -->
+        </section>
+
         <section id="history-section" class="card hidden">
             <div class="card-title">
-                <span data-i18n="ui.historyTitle">📜 On This Day in Climate History</span>
+                <a href="#climate-history" style="text-decoration: none; color: inherit;" id="climate-history">
+                    <span data-i18n="ui.historyTitle">📜 On This Day in Climate History</span>
+                </a>
             </div>
             <div id="history-content" style="font-size: 0.9rem; color: #2d3748;"></div>
         </section>
@@ -167,15 +187,9 @@
         <!-- Random Sections Container -->
         <div id="random-sections"></div>
 
-        <!-- Battle History Section -->
-        <section id="battle-history-section" class="card" style="display: none;">
-            <!-- Content will be dynamically generated -->
-        </section>
-
         <button id="reset-btn" class="secondary-btn" data-i18n="ui.resetLocation">Reset Location & History</button>
         <button id="refresh-location-btn" class="secondary-btn" data-i18n="ui.refreshLocation" style="margin-left: 10px;">🔄 Refresh Location</button>
         <button id="view-cache-btn" class="secondary-btn" data-i18n="ui.viewCache" style="margin-left: 10px;">📋 View Cache</button>
-        <button id="view-battles-btn" class="secondary-btn" style="margin-left: 10px;">⚔️ Battle History</button>
         <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
     
         <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid #e2e8f0;">
@@ -258,14 +272,6 @@
         UI.onCacheInspector(() => {
             console.log('Cache Inspector opened');
         });
-
-        // Battle History Button
-        const viewBattlesBtn = document.getElementById('view-battles-btn');
-        if (viewBattlesBtn) {
-            viewBattlesBtn.addEventListener('click', () => {
-                UI.toggleBattleHistory();
-            });
-        }
 
         App.init();
     </script>
