@@ -16,6 +16,8 @@
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="mask-icon" href="/icons/icon.svg" color="#03a9f4">
+    <meta name="apple-mobile-web-app-title" content="Risky Weather">
     <header>
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="flex: 1;">
@@ -282,5 +284,14 @@
 
         App.init();
     </script>
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js').then(reg => {
+                        console.log('ServiceWorker registered', reg.scope);
+                    }).catch(err => console.warn('ServiceWorker registration failed', err));
+                });
+            }
+        </script>
 </body>
 </html>
