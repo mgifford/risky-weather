@@ -15,7 +15,7 @@ const Emissions = (() => {
                 <h2 style="margin:0;">Global CO2 Emissions</h2>
             </div>
             <div style="text-align: center; padding: 20px 0;">
-                <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 5px;">Since Jan 1, 2025</div>
+                <div id="emissions-since-label" style="font-size: 0.9rem; color: #4a5568; margin-bottom: 5px;">Since Jan 1, 2025</div>
                 <div id="emissions-counter" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 2.0rem; font-weight: 700; color: #2d3748; line-height: 1.2;">
                     Loading...
                 </div>
@@ -36,6 +36,15 @@ const Emissions = (() => {
                 return;
             }
             const tonnes = ClimateData.getEmissionsSince2025();
+            // Update the since label dynamically from ClimateData
+            try {
+                const labelEl = document.getElementById('emissions-since-label');
+                if (labelEl && typeof ClimateData.getReferenceLabel === 'function') {
+                    labelEl.textContent = `Since ${ClimateData.getReferenceLabel()}`;
+                }
+            } catch (e) {
+                // ignore
+            }
             // Format with commas
             counterEl.textContent = Math.floor(tonnes).toLocaleString();
         }

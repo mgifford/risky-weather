@@ -56,9 +56,24 @@ const ClimateData = (() => {
         return Math.max(0, elapsed * EMISSION_RATE_TONNES_PER_SEC);
     }
 
+    /**
+     * Expose reference date info for UI
+     */
+    function getReferenceDate() {
+        return REFERENCE_DATE;
+    }
+
+    function getReferenceLabel() {
+        const d = REFERENCE_DATE;
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+    }
+
     return {
         getCurrentWarming,
         getCarbonBudget,
-        getEmissionsSince2025
+        getEmissionsSince2025,
+        getReferenceDate,
+        getReferenceLabel
     };
 })();

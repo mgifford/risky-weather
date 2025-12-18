@@ -72,7 +72,7 @@ The application displays one of the following blocks at random on each load. You
 - `carbon` - Carbon Budget countdown (Static Target: July 2029)
 - `carbon-live` - Carbon Budget countdown (Dynamic: Based on 130Gt budget from Jan 2025)
 - `warming` - Global Warming since 1880 (Live counter)
-- `emissions` - Global CO2 Emissions since Jan 1, 2025 (Live counter)
+- `emissions` - Global CO2 Emissions (Live counter). The displayed "Since" date is driven by `modules/climate_data.js` (the `REFERENCE_DATE` constant) and will update automatically if changed.
 - `rss` - Climate news feed
 - `cat` - Climate Action Tracker (Country-specific ratings)
 
