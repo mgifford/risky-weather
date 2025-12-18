@@ -455,7 +455,23 @@ const App = (() => {
         UI.setStatus(loadedMsg);
         UI.announce(loadedMsg + " for " + config.city);
         
+        // Auto-display battle history if there are past forecasts
+        await showBattleHistoryIfAvailable();
+        
         return todayData; // Return for historical normals comparison
+    }
+
+    /**
+     * Show battle history section if there are past forecasts available
+     */
+    async function showBattleHistoryIfAvailable() {
+        const history = Storage.getHistoricalForecasts();
+        const pastForecastCount = history ? history.filter(h => h.savedDate < new Date().toISOString().split('T')[0]).length : 0;
+        
+        if (pastForecastCount > 0) {
+            console.log(`Found ${pastForecastCount} past forecasts. Rendering battle history...`);
+            await UI.renderBattleHistory();
+        }
     }
 
     /**

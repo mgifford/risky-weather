@@ -1040,40 +1040,46 @@ const UI = (() => {
                 }
 
                 const trends = Battles.calculateTrends(battles);
-                
-                // Build HTML
-                let html = '<div style="padding: 20px;">';
-                
-                // Header and stats
-                html += '<div style="margin-bottom: 25px;">';
-                html += '<h3 style="margin: 0 0 15px 0; font-size: 1.5rem; color: #2d3748;">⚔️ Battle History</h3>';
-                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">';
-                
                 const modelAName = battles[0]?.modelA || 'Model A';
                 const modelBName = battles[0]?.modelB || 'Model B';
                 
+                // Build HTML - Summary at top level (always visible)
+                let html = '<div style="padding: 20px;">';
+                
+                // Header
+                html += '<div style="margin-bottom: 20px;">';
+                html += '<h3 style="margin: 0 0 15px 0; font-size: 1.5rem; color: #2d3748;">⚔️ Weather Model Battles</h3>';
+                
+                // Summary score boxes
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px;">';
+                
                 html += `
-                    <div style="background: #edf2f7; padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 0.85rem; color: #718096; margin-bottom: 5px;">Total Battles</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #2d3748;">${trends.totalBattles}</div>
+                    <div style="background: #bee3f8; padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid #3182ce;">
+                        <div style="font-size: 0.85rem; color: #2c5282; margin-bottom: 4px;">Wins</div>
+                        <div style="font-size: 1.6rem; font-weight: bold; color: #2c5282;">${trends.winsA}</div>
+                        <div style="font-size: 0.75rem; color: #2c5282;">${modelAName}</div>
                     </div>
-                    <div style="background: #bee3f8; padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 0.85rem; color: #2c5282; margin-bottom: 5px;">${modelAName} Wins</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #2c5282;">${trends.winsA}</div>
+                    <div style="background: #fbd38d; padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid #dd6b20;">
+                        <div style="font-size: 0.85rem; color: #7c2d12; margin-bottom: 4px;">Wins</div>
+                        <div style="font-size: 1.6rem; font-weight: bold; color: #7c2d12;">${trends.winsB}</div>
+                        <div style="font-size: 0.75rem; color: #7c2d12;">${modelBName}</div>
                     </div>
-                    <div style="background: #fbd38d; padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 0.85rem; color: #7c2d12; margin-bottom: 5px;">${modelBName} Wins</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #7c2d12;">${trends.winsB}</div>
-                    </div>
-                    <div style="background: #e2e8f0; padding: 15px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 5px;">Ties</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #4a5568;">${trends.ties}</div>
+                    <div style="background: #e2e8f0; padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid #718096;">
+                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Ties</div>
+                        <div style="font-size: 1.6rem; font-weight: bold; color: #4a5568;">${trends.ties}</div>
                     </div>
                 `;
                 html += '</div>';
+                html += '</div>';
                 
-                // Average errors comparison
-                html += '<div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">';
+                // Collapsible details section
+                html += '<details style="margin-top: 15px;">';
+                html += '<summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside; color: #2d3748;">📋 View Detailed Analysis</summary>';
+                
+                html += '<div style="margin-top: 12px;">';
+                
+                // Average errors
+                html += '<div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
                 html += '<div style="font-weight: 600; margin-bottom: 10px; color: #2d3748;">📈 Average Prediction Errors</div>';
                 html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">';
                 html += `
@@ -1093,11 +1099,9 @@ const UI = (() => {
                 html += '</div>';
                 html += '</div>';
                 
-                html += '</div>';
-                
-                // Timeline of battles
+                // Battle timeline
                 html += '<div style="margin-bottom: 15px; font-weight: 600; color: #2d3748;">📅 Battle Timeline</div>';
-                html += '<div style="max-height: 500px; overflow-y: auto;">';
+                html += '<div style="max-height: 400px; overflow-y: auto;">';
                 
                 battles.forEach((battle, index) => {
                     const bgColor = battle.overallWinner === 'A' ? '#bee3f8' : 
@@ -1105,7 +1109,7 @@ const UI = (() => {
                     const borderColor = battle.overallWinner === 'A' ? '#3182ce' : 
                                        battle.overallWinner === 'B' ? '#dd6b20' : '#718096';
                     
-                    html += `<div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 12px; margin-bottom: 10px; border-radius: 6px;">`;
+                    html += `<div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 12px; margin-bottom: 10px; border-radius: 6px;">';`;
                     html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">`;
                     html += `<div style="font-weight: 600; color: #2d3748;">${battle.date}</div>`;
                     html += `<div style="font-size: 0.9rem; color: #4a5568;">`;
@@ -1148,6 +1152,9 @@ const UI = (() => {
                 });
                 
                 html += '</div>';
+                
+                html += '</div>';
+                html += '</details>';
                 html += '</div>';
                 
                 container.innerHTML = html;
