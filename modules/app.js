@@ -376,6 +376,12 @@ const App = (() => {
             UI.getElement('forecastList').innerHTML = '<tr><td colspan="3">Error loading weather. Check Console.</td></tr>';
         }
 
+        // Auto-display battle history if there are past forecasts
+        try {
+            await showBattleHistoryIfAvailable();
+        } catch (battleError) {
+            console.warn('Could not display battle history:', battleError);
+        }
 
         // Lazy-load ECCC almanac after main content for Canada only
         try {
@@ -454,9 +460,6 @@ const App = (() => {
         const loadedMsg = I18n.t('status.weatherLoaded');
         UI.setStatus(loadedMsg);
         UI.announce(loadedMsg + " for " + config.city);
-        
-        // Auto-display battle history if there are past forecasts
-        await showBattleHistoryIfAvailable();
         
         return todayData; // Return for historical normals comparison
     }
