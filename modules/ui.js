@@ -1111,7 +1111,12 @@ const UI = (() => {
                     
                     html += `<div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 12px; margin-bottom: 10px; border-radius: 6px;">';`;
                     html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">`;
-                    html += `<div style="font-weight: 600; color: #2d3748;">${battle.date}</div>`;
+                    html += `<div style="font-weight: 600; color: #2d3748;">`;
+                    html += `${battle.date}`;
+                    if (battle.leadDays !== undefined && battle.leadDays > 0) {
+                        html += ` <span style="font-size: 0.75rem; color: #718096;">(forecast from ${battle.forecastDate}, +${battle.leadDays}d)</span>`;
+                    }
+                    html += `</div>`;
                     html += `<div style="font-size: 0.9rem; color: #4a5568;">`;
                     if (battle.overallWinner === 'A') html += `🏆 ${battle.modelA}`;
                     else if (battle.overallWinner === 'B') html += `🏆 ${battle.modelB}`;

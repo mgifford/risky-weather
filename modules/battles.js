@@ -34,9 +34,9 @@ const Battles = (() => {
      * Analyze a single day's battle
      * Returns battle result with winner and accuracy metrics
      */
-    async function analyzeDayBattle(forecastRecord, actualData) {
-        if (!forecastRecord || !actualData) {
-            console.warn('Missing forecast or actual data');
+    async function analyzeDayBattle(forecastRecord, targetDateIndex) {
+        if (!forecastRecord) {
+            console.warn('Missing forecast data');
             return null;
         }
 
@@ -46,12 +46,26 @@ const Battles = (() => {
             return null;
         }
 
-        // Get the first day's forecast (day 0 - the day it was saved)
-        const predA = forecasts.modelA.days[0];
-        const predB = forecasts.modelB.days[0];
+        // Get the prediction for the target date index
+        const predA = forecasts.modelA.days[targetDateIndex];
+        const predB = forecasts.modelB.days[targetDateIndex];
         
         if (!predA || !predB) {
-            console.warn(`Missing prediction data for ${forecastRecord.savedDate}`);
+            console.warn(`Missing prediction at index ${targetDateIndex}`);
+            return null;
+        }
+
+        const targetDate = predA.date;
+        
+        // Fetch actual weather for that date
+        let actualData = await API.fetchActualWeather(
+            forecastRecord.lat,
+            forecastRecord.lon,
+            targetDate
+        );
+
+        if (!actualData) {
+            console.warn(`No actual weather data for ${targetDate}`);
             return null;
         }
 
@@ -62,7 +76,7 @@ const Battles = (() => {
             precip: actualData.daily?.precipitation_sum?.[0]
         };
 
-        console.log(`Battle data for ${forecastRecord.savedDate}:`, {
+        console.log(`Battle data for ${targetDate} (predicted on ${forecastRecord.savedDate}):`, {
             predicted: { predA, predB },
             actual
         });
@@ -97,7 +111,9 @@ const Battles = (() => {
         else if (wins.B > wins.A) overallWinner = 'B';
 
         return {
-            date: forecastRecord.savedDate,
+            date: targetDate,
+            forecastDate: forecastRecord.savedDate,
+            leadDays: targetDateIndex,
             modelA: forecasts.modelA.name,
             modelB: forecasts.modelB.name,
             predicted: {
@@ -135,39 +151,46 @@ const Battles = (() => {
         for (const forecast of history) {
             const forecastDate = forecast.savedDate;
             
-            // Only analyze dates in the past (not today or future)
+            // Skip future forecasts
             if (forecastDate >= today) {
-                console.log(`Skipping future/today forecast: ${forecastDate}`);
+                console.log(`Skipping future forecast: ${forecastDate}`);
                 continue;
             }
 
-            console.log(`Analyzing battle for ${forecastDate}...`);
+            console.log(`Analyzing forecast from ${forecastDate}...`);
 
-            try {
-                // Fetch actual weather for that date
-                const actualData = await API.fetchActualWeather(
-                    forecast.lat,
-                    forecast.lon,
-                    forecastDate
-                );
+            // Check each day in the forecast
+            const days = forecast.forecasts?.modelA?.days || [];
+            for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
+                const targetDate = days[dayIndex].date;
+                
+                // Only analyze dates in the past
+                if (targetDate >= today) {
+                    console.log(`Skipping future target date: ${targetDate}`);
+                    continue;
+                }
 
-                if (actualData) {
-                    const battle = await analyzeDayBattle(forecast, actualData);
+                try {
+                    console.log(`Checking prediction for ${targetDate} (forecast from ${forecastDate}, day ${dayIndex})...`);
+                    const battle = await analyzeDayBattle(forecast, dayIndex);
+                    
                     if (battle) {
-                        console.log(`Battle result for ${forecastDate}: Winner = ${battle.overallWinner}`);
+                        console.log(`Battle result: ${battle.date} - Winner: ${battle.overallWinner}`);
                         battles.push(battle);
                     } else {
-                        console.warn(`Failed to analyze battle for ${forecastDate}: Battle data is null`);
+                        console.warn(`Failed to analyze battle for ${targetDate}`);
                     }
-                } else {
-                    console.warn(`No actual weather data for ${forecastDate}`);
+                } catch (error) {
+                    console.warn(`Error analyzing ${targetDate}:`, error);
                 }
-            } catch (error) {
-                console.warn(`Failed to analyze battle for ${forecastDate}:`, error);
             }
         }
 
         console.log(`Battle analysis complete. Found ${battles.length} battles.`);
+        
+        // Sort battles by date (most recent first)
+        battles.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
         return battles;
     }
 
