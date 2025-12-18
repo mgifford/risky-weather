@@ -513,6 +513,23 @@ const App = (() => {
     /**
      * Check stored forecasts vs actual weather for all past dates
      */
+    // Simple in-file cache for `fetchHistoricalDay` calls to avoid duplicate requests
+    const _historicalDayCache = { data: {}, TTL: 60 * 60 * 1000 }; // 1 hour TTL
+
+    async function fetchHistoricalDayCached(lat, lon, date) {
+        const key = `${lat},${lon},${date}`;
+        const cached = _historicalDayCache.data[key];
+        if (cached && (Date.now() - cached.ts) < _historicalDayCache.TTL) {
+            console.log(`[CACHE HIT] fetchHistoricalDay ${key}`);
+            return cached.val;
+        }
+
+        const val = await API.fetchHistoricalDay(lat, lon, date);
+        _historicalDayCache.data[key] = { val, ts: Date.now() };
+        console.log(`[CACHE SET] fetchHistoricalDay ${key}`);
+        return val;
+    }
+
     async function checkHistory(lat, lon, config) {
         const pendingRecord = Storage.getPendingForecast();
         if (!pendingRecord) return;
@@ -541,8 +558,8 @@ const App = (() => {
             const yesterdayForecast = datesToCheck[datesToCheck.length - 1];
             const dateToCheck = yesterdayForecast.date;
 
-            // Fetch actual weather for that date
-            const historyData = await API.fetchHistoricalDay(lat, lon, dateToCheck);
+            // Fetch actual weather for that date (cached wrapper)
+            const historyData = await fetchHistoricalDayCached(lat, lon, dateToCheck);
 
             if (!historyData.daily) {
                 throw new Error('No historical data');
@@ -619,7 +636,7 @@ const App = (() => {
      * Legacy check for old format records (rain only)
      */
     async function checkHistoryLegacy(pendingRecord, lat, lon) {
-        const historyData = await API.fetchHistoricalDay(lat, lon, pendingRecord.date);
+        const historyData = await fetchHistoricalDayCached(lat, lon, pendingRecord.date);
 
         if (!historyData.daily || !historyData.daily.rain_sum) {
             throw new Error('No historical data');
