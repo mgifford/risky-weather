@@ -148,40 +148,77 @@ const Battles = (() => {
         console.log(`Analyzing battles. Today: ${today}, Total forecasts: ${history.length}`);
 
         // Process each historical forecast
+        // Collect all past dates across all forecasts so we can fetch actuals in one batch
+        const datesToFetch = new Set();
         for (const forecast of history) {
             const forecastDate = forecast.savedDate;
-            
-            // Skip future forecasts
-            if (forecastDate >= today) {
-                console.log(`Skipping future forecast: ${forecastDate}`);
-                continue;
-            }
+            if (forecastDate >= today) continue; // skip future forecasts
+            const days = forecast.forecasts?.modelA?.days || [];
+            days.forEach(d => {
+                if (d && d.date && d.date < today) datesToFetch.add(d.date);
+            });
+        }
+
+        if (datesToFetch.size === 0) {
+            console.log('No past forecast dates to analyze');
+            return [];
+        }
+
+        const sortedDates = Array.from(datesToFetch).sort();
+        const startDate = sortedDates[0];
+        const endDate = sortedDates[sortedDates.length - 1];
+
+        console.log(`Fetching actual weather for ${startDate} -> ${endDate} (${sortedDates.length} days)`);
+
+        // Assume all historical forecasts are for the same location (Storage enforces that), use first record's coords
+        const location = history[0];
+        const allActualData = await API.fetchActualWeather(location.lat, location.lon, startDate, endDate);
+        if (!allActualData || !allActualData.daily) {
+            console.warn('No actual weather data received for batch range');
+            return [];
+        }
+
+        // Build map for quick lookup
+        const actualByDate = {};
+        const times = allActualData.daily.time || [];
+        const tempsMax = allActualData.daily.temperature_2m_max || [];
+        const tempsMin = allActualData.daily.temperature_2m_min || [];
+        const precips = allActualData.daily.precipitation_sum || [];
+
+        times.forEach((date, idx) => {
+            actualByDate[date] = {
+                tempMax: tempsMax[idx] != null ? tempsMax[idx] : null,
+                tempMin: tempsMin[idx] != null ? tempsMin[idx] : null,
+                precip: precips[idx] != null ? precips[idx] : null
+            };
+        });
+
+        // Now analyze each forecast using cached actuals
+        for (const forecast of history) {
+            const forecastDate = forecast.savedDate;
+            if (forecastDate >= today) continue;
 
             console.log(`Analyzing forecast from ${forecastDate}...`);
 
-            // Check each day in the forecast
             const days = forecast.forecasts?.modelA?.days || [];
             for (let dayIndex = 0; dayIndex < days.length; dayIndex++) {
                 const targetDate = days[dayIndex].date;
-                
-                // Only analyze dates in the past
-                if (targetDate >= today) {
-                    console.log(`Skipping future target date: ${targetDate}`);
+                if (!targetDate || targetDate >= today) continue;
+
+                const actual = actualByDate[targetDate];
+                if (!actual) {
+                    console.warn(`Missing actual weather for ${targetDate}`);
                     continue;
                 }
 
                 try {
-                    console.log(`Checking prediction for ${targetDate} (forecast from ${forecastDate}, day ${dayIndex})...`);
-                    const battle = await analyzeDayBattle(forecast, dayIndex);
-                    
+                    const battle = await analyzeDayBattleWithActual(forecast, dayIndex, actual);
                     if (battle) {
                         console.log(`Battle result: ${battle.date} - Winner: ${battle.overallWinner}`);
                         battles.push(battle);
-                    } else {
-                        console.warn(`Failed to analyze battle for ${targetDate}`);
                     }
-                } catch (error) {
-                    console.warn(`Error analyzing ${targetDate}:`, error);
+                } catch (err) {
+                    console.warn(`Error analyzing ${targetDate}:`, err);
                 }
             }
         }
@@ -192,6 +229,88 @@ const Battles = (() => {
         battles.sort((a, b) => new Date(b.date) - new Date(a.date));
         
         return battles;
+    }
+
+    /**
+     * Analyze a battle using pre-fetched actual weather data
+     * Avoids making an API call; returns the same structure as analyzeDayBattle
+     */
+    async function analyzeDayBattleWithActual(forecastRecord, targetDateIndex, actualWeather) {
+        if (!forecastRecord) {
+            console.warn('Missing forecast data');
+            return null;
+        }
+
+        const forecasts = forecastRecord.forecasts;
+        if (!forecasts || !forecasts.modelA || !forecasts.modelB) {
+            console.warn('Invalid forecast structure', forecastRecord);
+            return null;
+        }
+
+        const predA = forecasts.modelA.days[targetDateIndex];
+        const predB = forecasts.modelB.days[targetDateIndex];
+        
+        if (!predA || !predB) {
+            console.warn(`Missing prediction at index ${targetDateIndex}`);
+            return null;
+        }
+
+        const targetDate = predA.date;
+
+        const actual = {
+            tempMax: actualWeather.tempMax,
+            tempMin: actualWeather.tempMin,
+            precip: actualWeather.precip
+        };
+
+        // Calculate errors for each metric
+        const errors = {
+            modelA: {
+                tempMax: calculateAccuracy(predA.tempMax, actual.tempMax),
+                tempMin: calculateAccuracy(predA.tempMin, actual.tempMin),
+                precip: calculateAccuracy(predA.precip, actual.precip)
+            },
+            modelB: {
+                tempMax: calculateAccuracy(predB.tempMax, actual.tempMax),
+                tempMin: calculateAccuracy(predB.tempMin, actual.tempMin),
+                precip: calculateAccuracy(predB.precip, actual.precip)
+            }
+        };
+
+        // Determine winners for each metric
+        const winners = {
+            tempMax: determineWinner(errors.modelA.tempMax, errors.modelB.tempMax, 0.5),
+            tempMin: determineWinner(errors.modelA.tempMin, errors.modelB.tempMin, 0.5),
+            precip: determineWinner(errors.modelA.precip, errors.modelB.precip, 5)
+        };
+
+        // Calculate overall winner (best 2 out of 3)
+        const wins = { A: 0, B: 0, tie: 0 };
+        Object.values(winners).forEach(w => wins[w]++);
+        
+        let overallWinner = 'tie';
+        if (wins.A > wins.B) overallWinner = 'A';
+        else if (wins.B > wins.A) overallWinner = 'B';
+
+        return {
+            date: targetDate,
+            forecastDate: forecastRecord.savedDate,
+            leadDays: targetDateIndex,
+            modelA: forecasts.modelA.name,
+            modelB: forecasts.modelB.name,
+            predicted: {
+                modelA: predA,
+                modelB: predB
+            },
+            actual,
+            errors,
+            winners,
+            overallWinner,
+            location: {
+                lat: forecastRecord.lat,
+                lon: forecastRecord.lon
+            }
+        };
     }
 
     /**

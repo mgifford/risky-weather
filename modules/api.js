@@ -14,6 +14,12 @@ const API = (() => {
         GEOCODING_TIMEOUT: 5000
     };
 
+    // Simple in-memory cache for expensive API responses
+    const RESPONSE_CACHE = {
+        historicalYears: {},
+        TTL: 24 * 60 * 60 * 1000 // 24 hours
+    };
+
     /**
      * Fetch forecast data for two models
      * For Canada: also fetches GEM Global to fill in days 3-6
@@ -213,6 +219,13 @@ const API = (() => {
      * Large request but cacheable locally
      */
     async function fetchHistoricalYears(lat, lon, startYear = 1950, endYear = 2023) {
+        const cacheKey = `${lat},${lon},${startYear},${endYear}`;
+        const cached = RESPONSE_CACHE.historicalYears[cacheKey];
+        if (cached && (Date.now() - cached.timestamp) < RESPONSE_CACHE.TTL) {
+            console.log(`[CACHE HIT] fetchHistoricalYears for ${cacheKey}`);
+            return cached.data;
+        }
+
         const params = new URLSearchParams({
             latitude: lat,
             longitude: lon,
@@ -235,7 +248,10 @@ const API = (() => {
                 }
                 throw new Error(`API returned ${response.status}`);
             }
-            return await response.json();
+            const data = await response.json();
+            RESPONSE_CACHE.historicalYears[cacheKey] = { data, timestamp: Date.now() };
+            console.log(`[CACHE SET] fetchHistoricalYears for ${cacheKey}`);
+            return data;
         } catch (error) {
             console.error(`Historical years fetch failed: ${error.message}`);
             return null;
