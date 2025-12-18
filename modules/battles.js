@@ -35,16 +35,25 @@ const Battles = (() => {
      * Returns battle result with winner and accuracy metrics
      */
     async function analyzeDayBattle(forecastRecord, actualData) {
-        if (!forecastRecord || !actualData) return null;
+        if (!forecastRecord || !actualData) {
+            console.warn('Missing forecast or actual data');
+            return null;
+        }
 
         const forecasts = forecastRecord.forecasts;
-        if (!forecasts || !forecasts.modelA || !forecasts.modelB) return null;
+        if (!forecasts || !forecasts.modelA || !forecasts.modelB) {
+            console.warn('Invalid forecast structure', forecastRecord);
+            return null;
+        }
 
         // Get the first day's forecast (day 0 - the day it was saved)
         const predA = forecasts.modelA.days[0];
         const predB = forecasts.modelB.days[0];
         
-        if (!predA || !predB) return null;
+        if (!predA || !predB) {
+            console.warn(`Missing prediction data for ${forecastRecord.savedDate}`);
+            return null;
+        }
 
         // Get actual weather from archive API
         const actual = {
@@ -52,6 +61,11 @@ const Battles = (() => {
             tempMin: actualData.daily?.temperature_2m_min?.[0],
             precip: actualData.daily?.precipitation_sum?.[0]
         };
+
+        console.log(`Battle data for ${forecastRecord.savedDate}:`, {
+            predicted: { predA, predB },
+            actual
+        });
 
         // Calculate errors for each metric
         const errors = {
@@ -107,17 +121,27 @@ const Battles = (() => {
      */
     async function analyzeAllBattles() {
         const history = Storage.getHistoricalForecasts();
-        if (!history || history.length === 0) return [];
+        if (!history || history.length === 0) {
+            console.warn('No historical forecasts found');
+            return [];
+        }
 
         const today = new Date().toISOString().split('T')[0];
         const battles = [];
+
+        console.log(`Analyzing battles. Today: ${today}, Total forecasts: ${history.length}`);
 
         // Process each historical forecast
         for (const forecast of history) {
             const forecastDate = forecast.savedDate;
             
-            // Only analyze dates in the past (not today)
-            if (forecastDate >= today) continue;
+            // Only analyze dates in the past (not today or future)
+            if (forecastDate >= today) {
+                console.log(`Skipping future/today forecast: ${forecastDate}`);
+                continue;
+            }
+
+            console.log(`Analyzing battle for ${forecastDate}...`);
 
             try {
                 // Fetch actual weather for that date
@@ -130,14 +154,20 @@ const Battles = (() => {
                 if (actualData) {
                     const battle = await analyzeDayBattle(forecast, actualData);
                     if (battle) {
+                        console.log(`Battle result for ${forecastDate}: Winner = ${battle.overallWinner}`);
                         battles.push(battle);
+                    } else {
+                        console.warn(`Failed to analyze battle for ${forecastDate}: Battle data is null`);
                     }
+                } else {
+                    console.warn(`No actual weather data for ${forecastDate}`);
                 }
             } catch (error) {
                 console.warn(`Failed to analyze battle for ${forecastDate}:`, error);
             }
         }
 
+        console.log(`Battle analysis complete. Found ${battles.length} battles.`);
         return battles;
     }
 
