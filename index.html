@@ -24,7 +24,13 @@
                 <h1 data-i18n="ui.title">Risky <span style="color:var(--gem-color)">Weather</span></h1>
                 <p class="subtitle" data-i18n="ui.subtitle">Comparing Models & Assessing Uncertainty</p>
             </div>
-            <button id="language-toggle-btn" class="language-toggle" title="Toggle language" aria-label="Toggle language"></button>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button id="language-toggle-btn" class="language-toggle" title="Toggle language" aria-label="Toggle language"></button>
+                <div id="theme-toggle" aria-label="Toggle theme" role="group" style="display:flex; gap:6px; align-items:center;">
+                    <button id="btn-light" class="theme-btn" title="Light mode" aria-label="Light mode">☀️</button>
+                    <button id="btn-dark" class="theme-btn" title="Dark mode" aria-label="Dark mode">🌙</button>
+                </div>
+            </div>
         </div>
         <div class="location-badge" id="location-display">Initializing...</div>
         

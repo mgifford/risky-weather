@@ -20,6 +20,9 @@ const stripesContainer = document.getElementById('stripes-container');
 
 // 1. Initialization
 async function init() {
+    // Initialize theme based on user preference or system setting
+    initTheme();
+
     let lat, lon, city;
     const savedLoc = localStorage.getItem('user_location');
     
@@ -49,6 +52,56 @@ async function init() {
         }
     }
 }
+
+// Theme handling
+function applyTheme(theme) {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        document.getElementById('btn-dark').setAttribute('aria-pressed', 'true');
+        document.getElementById('btn-light').setAttribute('aria-pressed', 'false');
+    } else {
+        root.removeAttribute('data-theme');
+        document.getElementById('btn-light').setAttribute('aria-pressed', 'true');
+        document.getElementById('btn-dark').setAttribute('aria-pressed', 'false');
+    }
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('preferred-theme');
+    if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved);
+        return;
+    }
+
+    // Respect user's system preference initially
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark ? 'dark' : 'light');
+
+    // Listen for changes in system preference and update if user hasn't chosen explicitly
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        const stillSaved = localStorage.getItem('preferred-theme');
+        if (!stillSaved) {
+            applyTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+}
+
+// Theme button handlers
+document.addEventListener('DOMContentLoaded', () => {
+    const btnLight = document.getElementById('btn-light');
+    const btnDark = document.getElementById('btn-dark');
+    if (btnLight && btnDark) {
+        btnLight.addEventListener('click', () => {
+            applyTheme('light');
+            localStorage.setItem('preferred-theme', 'light');
+        });
+        btnDark.addEventListener('click', () => {
+            applyTheme('dark');
+            localStorage.setItem('preferred-theme', 'dark');
+        });
+    }
+});
 
 function initWeather(lat, lon, cityName) {
     locationDisplay.innerText = cityName;
