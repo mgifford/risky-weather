@@ -12,7 +12,7 @@ const Calculations = (() => {
 
         // Format precipitation probability
         formatRain(value) {
-            return value !== null ? value + '% Risk' : 'N/A';
+            return value !== null ? value + '% Chance of precipitation' : 'N/A';
         },
 
         // Determine rain pill CSS class
@@ -160,11 +160,11 @@ const Calculations = (() => {
         // Generate tooltip explaining what a probability means
         getProbabilityTooltip(probability) {
             if (probability === null) return 'No data available';
-            if (probability >= 80) return `${probability}% risk means rain is very likely. Out of 10 similar forecasts, rain occurs 8+ times. Plan for rain.`;
-            if (probability >= 60) return `${probability}% risk means rain is more likely than not. Out of 10 similar forecasts, rain occurs 6-7 times. Have backup plans.`;
-            if (probability >= 40) return `${probability}% risk means rain is possible but uncertain. Out of 10 similar forecasts, rain occurs 4-5 times. Watch for updates.`;
-            if (probability >= 20) return `${probability}% risk means rain is unlikely but not impossible. Out of 10 similar forecasts, rain occurs 2-3 times. Probably stay dry.`;
-            return `${probability}% risk means rain is very unlikely. Out of 10 similar forecasts, rain occurs 0-1 times. Expect dry conditions.`;
+            if (probability >= 80) return `${probability}% Chance of precipitation means rain is very likely. Out of 10 similar forecasts, rain occurs 8+ times. Plan for rain.`;
+            if (probability >= 60) return `${probability}% Chance of precipitation means rain is more likely than not. Out of 10 similar forecasts, rain occurs 6-7 times. Have backup plans.`;
+            if (probability >= 40) return `${probability}% Chance of precipitation means rain is possible but uncertain. Out of 10 similar forecasts, rain occurs 4-5 times. Watch for updates.`;
+            if (probability >= 20) return `${probability}% Chance of precipitation means rain is unlikely but not impossible. Out of 10 similar forecasts, rain occurs 2-3 times. Probably stay dry.`;
+            return `${probability}% Chance of precipitation means rain is very unlikely. Out of 10 similar forecasts, rain occurs 0-1 times. Expect dry conditions.`;
         },
 
         // Generate explanation for model disagreement

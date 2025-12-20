@@ -96,10 +96,10 @@ function updateUI(data, lat, lon, isCanada) {
     precipProbEl.innerText = `${probDisplay}%`;
 
     let interpretation = "";
-    if (precipProb < 10) interpretation = "<strong>Low Risk (Stability).</strong> The atmosphere is stable. If you played today out 10 times, it would stay dry in almost all of them.";
-    else if (precipProb < 40) interpretation = `<strong>Low-Medium Risk.</strong> There is a ${precipProb}% chance. Humans tend to round this down to '0', but in the long run, this event happens 1 out of 3 times.`;
-    else if (precipProb < 70) interpretation = `<strong>Coin Toss (Uncertainty).</strong> We are in a volatile state. It will rain in ${Math.round(precipProb/10)} out of 10 parallel universes today. Plan for wet weather.`;
-    else interpretation = `<strong>High Confidence.</strong> The atmospheric drivers are strong. Rain is the expected outcome, not just a risk.`;
+    if (precipProb < 10) interpretation = "<strong>Low Chance (Stable).</strong> The atmosphere is stable. If you played today out 10 times, it would stay dry in almost all of them.";
+    else if (precipProb < 40) interpretation = `<strong>Low–Medium Chance.</strong> There is a ${precipProb}% Chance of precipitation. Humans tend to round this down to '0', but in the long run, this event happens 1 out of 3 times.`;
+    else if (precipProb < 70) interpretation = `<strong>Coin Toss (Uncertain).</strong> Chance of precipitation is around ${precipProb}%. It will rain in ${Math.round(precipProb/10)} out of 10 parallel universes today. Plan for wet weather.`;
+    else interpretation = `<strong>High Confidence.</strong> The atmospheric drivers are strong. Precipitation is the expected outcome, not just a chance.`;
     
     riskTextEl.innerHTML = interpretation;
 

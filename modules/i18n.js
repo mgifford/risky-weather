@@ -75,7 +75,7 @@ const I18n = (() => {
             // Data units
             'unit.celsius': '°C',
             'unit.percent': '%',
-            'unit.rainRisk': '{0}% Rain',
+            'unit.rainRisk': '{0}% Chance of precipitation',
 
             // Cache Inspector
             'cache.title': '📋 Cache Inspector',
@@ -124,7 +124,7 @@ const I18n = (() => {
             'table.rain': 'Rain %',
 
             // Precipitation legend
-            'rain.legendTitle': 'Precipitation Risk',
+            'rain.legendTitle': 'Chance of precipitation',
             'rain.lowRisk': 'Unlikely',
             'rain.moderateRisk': 'Possible',
             'rain.highRisk': 'Likely',

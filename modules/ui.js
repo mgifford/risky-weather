@@ -390,8 +390,8 @@ const UI = (() => {
                 <p><strong>Date:</strong> ${date}</p>
                 <p><strong>Precipitation:</strong> ${rainLabel}</p>
                 <p style="font-size:0.85rem; color:#555;">
-                    ${modelAName} forecast: ${modelAProbability}% Risk<br>
-                    ${modelBName} forecast: ${modelBProbability}% Risk
+                    ${modelAName} forecast: ${modelAProbability}% Chance of precipitation<br>
+                    ${modelBName} forecast: ${modelBProbability}% Chance of precipitation
                 </p>
             `;
 
@@ -786,6 +786,46 @@ const UI = (() => {
         },
 
         /**
+         * Share a history event to Bluesky (or clipboard fallback)
+         */
+        async shareHistoryEvent(formattedEvent) {
+            try {
+                const baseUrl = window.location.origin + window.location.pathname;
+                const link = `${baseUrl}`; // use root page for sharing
+
+                const message = `${formattedEvent.event}\n\n📅 ${formattedEvent.formattedDate}\n\n${link}`;
+
+                // Try Web Share API first
+                if (navigator.share) {
+                    try {
+                        await navigator.share({ title: formattedEvent.event, text: message, url: link });
+                        return;
+                    } catch (e) {
+                        // Fall through to Bluesky / clipboard
+                    }
+                }
+
+                // Construct Bluesky post intent (opens new window to post)
+                // Bluesky does not have a simple URL intent for posting publicly, but many clients support deep links.
+                // We'll attempt to open the mgifford/bsky.app composer link if available, otherwise copy to clipboard.
+                const blueskyComposer = `https://bsky.app/compose?text=${encodeURIComponent(message)}`;
+                const win = window.open(blueskyComposer, '_blank');
+                if (win) {
+                    // Opened composer in new tab
+                    return;
+                }
+
+                // Clipboard fallback
+                await navigator.clipboard.writeText(message);
+                alert('Post text copied to clipboard. Paste into Bluesky or other social app.');
+            } catch (err) {
+                console.error('Failed to share history event:', err);
+                try { await navigator.clipboard.writeText(`${formattedEvent.event}\n\n📅 ${formattedEvent.formattedDate}\n\n${window.location.origin + window.location.pathname}`); } catch (e) {}
+                alert('Could not open Bluesky composer; post text copied to clipboard.');
+            }
+        },
+
+        /**
          * Display today's historical climate event
          */
         renderHistoryEvent(formattedEvent) {
@@ -800,9 +840,18 @@ const UI = (() => {
                 <p style="margin: 0 0 12px 0; font-size: 0.95rem; line-height: 1.6;">${formattedEvent.event}</p>
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #4a5568; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf2f7;">
                     <span>📅 ${formattedEvent.formattedDate}</span>
-                    ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: #1e3a8a; text-decoration: underline;">🔗 Learn more →</a>` : ''}
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: #1e3a8a; text-decoration: underline;">🔗 Learn more →</a>` : ''}
+                        <button id="history-share-btn" style="background:#0ea5e9;border:none;color:white;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Share</button>
+                    </div>
                 </div>
             `;
+
+            // Attach share handler
+            const shareBtn = document.getElementById('history-share-btn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', () => this.shareHistoryEvent(formattedEvent));
+            }
 
             if (ELEMENTS.historySection) {
                 ELEMENTS.historySection.classList.remove('hidden');
