@@ -6,7 +6,10 @@
 
 const ClimateData = (() => {
     // Constants from Python script / IPCC AR6 / MCC
-    const REFERENCE_DATE = new Date('2025-01-01T00:00:00Z');
+    // Use Jan 1 of the current UTC year as the reference date so the UI doesn't
+    // show a hard-coded future/past year when the code is reused across years.
+    const now = new Date();
+    const REFERENCE_DATE = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
     const REMAINING_BUDGET_GT = 130; // GtCO2 as of Jan 1, 2025
     const ANNUAL_EMISSIONS_GT = 42.2; // GtCO2 per year
     const GT_TO_TONNES = 1_000_000_000;

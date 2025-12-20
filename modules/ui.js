@@ -102,7 +102,7 @@ const UI = (() => {
             title.textContent = I18n.t('ui.ecccAlmanacTitle');
             const stationEl = document.createElement('div');
             stationEl.style.fontSize = '0.85rem';
-            stationEl.style.color = '#666';
+            stationEl.style.color = 'var(--subtext)';
             stationEl.textContent = `${station.name} (${station.prov})`;
             // Only render grid if we have almanac data
             let grid = null;
@@ -129,7 +129,7 @@ const UI = (() => {
             link.target = '_blank';
             link.rel = 'noopener noreferrer';
             link.style.fontSize = '0.8rem';
-            link.style.color = '#555';
+            link.style.color = 'var(--highlight)';
             link.textContent = I18n.t('ui.sourceECCC');
             // Add direct links to today's station data pages when station id is available
             const today = new Date();
@@ -144,13 +144,13 @@ const UI = (() => {
             histLink.target = '_blank';
             histLink.rel = 'noopener noreferrer';
             histLink.style.fontSize = '0.8rem';
-            histLink.style.color = '#555';
+            histLink.style.color = 'var(--highlight)';
             histLink.textContent = I18n.t('ui.ecccHistoricalLink') || 'ECCC Historical Data (Today)';
             const almLink = document.createElement('a');
             almLink.target = '_blank';
             almLink.rel = 'noopener noreferrer';
             almLink.style.fontSize = '0.8rem';
-            almLink.style.color = '#555';
+            almLink.style.color = 'var(--highlight)';
             almLink.textContent = I18n.t('ui.ecccAlmanacLink') || 'ECCC Almanac';
             // Build URLs with stationId and date params when possible
             if (station && station.id) {
@@ -226,8 +226,8 @@ const UI = (() => {
             const descB = Calculations.getWeatherDescription(data.codeB);
 
             // Temperature with weather icon
-            ELEMENTS.valA.innerHTML = `${iconA} ${Calculations.formatTemp(data.tempMaxA)}<span style="font-size: 0.7em; color: #666;">/${Calculations.formatTemp(data.tempMinA)}</span>`;
-            ELEMENTS.valB.innerHTML = `${iconB} ${Calculations.formatTemp(data.tempMaxB)}<span style="font-size: 0.7em; color: #666;">/${Calculations.formatTemp(data.tempMinB)}</span>`;
+            ELEMENTS.valA.innerHTML = `${iconA} ${Calculations.formatTemp(data.tempMaxA)}<span style="font-size: 0.7em; color: var(--subtext);">/${Calculations.formatTemp(data.tempMinA)}</span>`;
+            ELEMENTS.valB.innerHTML = `${iconB} ${Calculations.formatTemp(data.tempMaxB)}<span style="font-size: 0.7em; color: var(--subtext);">/${Calculations.formatTemp(data.tempMinB)}</span>`;
             
             // Rain probability
             ELEMENTS.rainA.innerText = Calculations.formatRain(data.probA);
@@ -246,12 +246,12 @@ const UI = (() => {
             // Add weather details below temps (snow, wind)
             const detailsA = this.formatWeatherDetails(data.snowA, data.windA, data.gustA);
             const detailsB = this.formatWeatherDetails(data.snowB, data.windB, data.gustB);
-            
+
             if (detailsA) {
-                ELEMENTS.valA.innerHTML += `<div style="font-size: 0.75rem; color: #666; margin-top: 4px;">${detailsA}</div>`;
+                ELEMENTS.valA.innerHTML += `<div style="font-size: 0.75rem; color: var(--subtext); margin-top: 4px;">${detailsA}</div>`;
             }
             if (detailsB) {
-                ELEMENTS.valB.innerHTML += `<div style="font-size: 0.75rem; color: #666; margin-top: 4px;">${detailsB}</div>`;
+                ELEMENTS.valB.innerHTML += `<div style="font-size: 0.75rem; color: var(--subtext); margin-top: 4px;">${detailsB}</div>`;
             }
 
             // Check for extreme weather warnings
@@ -321,7 +321,7 @@ const UI = (() => {
                 // Check for extreme weather
                 const extremeA = Calculations.getExtremeWeatherBadge(maxA, minA, windA, gustA, snowA);
                 const extremeB = Calculations.getExtremeWeatherBadge(maxB, minB, windB, gustB, snowB);
-                const extremeBadge = extremeA ? `<div style="color: #d32f2f; font-size: 0.75rem; font-weight: bold; margin-top: 2px;">${extremeA}</div>` : '';
+                const extremeBadge = extremeA ? `<div style="color: var(--accent); font-size: 0.75rem; font-weight: bold; margin-top: 2px;">${extremeA}</div>` : '';
 
                 // Add uncertainty indicator if present
                 const uncertaintyBadge = uncertaintyIcon ? 
@@ -331,11 +331,13 @@ const UI = (() => {
                     <td class="col-day">${dayName}${uncertaintyBadge}${extremeBadge}</td>
                     <td title="${Calculations.getProbabilityTooltip(probA)}" style="cursor: help;">
                         <div>${iconA} ${cellA}</div>
-                        ${detailsA ? `<div style="font-size: 0.75rem; color: #666; margin-top: 2px;">${detailsA}</div>` : ''}
+                        ${detailsA ? `<div style="font-size: 0.75rem; color: var(--subtext); margin-top: 2px;">${detailsA}</div>` : ''}
+                            ${detailsA ? `<div style="font-size: 0.75rem; color: var(--subtext); margin-top: 2px;">${detailsA}</div>` : ''}
                     </td>
                     <td title="${Calculations.getProbabilityTooltip(probB)}" style="cursor: help;">
                         <div>${iconB} ${cellB}</div>
-                        ${detailsB ? `<div style="font-size: 0.75rem; color: #666; margin-top: 2px;">${detailsB}</div>` : ''}
+                        ${detailsB ? `<div style="font-size: 0.75rem; color: var(--subtext); margin-top: 2px;">${detailsB}</div>` : ''}
+                            ${detailsB ? `<div style="font-size: 0.75rem; color: var(--subtext); margin-top: 2px;">${detailsB}</div>` : ''}
                     </td>
                 </tr>`;
             });
@@ -366,7 +368,7 @@ const UI = (() => {
             ELEMENTS.stripes.innerHTML = '';
 
             if (!annualMeans || annualMeans.length === 0) {
-                ELEMENTS.stripes.innerHTML = '<div style="text-align: center; color: #999; padding: 10px;">No historical data available</div>';
+                ELEMENTS.stripes.innerHTML = '<div style="text-align: center; color: var(--subtext); padding: 10px;">No historical data available</div>';
                 return;
             }
 
@@ -389,7 +391,7 @@ const UI = (() => {
             let html = `
                 <p><strong>Date:</strong> ${date}</p>
                 <p><strong>Precipitation:</strong> ${rainLabel}</p>
-                <p style="font-size:0.85rem; color:#555;">
+                <p style="font-size:0.85rem; color:var(--subtext);">
                     ${modelAName} forecast: ${modelAProbability}% Chance of precipitation<br>
                     ${modelBName} forecast: ${modelBProbability}% Chance of precipitation
                 </p>
@@ -407,11 +409,11 @@ const UI = (() => {
 
                 html += `
                     <p style="margin-top:12px;"><strong>Temperature:</strong></p>
-                    <p style="font-size:0.85rem; color:#555;">
+                    <p style="font-size:0.85rem; color:var(--subtext);">
                         Actual High: <strong>${formatTemp(tempData.actualTempMax)}</strong>, 
                         Low: <strong>${formatTemp(tempData.actualTempMin)}</strong>
                     </p>
-                    <p style="font-size:0.85rem; color:#555;">
+                    <p style="font-size:0.85rem; color:var(--subtext);">
                         ${modelAName}: ${formatTemp(tempData.forecastATempMax)}/${formatTemp(tempData.forecastATempMin)}${calcError(tempData.forecastATempMax, tempData.actualTempMax)}<br>
                         ${modelBName}: ${formatTemp(tempData.forecastBTempMax)}/${formatTemp(tempData.forecastBTempMin)}${calcError(tempData.forecastBTempMax, tempData.actualTempMax)}
                     </p>
@@ -433,7 +435,7 @@ const UI = (() => {
          * Show draw result
          */
         showDraw() {
-            ELEMENTS.winnerDisplay.innerHTML = `<div class="winner-banner" style="background:#edf2f7; color:#555;">🤝 Draw</div>`;
+            ELEMENTS.winnerDisplay.innerHTML = `<div class="winner-banner" style="background:var(--card); color:var(--subtext);">🤝 Draw</div>`;
         },
 
         /**
@@ -611,7 +613,7 @@ const UI = (() => {
                 const pastForecasts = cacheData.historicalForecasts.filter(f => f.savedDate < today);
                 
                 if (pastForecasts.length === 0) {
-                    html += '<div style="color: #718096; font-style: italic;">No past forecasts yet. Today\'s forecast will become historical tomorrow!</div>';
+                    html += '<div style="color: var(--subtext); font-style: italic;">No past forecasts yet. Today\'s forecast will become historical tomorrow!</div>';
                 } else {
                     html += `<div style="margin-bottom: 10px;"><strong>Past Forecasts: ${pastForecasts.length}</strong> (excludes today)</div>`;
                     pastForecasts.forEach((forecast, index) => {
@@ -619,7 +621,8 @@ const UI = (() => {
                         html += `<div style="padding: 8px; margin-bottom: 8px; background: ${isYesterday ? '#fff3cd' : 'white'}; border: 1px solid #ddd; border-radius: 4px;">`;
                         html += `<div style="font-weight: 600; margin-bottom: 4px;">${isYesterday ? '⏮️ ' : ''}${forecast.savedDate || 'N/A'}</div>`;
                     if (forecast.lat && forecast.lon) {
-                        html += `<div style="font-size: 0.85rem; color: #666;">Location: ${forecast.lat.toFixed(2)}, ${forecast.lon.toFixed(2)}</div>`;
+                        html += `<div style="font-size: 0.85rem; color: var(--subtext);">Location: ${forecast.lat.toFixed(2)}, ${forecast.lon.toFixed(2)}</div>`;
+                            html += `<div style="font-size: 0.85rem; color: var(--subtext);">Location: ${forecast.lat.toFixed(2)}, ${forecast.lon.toFixed(2)}</div>`;
                     }
                     if (forecast.forecasts) {
                         const modelA = forecast.forecasts.modelA;
@@ -654,7 +657,8 @@ const UI = (() => {
                 html += `${forecast.modelA?.name || 'Model A'}: ${forecast.modelA?.prob !== undefined ? forecast.modelA.prob + '% rain' : 'N/A'}<br>`;
                 html += `${forecast.modelB?.name || 'Model B'}: ${forecast.modelB?.prob !== undefined ? forecast.modelB.prob + '% rain' : 'N/A'}`;
                 html += `</div>`;
-                html += `<div style="margin-top: 8px; font-size: 0.85rem; color: #666;">Note: Revisit the page to migrate to new multi-day format.</div>`;
+                html += `<div style="margin-top: 8px; font-size: 0.85rem; color: var(--subtext);">Note: Revisit the page to migrate to new multi-day format.</div>`;
+                    html += `<div style="margin-top: 8px; font-size: 0.85rem; color: var(--subtext);">Note: Revisit the page to migrate to new multi-day format.</div>`;
             } else {
                 html += 'No historical forecasts stored yet. Will save on next visit.';
             }
@@ -672,7 +676,7 @@ const UI = (() => {
                 };
                 html += cacheData.allKeys.map(k => {
                     const desc = keyDescriptions[k] || 'Unknown key';
-                    return `<div style="margin-bottom: 4px;">• <strong>${k}</strong><br><span style="font-size: 0.85rem; color: #718096; margin-left: 12px;">${desc}</span></div>`;
+                    return `<div style="margin-bottom: 4px;">• <strong>${k}</strong><br><span style="font-size: 0.85rem; color: var(--subtext); margin-left: 12px;">${desc}</span></div>`;
                 }).join('');
             } else {
                 html += 'No data stored';
@@ -838,11 +842,11 @@ const UI = (() => {
 
             ELEMENTS.historyContent.innerHTML = `
                 <p style="margin: 0 0 12px 0; font-size: 0.95rem; line-height: 1.6;">${formattedEvent.event}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #4a5568; margin-top: 12px; padding-top: 12px; border-top: 1px solid #edf2f7;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--subtext); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--card);">
                     <span>📅 ${formattedEvent.formattedDate}</span>
                     <div style="display:flex; gap:8px; align-items:center;">
-                        ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: #1e3a8a; text-decoration: underline;">🔗 Learn more →</a>` : ''}
-                        <button id="history-share-btn" style="background:#0ea5e9;border:none;color:white;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Share</button>
+                        ${formattedEvent.link !== '#' ? `<a href="${formattedEvent.link}" target="_blank" style="color: var(--highlight); text-decoration: underline;">🔗 Learn more →</a>` : ''}
+                        <button id="history-share-btn" class="btn-history-share">Share</button>
                     </div>
                 </div>
             `;
@@ -873,40 +877,40 @@ const UI = (() => {
             const highDiff = todayHigh !== null ? Math.round(todayHigh - avgHigh) : null;
             const lowDiff = todayLow !== null ? Math.round(todayLow - avgLow) : null;
             
-            const highComparison = highDiff === null ? '' : 
-                highDiff > 0 ? `<span style="color: #c53030;">▲ ${highDiff}° above average</span>` :
-                highDiff < 0 ? `<span style="color: #1e3a8a;">▼ ${Math.abs(highDiff)}° below average</span>` :
-                `<span style="color: #2d3748;">at average</span>`;
+                const highComparison = highDiff === null ? '' : 
+                highDiff > 0 ? `<span style="color: var(--accent);">▲ ${highDiff}° above average</span>` :
+                highDiff < 0 ? `<span style="color: var(--highlight);">▼ ${Math.abs(highDiff)}° below average</span>` :
+                `<span style="color: var(--subtext);">at average</span>`;
                 
-            const lowComparison = lowDiff === null ? '' :
-                lowDiff > 0 ? `<span style="color: #c53030;">▲ ${lowDiff}° above average</span>` :
-                lowDiff < 0 ? `<span style="color: #1e3a8a;">▼ ${Math.abs(lowDiff)}° below average</span>` :
-                `<span style="color: #2d3748;">at average</span>`;
+                const lowComparison = lowDiff === null ? '' :
+                lowDiff > 0 ? `<span style="color: var(--accent);">▲ ${lowDiff}° above average</span>` :
+                lowDiff < 0 ? `<span style="color: var(--highlight);">▼ ${Math.abs(lowDiff)}° below average</span>` :
+                `<span style="color: var(--subtext);">at average</span>`;
 
             ELEMENTS.historicalNormalsContent.innerHTML = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
-                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Average High</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: #c53030;">${avgHigh}°</div>
-                        ${todayHigh !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: #2d3748;">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
+                    <div style="background: var(--card); padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">Average High</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">${avgHigh}°</div>
+                        ${todayHigh !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: var(--text);">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
                     </div>
-                    <div style="background: #f7fafc; padding: 12px; border-radius: 6px;">
-                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Average Low</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a;">${avgLow}°</div>
-                        ${todayLow !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: #2d3748;">Today: ${Math.round(todayLow)}° ${lowComparison}</div>` : ''}
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; color: #2d3748;">
-                    <div>
-                        <span>Record High:</span> <strong style="color: #b91c1c;">${recordHigh}°</strong>
-                    </div>
-                    <div>
-                        <span>Record Low:</span> <strong style="color: #1e3a8a;">${recordLow}°</strong>
+                    <div style="background: var(--card); padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">Average Low</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--highlight);">${avgLow}°</div>
+                        ${todayLow !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: var(--text);">Today: ${Math.round(todayLow)}° ${lowComparison}</div>` : ''}
                     </div>
                 </div>
-                <div style="font-size: 0.8rem; color: #4a5568; margin-top: 12px; text-align: right;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; color: var(--text);">
+                    <div>
+                        <span>Record High:</span> <strong style="color: var(--accent);">${recordHigh}°</strong>
+                    </div>
+                    <div>
+                        <span>Record Low:</span> <strong style="color: var(--highlight);">${recordLow}°</strong>
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--subtext); margin-top: 12px; text-align: right;">
                     Based on ${normals.yearsOfData} years of data • 
-                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">Data: Open-Meteo Archive API</a>
+                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Data: Open-Meteo Archive API</a>
                 </div>
             `;
 
@@ -981,7 +985,7 @@ const UI = (() => {
          */
         displayCityResults(results, onCitySelect) {
             if (!results || results.length === 0) {
-                ELEMENTS.citySearchResults.innerHTML = '<div style="padding: 12px; color: #a0aec0; font-size: 0.9rem;">No cities found</div>';
+                ELEMENTS.citySearchResults.innerHTML = '<div style="padding: 12px; color: var(--subtext); font-size: 0.9rem;">No cities found</div>';
                 ELEMENTS.citySearchResults.style.display = 'block';
                 return;
             }
@@ -992,11 +996,11 @@ const UI = (() => {
                      data-lon="${city.lon}" 
                      data-name="${city.name}"
                      data-region="${city.region}"
-                     style="padding: 12px; cursor: pointer; border-bottom: 1px solid #edf2f7; transition: background 0.2s;"
-                     onmouseover="this.style.background='#f7fafc'" 
-                     onmouseout="this.style.background='white'">
-                    <div style="font-weight: 600; color: #2d3748;">${city.name}</div>
-                    <div style="font-size: 0.85rem; color: #718096;">${city.region ? city.region + ', ' : ''}${city.country}</div>
+                     style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--card); transition: background 0.2s;"
+                     onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--bg')" 
+                     onmouseout="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--card')">
+                    <div style="font-weight: 600; color: var(--text);">${city.name}</div>
+                    <div style="font-size: 0.85rem; color: var(--subtext);">${city.region ? city.region + ', ' : ''}${city.country}</div>
                 </li>
             `).join('');
 
@@ -1048,7 +1052,7 @@ const UI = (() => {
             const container = document.getElementById('battle-history-section');
             if (!container) return;
 
-            container.innerHTML = '<div style="text-align: center; padding: 20px; color: #718096;">⏳ Analyzing historical battles...</div>';
+            container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--subtext);">⏳ Analyzing historical battles...</div>';
             container.style.display = 'block';
 
             try {
@@ -1064,7 +1068,7 @@ const UI = (() => {
                     let diagInfo = '';
                     
                     if (history && history.length > 0) {
-                        diagInfo = `<div style="font-size: 0.8rem; color: #4a5568; margin-top: 15px; padding: 10px; background: #f7fafc; border-radius: 4px;">
+                        diagInfo = `<div style="font-size: 0.8rem; color: var(--subtext); margin-top: 15px; padding: 10px; background: var(--card); border-radius: 4px;">
                             <strong>Debug Info:</strong><br/>
                             Forecasts in storage: ${historyCount}<br/>
                             Today's date: ${today}<br/>
@@ -1074,7 +1078,7 @@ const UI = (() => {
                     }
                     
                     container.innerHTML = `
-                        <div style="text-align: center; padding: 30px; color: #718096;">
+                        <div style="text-align: center; padding: 30px; color: var(--subtext);">
                             <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
                             <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No Battle Results Yet</div>
                             <div style="font-size: 0.9rem;">
@@ -1097,25 +1101,25 @@ const UI = (() => {
                 
                 // Header
                 html += '<div style="margin-bottom: 20px;">';
-                html += '<h3 style="margin: 0 0 15px 0; font-size: 1.5rem; color: #2d3748;">⚔️ Weather Model Battles</h3>';
+                    html += '<h3 style="margin: 0 0 15px 0; font-size: 1.5rem; color: var(--text);">⚔️ Weather Model Battles</h3>';
                 
                 // Summary score boxes
                 html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 15px;">';
                 
                 html += `
-                    <div style="background: #bee3f8; padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid #3182ce;">
-                        <div style="font-size: 0.85rem; color: #2c5282; margin-bottom: 4px;">Wins</div>
-                        <div style="font-size: 1.6rem; font-weight: bold; color: #2c5282;">${trends.winsA}</div>
-                        <div style="font-size: 0.75rem; color: #2c5282;">${modelAName}</div>
+                    <div style="background: color-mix(in srgb, var(--highlight) 12%, transparent); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--highlight);">
+                        <div style="font-size: 0.85rem; color: var(--highlight); margin-bottom: 4px;">Wins</div>
+                        <div style="font-size: 1.6rem; font-weight: bold; color: var(--highlight);">${trends.winsA}</div>
+                        <div style="font-size: 0.75rem; color: var(--highlight);">${modelAName}</div>
                     </div>
-                    <div style="background: #fbd38d; padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid #dd6b20;">
-                        <div style="font-size: 0.85rem; color: #7c2d12; margin-bottom: 4px;">Wins</div>
-                        <div style="font-size: 1.6rem; font-weight: bold; color: #7c2d12;">${trends.winsB}</div>
-                        <div style="font-size: 0.75rem; color: #7c2d12;">${modelBName}</div>
+                    <div style="background: color-mix(in srgb, var(--accent) 12%, transparent); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--accent);">
+                        <div style="font-size: 0.85rem; color: var(--accent); margin-bottom: 4px;">Wins</div>
+                        <div style="font-size: 1.6rem; font-weight: bold; color: var(--accent);">${trends.winsB}</div>
+                        <div style="font-size: 0.75rem; color: var(--accent);">${modelBName}</div>
                     </div>
-                    <div style="background: #e2e8f0; padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid #718096;">
-                        <div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 4px;">Ties</div>
-                        <div style="font-size: 1.6rem; font-weight: bold; color: #4a5568;">${trends.ties}</div>
+                    <div style="background: var(--card); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--subtext);">
+                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">Ties</div>
+                        <div style="font-size: 1.6rem; font-weight: bold; color: var(--subtext);">${trends.ties}</div>
                     </div>
                 `;
                 html += '</div>';
@@ -1123,23 +1127,23 @@ const UI = (() => {
                 
                 // Collapsible details section
                 html += '<details style="margin-top: 15px;">';
-                html += '<summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside; color: #2d3748;">📋 View Detailed Analysis</summary>';
+                html += '<summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside; color: var(--text);">📋 View Detailed Analysis</summary>';
                 
                 html += '<div style="margin-top: 12px;">';
                 
                 // Average errors
-                html += '<div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
-                html += '<div style="font-weight: 600; margin-bottom: 10px; color: #2d3748;">📈 Average Prediction Errors</div>';
+                html += '<div style="background: var(--bg); padding: 15px; border-radius: 8px; margin-bottom: 15px;">';
+                html += '<div style="font-weight: 600; margin-bottom: 10px; color: var(--text);">📈 Average Prediction Errors</div>';
                 html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">';
                 html += `
                     <div>
-                        <div style="color: #2c5282; font-weight: 600; margin-bottom: 5px;">${modelAName}</div>
+                        <div style="color: var(--highlight); font-weight: 600; margin-bottom: 5px;">${modelAName}</div>
                         <div>Temp Max: ±${trends.avgErrorA.tempMax.toFixed(1)}°C</div>
                         <div>Temp Min: ±${trends.avgErrorA.tempMin.toFixed(1)}°C</div>
                         <div>Precip: ±${trends.avgErrorA.precip.toFixed(1)}mm</div>
                     </div>
                     <div>
-                        <div style="color: #7c2d12; font-weight: 600; margin-bottom: 5px;">${modelBName}</div>
+                        <div style="color: var(--accent); font-weight: 600; margin-bottom: 5px;">${modelBName}</div>
                         <div>Temp Max: ±${trends.avgErrorB.tempMax.toFixed(1)}°C</div>
                         <div>Temp Min: ±${trends.avgErrorB.tempMin.toFixed(1)}°C</div>
                         <div>Precip: ±${trends.avgErrorB.precip.toFixed(1)}mm</div>
@@ -1149,24 +1153,24 @@ const UI = (() => {
                 html += '</div>';
                 
                 // Battle timeline
-                html += '<div style="margin-bottom: 15px; font-weight: 600; color: #2d3748;">📅 Battle Timeline</div>';
+                html += '<div style="margin-bottom: 15px; font-weight: 600; color: var(--text);">📅 Battle Timeline</div>';
                 html += '<div style="max-height: 400px; overflow-y: auto;">';
                 
                 battles.forEach((battle, index) => {
-                    const bgColor = battle.overallWinner === 'A' ? '#bee3f8' : 
-                                   battle.overallWinner === 'B' ? '#fbd38d' : '#e2e8f0';
-                    const borderColor = battle.overallWinner === 'A' ? '#3182ce' : 
-                                       battle.overallWinner === 'B' ? '#dd6b20' : '#718096';
+                    const bgColor = battle.overallWinner === 'A' ? 'color-mix(in srgb, var(--highlight) 12%, transparent)' : 
+                                   battle.overallWinner === 'B' ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'color-mix(in srgb, var(--card) 90%, transparent)';
+                    const borderColor = battle.overallWinner === 'A' ? 'var(--highlight)' : 
+                                       battle.overallWinner === 'B' ? 'var(--accent)' : 'var(--subtext)';
                     
                     html += `<div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 12px; margin-bottom: 10px; border-radius: 6px;">';`;
                     html += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">`;
-                    html += `<div style="font-weight: 600; color: #2d3748;">`;
+                    html += `<div style="font-weight: 600; color: var(--text);">`;
                     html += `${battle.date}`;
                     if (battle.leadDays !== undefined && battle.leadDays > 0) {
-                        html += ` <span style="font-size: 0.75rem; color: #718096;">(forecast from ${battle.forecastDate}, +${battle.leadDays}d)</span>`;
+                        html += ` <span style="font-size: 0.75rem; color: var(--subtext);">(forecast from ${battle.forecastDate}, +${battle.leadDays}d)</span>`;
                     }
                     html += `</div>`;
-                    html += `<div style="font-size: 0.9rem; color: #4a5568;">`;
+                    html += `<div style="font-size: 0.9rem; color: var(--subtext);">`;
                     if (battle.overallWinner === 'A') html += `🏆 ${battle.modelA}`;
                     else if (battle.overallWinner === 'B') html += `🏆 ${battle.modelB}`;
                     else html += '🤝 Tie';
@@ -1174,27 +1178,27 @@ const UI = (() => {
                     html += `</div>`;
                     
                     // Actual weather
-                    html += `<div style="font-size: 0.85rem; color: #4a5568; margin-bottom: 8px;">`;
+                    html += `<div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 8px;">`;
                     html += `<strong>Actual:</strong> ${battle.actual.tempMax?.toFixed(1) || '?'}° / ${battle.actual.tempMin?.toFixed(1) || '?'}° | ${battle.actual.precip?.toFixed(1) || '0'}mm rain`;
                     html += `</div>`;
                     
                     // Predictions and errors
                     html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem;">`;
                     
-                    html += `<div style="background: rgba(255,255,255,0.5); padding: 8px; border-radius: 4px;">`;
-                    html += `<div style="color: #2c5282; font-weight: 600; margin-bottom: 4px;">${battle.modelA}</div>`;
+                    html += `<div style="background: color-mix(in srgb, var(--card) 85%, transparent); padding: 8px; border-radius: 4px;">`;
+                    html += `<div style="color: var(--highlight); font-weight: 600; margin-bottom: 4px;">${battle.modelA}</div>`;
                     html += `<div>Predicted: ${battle.predicted.modelA.tempMax?.toFixed(1) || '?'}° / ${battle.predicted.modelA.tempMin?.toFixed(1) || '?'}° | ${battle.predicted.modelA.precip?.toFixed(1) || '0'}mm</div>`;
-                    html += `<div style="color: #718096; font-size: 0.8rem;">`;
+                    html += `<div style="color: var(--subtext); font-size: 0.8rem;">`;
                     html += `Error: ${battle.errors.modelA.tempMax !== null ? '±' + battle.errors.modelA.tempMax.toFixed(1) + '°' : '—'} / `;
                     html += `${battle.errors.modelA.tempMin !== null ? '±' + battle.errors.modelA.tempMin.toFixed(1) + '°' : '—'} | `;
                     html += `${battle.errors.modelA.precip !== null ? '±' + battle.errors.modelA.precip.toFixed(1) + 'mm' : '—'}`;
                     html += `</div>`;
                     html += `</div>`;
                     
-                    html += `<div style="background: rgba(255,255,255,0.5); padding: 8px; border-radius: 4px;">`;
-                    html += `<div style="color: #7c2d12; font-weight: 600; margin-bottom: 4px;">${battle.modelB}</div>`;
+                    html += `<div style="background: color-mix(in srgb, var(--card) 85%, transparent); padding: 8px; border-radius: 4px;">`;
+                    html += `<div style="color: var(--accent); font-weight: 600; margin-bottom: 4px;">${battle.modelB}</div>`;
                     html += `<div>Predicted: ${battle.predicted.modelB.tempMax?.toFixed(1) || '?'}° / ${battle.predicted.modelB.tempMin?.toFixed(1) || '?'}° | ${battle.predicted.modelB.precip?.toFixed(1) || '0'}mm</div>`;
-                    html += `<div style="color: #718096; font-size: 0.8rem;">`;
+                    html += `<div style="color: var(--subtext); font-size: 0.8rem;">`;
                     html += `Error: ${battle.errors.modelB.tempMax !== null ? '±' + battle.errors.modelB.tempMax.toFixed(1) + '°' : '—'} / `;
                     html += `${battle.errors.modelB.tempMin !== null ? '±' + battle.errors.modelB.tempMin.toFixed(1) + '°' : '—'} | `;
                     html += `${battle.errors.modelB.precip !== null ? '±' + battle.errors.modelB.precip.toFixed(1) + 'mm' : '—'}`;
@@ -1215,10 +1219,10 @@ const UI = (() => {
             } catch (error) {
                 console.error('Failed to render battle history:', error);
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 30px; color: #c53030;">
+                    <div style="text-align: center; padding: 30px; color: var(--accent);">
                         <div style="font-size: 1.5rem; margin-bottom: 10px;">⚠️</div>
                         <div>Failed to load battle history</div>
-                        <div style="font-size: 0.85rem; margin-top: 8px; color: #718096;">${error.message}</div>
+                        <div style="font-size: 0.85rem; margin-top: 8px; color: var(--subtext);">${error.message}</div>
                     </div>
                 `;
             }

@@ -116,8 +116,8 @@ const Education = (() => {
                 <span id="lesson-title" style="flex: 1; margin-left: 10px;" data-i18n="ui.education">Understanding Weather & Risk</span>
                 <button id="lesson-cycle-btn" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0;" data-i18n-title="education.nextLesson" title="Show next lesson">→</button>
             </div>
-            <p id="lesson-content" style="font-size: 0.95rem; color: #444; line-height: 1.6; margin: 0;" data-i18n="ui.loadingLesson">Loading lesson...</p>
-            <div style="font-size: 0.8rem; color: #4a5568; margin-top: 12px; text-align: right;">
+            <p id="lesson-content" class="lesson-content" style="font-size: 0.95rem; line-height: 1.6; margin: 0;" data-i18n="ui.loadingLesson">Loading lesson...</p>
+            <div style="font-size: 0.8rem; color: var(--subtext); margin-top: 12px; text-align: right;">
                 <span id="lesson-counter">-- / --</span>
             </div>
         `;

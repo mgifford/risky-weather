@@ -735,7 +735,7 @@ const App = (() => {
             // Show placeholder in stripes area
             const stripesEl = document.getElementById('stripes');
             if (stripesEl) {
-                stripesEl.innerHTML = '<div style="text-align: center; color: #999; padding: 10px; font-size: 0.85rem;">Historical climate data unavailable (may be rate-limited)</div>';
+                stripesEl.innerHTML = '<div style="text-align: center; color: var(--subtext); padding: 10px; font-size: 0.85rem;">Historical climate data unavailable (may be rate-limited)</div>';
             }
         }
     }

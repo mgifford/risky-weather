@@ -14,7 +14,7 @@ const Stripes = (() => {
         // Initial HTML structure
         container.innerHTML = `
             <div class="card-title"><h2 style="margin:0;" data-i18n="ui.climateContext">🌍 Climate Context</h2></div>
-            <p style="font-size: 0.9rem; color: #2d3748;" data-i18n="stripes.description">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
+            <p style="font-size: 0.9rem; color: var(--text);" data-i18n="stripes.description">Annual temperature deviation (1950-2023). <br><strong>Blue</strong> = Cooler than normal. <strong>Red</strong> = Warmer.</p>
             <div id="stripes-viz" class="stripes-wrap"></div>
             <div class="legend"><span data-i18n="stripes.start">1950</span><span data-i18n="stripes.end">2023</span></div>
             <button id="load-stripes-btn" class="secondary-btn" style="margin-top: 10px;">Load Stripes</button>
@@ -90,7 +90,7 @@ const Stripes = (() => {
     function renderViz(container, annualMeans, baseline) {
         container.innerHTML = '';
         if (!annualMeans || annualMeans.length === 0) {
-            container.innerHTML = '<div style="text-align: center; color: #999; padding: 10px;">No historical data available</div>';
+            container.innerHTML = '<div style="text-align: center; color: var(--subtext); padding: 10px;">No historical data available</div>';
             return;
         }
 

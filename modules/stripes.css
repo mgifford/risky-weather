@@ -1,7 +1,7 @@
 /* STRIPES STYLING */
 .stripes-wrap { height: 40px; display: flex; width: 100%; border-radius: 6px; overflow: hidden; margin: 10px 0; }
 .stripe { flex: 1; height: 100%; }
-.legend { display: flex; justify-content: space-between; font-size: 0.85rem; color: #4a5568; }
+.legend { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--subtext); }
 
 .stripes-container {
     display: flex;
@@ -10,7 +10,7 @@
     margin: 20px 0;
     border-radius: 4px;
     overflow: hidden;
-    background: #eee;
+    background: color-mix(in srgb, var(--card) 90%, transparent);
     align-items: center;
     justify-content: center;
 }
@@ -25,7 +25,7 @@
 .gradient-bar {
     flex-grow: 1;
     height: 4px;
-    background: linear-gradient(to right, #08306b, #c6dbef, #f7f7f7, #fee0d2, #a50f15);
+    background: linear-gradient(to right, color-mix(in srgb, var(--highlight) 80%, transparent), color-mix(in srgb, var(--card) 70%, transparent), color-mix(in srgb, var(--card) 90%, transparent), color-mix(in srgb, var(--accent) 20%, transparent), color-mix(in srgb, var(--accent) 90%, transparent));
     margin: 8px 10px 0 10px;
     border-radius: 2px;
 }

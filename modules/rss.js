@@ -85,10 +85,10 @@ const RSS = (() => {
         container.innerHTML = `
             <div class="card-title">
                 <h2 style="margin:0;">📰 Climate News</h2>
-                <span style="font-size: 0.8rem; color: #718096; font-weight: normal;">via ${feedConfig.name}</span>
+                <span style="font-size: 0.8rem; color: #657286; font-weight: normal;">via ${feedConfig.name}</span>
             </div>
             <div id="rss-content" style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: #718096;">Loading news...</span>
+                <span style="color: #657286;">Loading news...</span>
             </div>
         `;
 
@@ -96,14 +96,14 @@ const RSS = (() => {
         const contentDiv = container.querySelector('#rss-content');
 
         if (!xml) {
-            contentDiv.innerHTML = `<div style="text-align: center; color: #c53030;">Unable to load news feed.</div>`;
+            contentDiv.innerHTML = `<div style="text-align: center; color: var(--accent);">Unable to load news feed.</div>`;
             return;
         }
 
         const items = parseItems(xml);
         
         if (items.length === 0) {
-            contentDiv.innerHTML = `<div style="text-align: center; color: #718096;">No recent news found.</div>`;
+            contentDiv.innerHTML = `<div style="text-align: center; color: #657286;">No recent news found.</div>`;
             return;
         }
 
@@ -111,11 +111,11 @@ const RSS = (() => {
         items.forEach(item => {
             html += `
                 <li style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #edf2f7;">
-                    <a href="${item.link}" target="_blank" style="text-decoration: none; color: #2d3748; font-weight: 600; display: block; margin-bottom: 4px;">
+                    <a href="${item.link}" target="_blank" style="text-decoration: none; color: var(--text); font-weight: 600; display: block; margin-bottom: 4px;">
                         ${item.title}
                     </a>
-                    <div style="font-size: 0.75rem; color: #718096;">
-                        ${item.date} • <a href="${item.link}" target="_blank" style="color: #1e3a8a;">Read more &rarr;</a>
+                    <div style="font-size: 0.75rem; color: var(--subtext);">
+                        ${item.date} • <a href="${item.link}" target="_blank" style="color: var(--highlight);">Read more &rarr;</a>
                     </div>
                 </li>
             `;
@@ -125,7 +125,7 @@ const RSS = (() => {
         // Add "More from source" link
         html += `
             <div style="text-align: right; margin-top: 10px; font-size: 0.8rem;">
-                <a href="${feedConfig.url.replace('/feed/', '').replace('/rss.xml', '')}" target="_blank" style="color: #718096; text-decoration: underline;">
+                <a href="${feedConfig.url.replace('/feed/', '').replace('/rss.xml', '')}" target="_blank" style="color: var(--highlight); text-decoration: underline;">
                     More from ${feedConfig.name}
                 </a>
             </div>
