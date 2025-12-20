@@ -15,11 +15,11 @@ const CarbonLive = (() => {
                 <h2 style="margin:0;">Carbon Budget: Time to 1.5°C</h2>
             </div>
             <div style="text-align: center; padding: 20px 0;">
-                <div id="carbon-live-countdown" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1.2rem; font-weight: 600; color: #c53030; line-height: 1.5;">
+                <div id="carbon-live-countdown" class="carbon-live-countdown" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1.2rem; font-weight: 600; line-height: 1.5;">
                     Loading...
                 </div>
                 <div style="margin-top: 15px; font-size: 0.85rem;">
-                    <a href="https://climateclock.net/" target="_blank" style="color: #1e3a8a; text-decoration: none;">Source: Climate Clock (MCC/IPCC 2025)</a>
+                    <a href="https://climateclock.net/" target="_blank" class="carbon-live-ref" style="text-decoration: none;">Source: Climate Clock (MCC/IPCC 2025)</a>
                 </div>
             </div>
         `;

@@ -58,12 +58,24 @@ function applyTheme(theme) {
     const root = document.documentElement;
     if (theme === 'dark') {
         root.setAttribute('data-theme', 'dark');
+        document.body.classList.add('dark-theme');
         document.getElementById('btn-dark').setAttribute('aria-pressed', 'true');
         document.getElementById('btn-light').setAttribute('aria-pressed', 'false');
+        // Show the sun (action to switch to light), hide the moon
+        const bl = document.getElementById('btn-light');
+        const bd = document.getElementById('btn-dark');
+        if (bl) { bl.style.display = 'inline-block'; bl.title = 'Switch to light mode'; bl.setAttribute('aria-label','Switch to light mode'); }
+        if (bd) { bd.style.display = 'none'; bd.title = 'Dark mode (active)'; bd.setAttribute('aria-label','Dark mode (active)'); }
     } else {
         root.removeAttribute('data-theme');
+        document.body.classList.remove('dark-theme');
         document.getElementById('btn-light').setAttribute('aria-pressed', 'true');
         document.getElementById('btn-dark').setAttribute('aria-pressed', 'false');
+        // Show the moon (action to switch to dark), hide the sun
+        const bl = document.getElementById('btn-light');
+        const bd = document.getElementById('btn-dark');
+        if (bd) { bd.style.display = 'inline-block'; bd.title = 'Switch to dark mode'; bd.setAttribute('aria-label','Switch to dark mode'); }
+        if (bl) { bl.style.display = 'none'; bl.title = 'Light mode (active)'; bl.setAttribute('aria-label','Light mode (active)'); }
     }
 }
 

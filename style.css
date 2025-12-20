@@ -11,13 +11,179 @@
 }
 
 /* Dark theme variables applied when `data-theme="dark"` on the root */
-html[data-theme="dark"] {
+html[data-theme="dark"], body.dark-theme {
     --bg: #0f1724;
     --card: #0b1220;
     --text: #e6eef8;
     --subtext: #cbd5e1;
     --highlight: #9bd3ff;
     --highlight-strong: #6ec1ff;
+    --accent: #ff4d4d; /* accessible red for dark mode */
+}
+
+/* Ensure external/footer links in dark mode meet contrast requirements */
+html[data-theme="dark"] footer a,
+html[data-theme="dark"] a[rel="noopener"][target="_blank"],
+html[data-theme="dark"] a[href$="ACCESSIBILITY.md"] {
+    color: var(--text) !important;
+}
+
+/* Targeted dark-mode adjustments to fix small/text contrast issues reported by Accessibility Insights */
+html[data-theme="dark"] .debug-label,
+body.dark-theme .debug-label,
+html[data-theme="dark"] #storage-display,
+body.dark-theme #storage-display {
+    color: #7385a3; /* meets 4.8:1 vs --bg */
+}
+
+/* Small muted text used across the UI */
+html[data-theme="dark"] .muted, body.dark-theme .muted,
+html[data-theme="dark"] .debug-info .debug-info-line span,
+html[data-theme="dark"] .info-box-title,
+body.dark-theme .muted {
+    color: #7385a3; /* accessible subtext color */
+}
+
+/* Temperature / key numeric values need stronger contrast in dark mode */
+html[data-theme="dark"] .temp-val, body.dark-theme .temp-val {
+    color: #6f86a6; /* adjusted for >=4.5:1 contrast vs dark bg */
+}
+
+/* Column day labels */
+html[data-theme="dark"] .col-day, body.dark-theme .col-day {
+    color: #6e7f9c; /* meets 4.6:1 on dark bg */
+}
+
+/* Muted details (wind, small measurements) */
+html[data-theme="dark"] .small-muted, body.dark-theme .small-muted,
+html[data-theme="dark"] .forecast-table td div[style], body.dark-theme .forecast-table td div[style] {
+    color: #808080; /* neutral grey with sufficient contrast */
+}
+
+/* Historical normals / record highlight corrections */
+html[data-theme="dark"] #historical-normals-content span, body.dark-theme #historical-normals-content span {
+    color: #6680ae;
+}
+
+/* Education lesson content: ensure sufficient contrast for paragraph text and small counter */
+html[data-theme="dark"] #lesson-content, body.dark-theme #lesson-content,
+html[data-theme="dark"] .lesson-content, body.dark-theme .lesson-content {
+    color: #d7e6fa; /* lightened text for body of lesson to meet 4.5:1 */
+}
+
+html[data-theme="dark"] #lesson-counter, body.dark-theme #lesson-counter {
+    color: #b9c9e0; /* slightly stronger subtext for small counter to meet 4.5:1 */
+}
+
+/* ECCC / external data links in dark mode - use highlight-strong if suitable */
+html[data-theme="dark"] a[rel~="noopener"], body.dark-theme a[rel~="noopener"] {
+    color: var(--highlight-strong);
+}
+
+/* Warming section: ensure small labels and external link meet contrast in dark mode */
+html[data-theme="dark"] #warming-section div[style], body.dark-theme #warming-section div[style] {
+    color: #6e7f9c !important;
+}
+
+html[data-theme="dark"] #warming-section a, body.dark-theme #warming-section a {
+    color: #3474ff !important; /* meets 4.5:1 on dark bg */
+}
+
+/* CAT (Climate Action Tracker) dark-mode adjustments */
+html[data-theme="dark"] #cat-section div[style], body.dark-theme #cat-section div[style] {
+    color: #6680ae; /* meets contrast for body text */
+}
+
+/* CAT message and rating elements use classes instead of inline colors so
+   theme overrides can control contrast reliably. */
+.cat-message { color: var(--text); }
+.cat-rating { font-weight: bold; font-size: 1.4rem; text-transform: uppercase; }
+
+/* Rating variants (light theme defaults) */
+.cat-rating.critically { color: #111827; } /* near-black for light themes */
+.cat-rating.highly { color: #c53030; }
+.cat-rating.insufficient { color: #c05621; }
+.cat-rating.almost { color: #975a16; }
+.cat-rating.compatible { color: #276749; }
+
+/* Dark-mode overrides for message and ratings */
+html[data-theme="dark"] .cat-message, body.dark-theme .cat-message {
+    color: #6680ae;
+}
+
+html[data-theme="dark"] .cat-rating.critically, body.dark-theme .cat-rating.critically {
+    color: #e6eef8; /* light text to be readable on dark bg */
+}
+html[data-theme="dark"] .cat-rating.highly, body.dark-theme .cat-rating.highly { color: #ff7b7b; }
+html[data-theme="dark"] .cat-rating.insufficient, body.dark-theme .cat-rating.insufficient { color: #ffb37b; }
+html[data-theme="dark"] .cat-rating.almost, body.dark-theme .cat-rating.almost { color: #ffd88a; }
+html[data-theme="dark"] .cat-rating.compatible, body.dark-theme .cat-rating.compatible { color: #7dd3a6; }
+
+/* RSS feed links: ensure high contrast in dark mode */
+html[data-theme="dark"] #rss-section a[target="_blank"], body.dark-theme #rss-section a[target="_blank"] {
+    color: #6680ae !important; /* title links */
+}
+
+html[data-theme="dark"] #rss-section a[style*="Read more"], body.dark-theme #rss-section a[style*="Read more"] {
+    color: #3474ff !important; /* explicit Read more links */
+}
+
+html[data-theme="dark"] #rss-section div[style] a, body.dark-theme #rss-section div[style] a {
+    color: #3474ff !important;
+}
+
+/* Carbon section: ensure countdown and reference link are readable in dark mode */
+html[data-theme="dark"] #carbon-countdown, body.dark-theme #carbon-countdown {
+    color: #6680ae;
+}
+
+html[data-theme="dark"] #carbon-section a, body.dark-theme #carbon-section a {
+    color: #6e7f9c;
+}
+
+/* Use class-based selectors to override inline styles more reliably */
+.carbon-countdown { color: var(--text); }
+.carbon-ref-link { color: var(--subtext); }
+
+html[data-theme="dark"] .carbon-countdown, body.dark-theme .carbon-countdown {
+    color: #6680ae; /* meets ~4.7:1 against --card (#0b1220) */
+}
+
+html[data-theme="dark"] .carbon-ref-link, body.dark-theme .carbon-ref-link {
+    color: #6e7f9c; /* meets ~4.6:1 for small reference text */
+}
+
+/* Carbon Live countdown (uses var(--accent) in light mode) */
+.carbon-live-countdown { color: var(--accent); }
+.carbon-live-ref { color: var(--highlight); }
+
+/* Dark mode overrides for Carbon Live to ensure accessible contrast */
+html[data-theme="dark"] .carbon-live-countdown, body.dark-theme .carbon-live-countdown {
+    color: #ed3838; /* meets ~4.66:1 vs dark card */
+}
+html[data-theme="dark"] .carbon-live-ref, body.dark-theme .carbon-live-ref {
+    color: #3474ff; /* meets ~4.54:1 for small link text */
+}
+
+/* Defensive overrides if inline styles are present (force accessible dark-mode colors) */
+#carbon-countdown[style], .carbon-countdown[style] {
+    color: #6680ae !important;
+}
+
+a[href$="climateclock.net/"][style], .carbon-live-ref[style], .carbon-ref-link[style] {
+    color: #6e7f9c !important;
+}
+
+/* History share button in dark mode - improve background for white text contrast */
+html[data-theme="dark"] #history-share-btn, body.dark-theme #history-share-btn,
+html[data-theme="dark"] .btn-history-share, body.dark-theme .btn-history-share {
+    background: #075f8f; /* adjusted to reach sufficient contrast with white text */
+    color: #ffffff;
+}
+
+/* Secondary buttons (reset/refresh/view cache/share) - ensure contrast */
+html[data-theme="dark"] .secondary-btn, body.dark-theme .secondary-btn {
+    color: #6680ae;
 }
 
 /* Theme toggle buttons */
@@ -33,6 +199,40 @@ html[data-theme="dark"] {
 .theme-btn[aria-pressed="true"] {
     background: rgba(0,0,0,0.06);
 }
+
+/* Dark-mode component overrides for elements that used hard-coded colors */
+html[data-theme="dark"] body, body.dark-theme {
+    background: var(--bg);
+    color: var(--text);
+}
+
+html[data-theme="dark"] .card, body.dark-theme .card {
+    background: var(--card);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+html[data-theme="dark"] header, body.dark-theme header {
+    color: var(--text);
+}
+
+html[data-theme="dark"] .location-badge, body.dark-theme .location-badge {
+    background: rgba(255,255,255,0.02);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.06);
+}
+
+html[data-theme="dark"] .divider, body.dark-theme .divider { background: rgba(255,255,255,0.04); }
+html[data-theme="dark"] .card-title, body.dark-theme .card-title { border-bottom-color: rgba(255,255,255,0.03); }
+html[data-theme="dark"] .forecast-table td, body.dark-theme .forecast-table td { border-bottom-color: rgba(255,255,255,0.03); }
+html[data-theme="dark"] .language-toggle, body.dark-theme .language-toggle { border-color: rgba(255,255,255,0.06); color: var(--text); }
+html[data-theme="dark"] .official-link, body.dark-theme .official-link { color: #fff; }
+
+/* Make the active theme button more visible in both themes */
+.theme-btn[aria-pressed="true"] {
+    background: var(--highlight-strong, rgba(0,0,0,0.1));
+    border-color: rgba(0,0,0,0.12);
+}
+
 
 
 body {
@@ -54,7 +254,7 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
 
 .language-toggle {
     background: none;
-    border: 1px solid #cbd5e0;
+    border: 1px solid color-mix(in srgb, var(--subtext) 36%, transparent);
     padding: 8px 12px;
     border-radius: 8px;
     cursor: pointer;
@@ -64,20 +264,20 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
     min-width: 50px;
 }
 .language-toggle:hover {
-    background: #edf2f7;
-    border-color: #a0aec0;
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    border-color: color-mix(in srgb, var(--subtext) 36%, transparent);
 }
 
 .location-badge {
-    background: #e2e8f0;
+    background: color-mix(in srgb, var(--card) 96%, transparent);
     padding: 6px 16px;
     border-radius: 20px;
     display: inline-block;
     margin-top: 10px;
     font-weight: 600;
     font-size: 0.9rem;
-    color: #2d3748;
-    border: 1px solid #cbd5e0;
+    color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--subtext) 36%, transparent);
 }
 
 /* CARDS */
@@ -97,7 +297,7 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #edf2f7;
+    border-bottom: 1px solid color-mix(in srgb, var(--card) 80%, transparent);
     padding-bottom: 12px;
     font-size: 1.1rem;
 }
@@ -109,7 +309,7 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
     gap: 10px;
     text-align: center;
 }
-.divider { width: 1px; background: #e2e8f0; height: 100%; }
+.divider { width: 1px; background: color-mix(in srgb, var(--card) 88%, transparent); height: 100%; }
 
 .model-col h3 { font-size: 0.75rem; text-transform: uppercase; margin-bottom: 5px; color: var(--subtext); letter-spacing: 0.5px; }
 .model-val { font-size: 2.5rem; font-weight: 800; line-height: 1; }
@@ -118,11 +318,11 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
 /* 7-DAY TABLE */
 .forecast-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .forecast-table th { text-align: left; color: var(--subtext); padding: 8px 4px; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase;}
-.forecast-table td { padding: 10px 4px; border-bottom: 1px solid #f7fafc; vertical-align: middle; }
-.col-day { width: 15%; font-weight: 600; color: #4a5568; }
+.forecast-table td { padding: 10px 4px; border-bottom: 1px solid color-mix(in srgb, var(--card) 60%, transparent); vertical-align: middle; }
+.col-day { width: 15%; font-weight: 600; color: var(--subtext); }
 .col-model { width: 42%; }
 
-.temp-val { font-weight: 700; color: #2d3748; margin-left: 6px; }
+.temp-val { font-weight: 700; color: var(--text); margin-left: 6px; }
 .rain-pill {
     display: inline-block;
     padding: 2px 6px;
@@ -133,10 +333,10 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
     text-align: center;
 }
 /* Improve pill contrast combinations */
-.rain-none { background: #e2e8f0; color: #2d3748; font-weight: 700; }
-.rain-low { background: #dbeafe; color: #1e3a8a; }
-.rain-med { background: #bfdbfe; color: #1e40af; }
-.rain-high { background: #fecaca; color: #7f1d1d; }
+.rain-none { background: color-mix(in srgb, var(--card) 90%, transparent); color: var(--text); font-weight: 700; }
+.rain-low { background: color-mix(in srgb, var(--highlight) 18%, transparent); color: var(--highlight); }
+.rain-med { background: color-mix(in srgb, var(--highlight) 26%, transparent); color: var(--highlight-strong, var(--highlight)); }
+.rain-high { background: color-mix(in srgb, var(--accent) 14%, transparent); color: #bb2d2d; }
 
 /* LINKS */
 .official-link {
@@ -156,28 +356,28 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
 .official-link:hover { opacity: 0.9; }
 /* Accessible focus styles */
 a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
-    outline: 3px solid #3182ce;
+    outline: 3px solid var(--highlight-strong, #3182ce);
     outline-offset: 2px;
 }
 
 /* REALITY CHECK */
 .winner-banner {
-    background: #c6f6d5;
-    color: #22543d;
+    background: color-mix(in srgb, var(--card) 94%, transparent);
+    color: var(--text);
     padding: 12px;
     border-radius: 8px;
     text-align: center;
     font-weight: 700;
     margin-top: 10px;
-    border: 1px solid #9ae6b4;
+    border: 1px solid color-mix(in srgb, var(--card) 88%, transparent);
 }
 
 /* SCOREBOARD */
 .scoreboard {
     display: flex;
     justify-content: space-around;
-    background: #2d3748;
-    color: white;
+    background: var(--text);
+    color: var(--card);
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 20px;
@@ -190,12 +390,42 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
 .secondary-btn {
     background: none;
     border: none;
-    color: #2d3748;
+    color: var(--text);
     text-decoration: underline;
     cursor: pointer;
     font-size: 0.85rem;
     margin-top: 20px;
 }
+
+/* History share button: higher contrast for light mode and accessible focus */
+.btn-history-share {
+    background: #0c7bb3; /* adjusted to ensure white text meets 4.5:1 */
+    color: #ffffff;
+    border: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+/* Ensure inline styles don't accidentally set low-contrast background on this share button */
+#history-share-btn[style], .btn-history-share[style] {
+    background: #0c7bb3 !important;
+    color: #ffffff !important;
+}
+.btn-history-share, #history-share-btn {
+    background: #0c7bb3 !important;
+    color: #ffffff !important;
+}
+.btn-history-share:hover {
+    background: var(--highlight-strong, color-mix(in srgb, var(--highlight) 80%, transparent));
+}
+.btn-history-share:focus {
+    outline: 3px solid color-mix(in srgb, var(--highlight) 36%, transparent);
+    outline-offset: 2px;
+}
+
+/* (consolidated) Dark theme override for share button already set above; ensure no conflicting rules remain */
 
 /* STATUS LOG (Debug) */
 #status-log {
@@ -213,20 +443,20 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
 /* DEBUG INFO */
 .debug-info {
     font-size: 0.75rem;
-    color: #4a5568;
+    color: var(--subtext);
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid #edf2f7;
+    border-top: 1px solid color-mix(in srgb, var(--card) 80%, transparent);
     text-align: center;
 }
-/* Ensure storage display meets contrast */
-#storage-display { color: #2d3748; }
+/* Ensure storage display meets contrast and is theme-aware */
+#storage-display { color: var(--subtext); }
 .debug-info-line {
     margin: 2px 0;
 }
 .debug-label {
     font-weight: 600;
-    color: #4a5568;
+    color: var(--subtext);
 }
 
 /* UNCERTAINTY INDICATORS */
@@ -238,8 +468,8 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
 }
 
 .info-box {
-    background: #edf2f7;
-    border-left: 4px solid #3182ce;
+    background: var(--card);
+    border-left: 4px solid var(--highlight);
     padding: 12px 16px;
     margin: 16px 0;
     border-radius: 6px;
@@ -248,14 +478,14 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
 }
 
 .info-box-warning {
-    background: #fffaf0;
-    border-left-color: #ed8936;
+    background: color-mix(in srgb, var(--card) 96%, transparent);
+    border-left-color: var(--accent);
 }
 
 .info-box-title {
     font-weight: 700;
     margin-bottom: 6px;
-    color: #2d3748;
+    color: var(--text);
 }
 
 /* RAIN PROBABILITY LEGEND */
@@ -266,7 +496,7 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
     font-size: 0.8rem;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid #edf2f7;
+    border-top: 1px solid color-mix(in srgb, var(--card) 80%, transparent);
     justify-content: center;
 }
 .rain-legend-item {
@@ -282,6 +512,12 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
     font-size: 0.7rem;
     min-width: 30px;
     text-align: center;
+}
+
+/* Restore accent color for rain-high in dark mode so it uses --accent (bright red) */
+html[data-theme="dark"] .rain-high, body.dark-theme .rain-high {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 /* Bluesky Links */

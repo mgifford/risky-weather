@@ -27,8 +27,8 @@
             <div style="display:flex; gap:8px; align-items:center;">
                 <button id="language-toggle-btn" class="language-toggle" title="Toggle language" aria-label="Toggle language"></button>
                 <div id="theme-toggle" aria-label="Toggle theme" role="group" style="display:flex; gap:6px; align-items:center;">
-                    <button id="btn-light" class="theme-btn" title="Light mode" aria-label="Light mode">☀️</button>
-                    <button id="btn-dark" class="theme-btn" title="Dark mode" aria-label="Dark mode">🌙</button>
+                    <button id="btn-light" class="theme-btn" title="Light mode" aria-label="Light mode" onclick="(function(){ document.body.classList.remove('dark-theme'); document.documentElement.removeAttribute('data-theme'); localStorage.setItem('preferred-theme','light'); document.getElementById('btn-light')?.setAttribute('aria-pressed','true'); document.getElementById('btn-dark')?.setAttribute('aria-pressed','false'); })()">☀️</button>
+                    <button id="btn-dark" class="theme-btn" title="Dark mode" aria-label="Dark mode" onclick="(function(){ document.body.classList.add('dark-theme'); document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('preferred-theme','dark'); document.getElementById('btn-dark')?.setAttribute('aria-pressed','true'); document.getElementById('btn-light')?.setAttribute('aria-pressed','false'); })()">🌙</button>
                 </div>
             </div>
         </div>
@@ -43,10 +43,10 @@
                 placeholder="Search for a city..."
                 data-i18n-placeholder="ui.searchCity"
                 role="combobox" aria-autocomplete="list" aria-controls="city-search-results" aria-expanded="false"
-                style="width: 100%; padding: 10px 40px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem;"
+                style="width: 100%; padding: 10px 40px 10px 12px; border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-radius: 8px; font-size: 0.95rem;"
             />
-            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #a0aec0; pointer-events: none;">🔍</span>
-            <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--subtext); pointer-events: none;">🔍</span>
+            <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
         </div>
         
         <div class="debug-info">
@@ -64,14 +64,14 @@
         <section id="scoreboard-section" class="card hidden">
             <div class="card-title">
                 <h2 style="margin:0; font-size:1.1rem;" data-i18n="ui.scoreboard">🏆 Model Scoreboard</h2>
-                <span style="font-size:0.75rem; font-weight:400; color:#718096;"><span data-i18n="ui.winsSince">Wins since</span> <span id="start-date">--</span></span>
+                <span style="font-size:0.75rem; font-weight:400; color:var(--subtext);"><span data-i18n="ui.winsSince">Wins since</span> <span id="start-date">--</span></span>
             </div>
             <div class="scoreboard">
                 <div class="score-box">
                     <div class="score-val" id="score-a">0</div>
                     <div class="score-label" id="score-label-a">Model A</div>
                 </div>
-                <div style="align-self:center; color:#718096; font-weight:900;" data-i18n="ui.versus">vs</div>
+                <div style="align-self:center; color:var(--subtext); font-weight:900;" data-i18n="ui.versus">vs</div>
                 <div class="score-box">
                     <div class="score-val" id="score-b">0</div>
                     <div class="score-label" id="score-label-b">Model B</div>
@@ -131,7 +131,7 @@
                 </tbody>
             </table>
             <div style="margin-top: 16px;">
-                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: #2d3748;" data-i18n="rain.legendTitle">Chance of precipitation</div>
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; color: var(--text);" data-i18n="rain.legendTitle">Chance of precipitation</div>
                 <div class="rain-legend">
                     <div class="rain-legend-item">
                         <span class="rain-legend-pill rain-none">0-29%</span>
@@ -155,14 +155,13 @@
 
         <section class="card" id="model-disagreement">
             <details>
-                <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">
-                    <a href="#model-disagreement" style="text-decoration: none; color: inherit;">
-                        <span data-i18n="ui.uncertaintyTitle">🎯 Understanding Model Disagreement</span>
-                    </a>
-                </summary>
+                <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">🎯 Understanding Model Disagreement</summary>
+                <div style="margin-top:6px; font-size:0.85rem;">
+                    <a href="#model-disagreement" style="text-decoration: none; color: inherit; display:inline-block;">Jump to section</a>
+                </div>
                 <div style="margin-top: 12px;">
                     <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.</p>
-                    <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: #555;">
+                    <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: var(--subtext);">
                         • <strong>Temperature difference &gt;5°C:</strong> Plan for a wide range<br>
                         • <strong>Rain difference &gt;30%:</strong> One model sees rain, another doesn't<br>
                         • <strong>Models agree closely:</strong> High confidence forecast
@@ -196,7 +195,7 @@
                     <span data-i18n="ui.historyTitle">📜 On This Day in Climate History</span>
                 </a>
             </div>
-            <div id="history-content" style="font-size: 0.9rem; color: #2d3748;"></div>
+            <div id="history-content" style="font-size: 0.9rem; color: var(--text);"></div>
         </section>
 
         <!-- Random Sections Container -->
@@ -207,22 +206,22 @@
         <button id="view-cache-btn" class="secondary-btn" data-i18n="ui.viewCache" style="margin-left: 10px;">📋 View Cache</button>
         <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
     
-        <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid #e2e8f0;">
-            <p style="font-size: 0.85rem; color: #4a5568; margin: 0 0 8px 0;">
-                <strong style="color:#2d3748;">Data Sources:</strong> 
-                <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">Open-Meteo API</a> • 
-                <a href="https://ipwho.is/" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">IPWho.is</a>
+        <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid color-mix(in srgb, var(--card) 80%, transparent);">
+            <p style="font-size: 0.85rem; color: var(--subtext); margin: 0 0 8px 0;">
+                <strong style="color:var(--text);">Data Sources:</strong> 
+                <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Open-Meteo API</a> • 
+                <a href="https://ipwho.is/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">IPWho.is</a>
             </p>
-            <p style="font-size: 0.85rem; color: #4a5568; margin: 8px 0 0 0;">
-                <a href="https://github.com/mgifford/risky-weather" target="_blank" rel="noopener" style="color: #1e3a8a; text-decoration: underline;">
+            <p style="font-size: 0.85rem; color: var(--subtext); margin: 8px 0 0 0;">
+                <a href="https://github.com/mgifford/risky-weather" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">
                     <svg style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                     </svg>
                     View on GitHub
                 </a>
             </p>
-            <p style="font-size: 0.85rem; color: #4a5568; margin: 8px 0 0 0;">
-                <a href="ACCESSIBILITY.md" target="_blank" style="color: #1e3a8a; text-decoration: underline;">Accessibility Statement</a>
+            <p style="font-size: 0.85rem; color: var(--subtext); margin: 8px 0 0 0;">
+                <a href="ACCESSIBILITY.md" target="_blank" style="color: inherit; text-decoration: underline;">Accessibility Statement</a>
             </p>
 
             <!-- Bluesky Footer -->
@@ -243,12 +242,12 @@
 
     <!-- Cache Inspector Modal -->
     <div id="cache-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow: auto;">
-        <div role="dialog" aria-modal="true" aria-labelledby="cache-modal-title" style="background: white; max-width: 700px; margin: 50px auto; padding: 30px; border-radius: 12px; max-height: 80vh; overflow-y: auto;">
+            <div role="dialog" aria-modal="true" aria-labelledby="cache-modal-title" style="background: var(--card); max-width: 700px; margin: 50px auto; padding: 30px; border-radius: 12px; max-height: 80vh; overflow-y: auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 id="cache-modal-title" style="margin: 0; font-size: 1.3rem;">📋 Cache Inspector</h2>
                 <button id="close-cache-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">✕</button>
             </div>
-            <div id="cache-content" style="font-family: monospace; font-size: 0.85rem; line-height: 1.6; color: #2d3748;">
+            <div id="cache-content" style="font-family: monospace; font-size: 0.85rem; line-height: 1.6; color: var(--text);">
                 Loading cache...
             </div>
         </div>
@@ -287,6 +286,60 @@
         UI.onCacheInspector(() => {
             console.log('Cache Inspector opened');
         });
+
+        // Theme: initialize and bind toggle buttons here so theme works even
+        // if separate script files aren't loaded.
+        (function(){
+            const root = document.documentElement;
+            function applyTheme(theme){
+                if(theme === 'dark'){
+                    root.setAttribute('data-theme','dark');
+                    document.body.classList.add('dark-theme');
+                    document.getElementById('btn-dark')?.setAttribute('aria-pressed','true');
+                    document.getElementById('btn-light')?.setAttribute('aria-pressed','false');
+                    const __btn_light = document.getElementById('btn-light');
+                    if (__btn_light) __btn_light.style.display = 'inline-block';
+                    document.getElementById('btn-light')?.setAttribute('aria-label','Switch to light mode');
+                    const __btn_dark = document.getElementById('btn-dark');
+                    if (__btn_dark) __btn_dark.style.display = 'none';
+                } else {
+                    root.removeAttribute('data-theme');
+                    document.body.classList.remove('dark-theme');
+                    document.getElementById('btn-light')?.setAttribute('aria-pressed','true');
+                    document.getElementById('btn-dark')?.setAttribute('aria-pressed','false');
+                    const __btn_dark = document.getElementById('btn-dark');
+                    if (__btn_dark) __btn_dark.style.display = 'inline-block';
+                    document.getElementById('btn-dark')?.setAttribute('aria-label','Switch to dark mode');
+                    const __btn_light = document.getElementById('btn-light');
+                    if (__btn_light) __btn_light.style.display = 'none';
+                }
+            }
+
+            function initTheme(){
+                const saved = localStorage.getItem('preferred-theme');
+                if(saved === 'dark' || saved === 'light'){
+                    applyTheme(saved);
+                    return;
+                }
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applyTheme(prefersDark ? 'dark' : 'light');
+                window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    const stillSaved = localStorage.getItem('preferred-theme');
+                    if(!stillSaved) applyTheme(e.matches ? 'dark' : 'light');
+                });
+            }
+
+            // Run immediately (buttons exist before this script) and also
+            // keep the listener for completeness.
+            try { initTheme(); } catch(e) { console.warn('initTheme failed', e); }
+            const btnLight = document.getElementById('btn-light');
+            const btnDark = document.getElementById('btn-dark');
+            if (btnLight) btnLight.addEventListener('click', () => { applyTheme('light'); localStorage.setItem('preferred-theme','light'); });
+            if (btnDark) btnDark.addEventListener('click', () => { applyTheme('dark'); localStorage.setItem('preferred-theme','dark'); });
+            document.addEventListener('DOMContentLoaded', () => {
+                initTheme();
+            });
+        })();
 
         App.init();
     </script>

@@ -117,14 +117,14 @@ const CAT = (() => {
     }
 
     function getRatingColor(rating) {
-        if (!rating) return '#718096';
+        if (!rating) return 'var(--subtext)';
         const r = rating.toUpperCase();
         if (r.includes('CRITICALLY')) return '#000000'; // Black/Grey
         if (r.includes('HIGHLY INSUFFICIENT')) return '#c53030'; // Red
         if (r.includes('INSUFFICIENT')) return '#c05621'; // Dark Orange (AA Compliant)
         if (r.includes('ALMOST')) return '#975a16'; // Dark Gold (AA Compliant)
         if (r.includes('COMPATIBLE')) return '#276749'; // Dark Green (AA Compliant)
-        return '#718096';
+        return '#657286';
     }
 
     async function render(containerId, countryName) {
@@ -145,19 +145,19 @@ const CAT = (() => {
                 <h2 style="margin:0;">Climate Action Tracker</h2>
             </div>
             <div style="text-align: center; padding: 20px 0;">
-                <div style="font-size: 1.1rem; margin-bottom: 15px; color: #2d3748;">
+                <div class="cat-message" style="font-size: 1.1rem; margin-bottom: 15px;">
                     ${message}
                 </div>
                 
                 ${isSpecificCountry ? `
                 <div id="cat-rating-container" style="margin-bottom: 15px; min-height: 30px;">
-                    <span style="color: #718096; font-size: 0.9rem;">Loading rating...</span>
+                    <span class="muted" style="font-size: 0.9rem;">Loading rating...</span>
                 </div>
                 ` : ''}
 
                 <a href="${url}" target="_blank" style="
                     display: inline-block;
-                    background-color: #1e3a8a;
+                    background-color: var(--highlight);
                     color: white;
                     padding: 12px 24px;
                     border-radius: 6px;
@@ -165,10 +165,10 @@ const CAT = (() => {
                     font-weight: 600;
                     transition: background-color 0.2s;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                " onmouseover="this.style.backgroundColor='#1a365d'" onmouseout="this.style.backgroundColor='#1e3a8a'">
+                " onmouseover="this.style.backgroundColor=getComputedStyle(document.documentElement).getPropertyValue('--highlight-strong') || getComputedStyle(document.documentElement).getPropertyValue('--highlight')" onmouseout="this.style.backgroundColor=getComputedStyle(document.documentElement).getPropertyValue('--highlight')">
                     View Full Analysis
                 </a>
-                <div style="margin-top: 15px; font-size: 0.85rem; color: #718096;">
+                <div style="margin-top: 15px; font-size: 0.85rem; color: #657286;">
                     Source: Climate Action Tracker
                 </div>
             </div>
@@ -179,15 +179,26 @@ const CAT = (() => {
             const ratingContainer = container.querySelector('#cat-rating-container');
             if (ratingContainer) {
                 if (rating) {
-                    const color = getRatingColor(rating);
+                    // Map rating text to a CSS class so styles (including dark-mode overrides)
+                    // control the color rather than inline styles which are hard to override.
+                    const cls = (function(r) {
+                        const utf = r.toUpperCase();
+                        if (utf.includes('CRITICALLY')) return 'critically';
+                        if (utf.includes('HIGHLY')) return 'highly';
+                        if (utf.includes('INSUFFICIENT')) return 'insufficient';
+                        if (utf.includes('ALMOST')) return 'almost';
+                        if (utf.includes('COMPATIBLE')) return 'compatible';
+                        return 'unknown';
+                    })(rating);
+
                     ratingContainer.innerHTML = `
-                        <div style="font-weight: bold; font-size: 1.4rem; color: ${color}; text-transform: uppercase;">
+                        <div class="cat-rating ${cls}">
                             ${rating}
                         </div>
                     `;
                 } else {
                     ratingContainer.innerHTML = `
-                        <span style="color: #718096; font-size: 0.9rem;">Rating not available</span>
+                        <span class="muted" style="font-size: 0.9rem;">Rating not available</span>
                     `;
                 }
             }

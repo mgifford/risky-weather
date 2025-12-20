@@ -15,14 +15,14 @@ const Warming = (() => {
                 <h2 style="margin:0;">Global Warming Since 1880</h2>
             </div>
             <div style="text-align: center; padding: 20px 0;">
-                <div id="warming-counter" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 2.5rem; font-weight: 700; color: #c53030; line-height: 1.2;">
+                <div id="warming-counter" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1.2;">
                     Loading...
                 </div>
-                <div style="margin-top: 10px; font-size: 0.9rem; color: #4a5568;">
+                <div style="margin-top: 10px; font-size: 0.9rem; color: var(--subtext);">
                     Degrees Celsius (°C)
                 </div>
                 <div style="margin-top: 15px; font-size: 0.85rem;">
-                    <a href="https://climateclock.net/" target="_blank" style="color: #1e3a8a; text-decoration: none;">Source: Climate Clock</a>
+                    <a href="https://climateclock.net/" target="_blank" style="color: var(--highlight); text-decoration: none;">Source: Climate Clock</a>
                 </div>
             </div>
         `;
