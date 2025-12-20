@@ -85,10 +85,10 @@ const RSS = (() => {
         container.innerHTML = `
             <div class="card-title">
                 <h2 style="margin:0;">📰 Climate News</h2>
-                <span style="font-size: 0.8rem; color: #657286; font-weight: normal;">via ${feedConfig.name}</span>
+                <span style="font-size: 0.8rem; color: var(--subtext); font-weight: normal;">via ${feedConfig.name}</span>
             </div>
             <div id="rss-content" style="min-height: 100px; display: flex; align-items: center; justify-content: center;">
-                <span style="color: #657286;">Loading news...</span>
+                <span style="color: var(--subtext);">Loading news...</span>
             </div>
         `;
 
@@ -103,7 +103,7 @@ const RSS = (() => {
         const items = parseItems(xml);
         
         if (items.length === 0) {
-            contentDiv.innerHTML = `<div style="text-align: center; color: #657286;">No recent news found.</div>`;
+            contentDiv.innerHTML = `<div style="text-align: center; color: var(--subtext);">No recent news found.</div>`;
             return;
         }
 
