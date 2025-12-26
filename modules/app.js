@@ -326,9 +326,9 @@ const App = (() => {
         // Parse scenario/debug overrides from URL
         const overrides = Scenario.parseOverrides(window.location.search);
         
-        // Show scenario badge if in test mode
-        if (overrides.scenario || overrides.debug) {
-            const badgeInfo = Scenario.getScenarioModeBadge(overrides);
+        // Show scenario badge only if in test/scenario mode (not for debug-only)
+        const badgeInfo = Scenario.getScenarioModeBadge(overrides);
+        if (badgeInfo) {
             UI.showScenarioBadge(badgeInfo);
         }
 
