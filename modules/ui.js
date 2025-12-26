@@ -1509,7 +1509,12 @@ const UI = (() => {
          * Show scenario mode badge
          */
         showScenarioBadge(badgeInfo) {
-            if (!ELEMENTS.scenarioBadge || !badgeInfo || !badgeInfo.show) return;
+            if (!ELEMENTS.scenarioBadge) return;
+            
+            if (!badgeInfo || !badgeInfo.show) {
+                ELEMENTS.scenarioBadge.style.display = 'none';
+                return;
+            }
 
             ELEMENTS.scenarioBadge.style.display = 'flex';
             ELEMENTS.scenarioBadge.innerHTML = `
