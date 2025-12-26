@@ -99,7 +99,8 @@ const Actions = (() => {
         const dewpoint = overrides.dp_out ?? calculateDewpoint(temp, humidity);
         const rain48h = overrides.rain_48h ?? estimateRain48h(forecastData);
         const snow24h = overrides.snow_24h ?? estimateSnow24h(forecastData);
-        const tminOvernight = overrides.tmin_overnight ?? estimateMinOvernight(forecastData);
+            const tminOvernight = overrides.tmin_overnight ?? estimateMinOvernight(forecastData);
+            const tmaxDay = forecastData.daily?.temperature_2m_max?.[0] ?? null;
         const season = overrides.season ?? getSeason(now);
 
         // Cooling/Ventilation actions
@@ -166,38 +167,25 @@ const Actions = (() => {
                 timeframe: 'Next 12-24 hours',
                 severity: 'urgent',
                 dismissTTLHours: DISMISSAL_TTLS.snow,
-                remindLaterTTLHours: REMIND_LATER_TTLS.snow,
-                easterEgg: true,
-                easterEggText: 'Snow day checklist: charge 
+                remindLaterTTLHours: REMIND_LATER_TTLS.snow
+            });
+        } else if (snow24h !== null && snow24h >= 5 && tminOvernight !== null && tminOvernight > 0) {
+            const note = (tmaxDay !== null && tmaxDay >= 5) || (tminOvernight !== null && tminOvernight >= 1) ? ' Consider waiting until temperatures rise.' : '';
             actions.push({
                 id: generateActionId('snow', 'light_snow_warming', forecastData),
                 type: 'snow',
                 title: 'Wait to shovel',
-                description: 'Light snow is forecast but warming follows. Waiting may reduce shoveling effort.',
+                description: `Light snow is forecast but warming follows. Waiting may reduce shoveling effort.${note}`,
                 why: `${Math.round(snow24h)}cm snow expected but warming to ${Math.round(tminOvernight)}°C overnight`,
                 timeframe: 'Next 24 hours',
-                severity: 'info',
+                severity: 'important',
                 dismissTTLHours: DISMISSAL_TTLS.snow
             });
         }
 
         // Basement/drainage actions
         if (season === 'winter' && tminOvernight !== null && tminOvernight > 2 && rain48h !== null && rain48h >= 10) {
-           Road safety actions - freeze-thaw cycle creates slippery conditions
-        if (season === 'winter' && tminOvernight !== null && tminOvernight <= 2 && tmaxDay !== null && tmaxDay >= 5 && (rain48h !== null && rain48h >= 5 || snow24h !== null && snow24h >= 3)) {
             actions.push({
-                id: generateActionId('roads', 'freeze_thaw_slippery', forecastData),
-                type: 'roads',
-                title: '⚠️ Slippery roads - freeze-thaw cycle',
-                description: 'Overnight freezing followed by daytime warming and precipitation creates ice patches on roads. Reduce speed, increase following distance, and watch for black ice.',
-                why: `Temperature cycle ${Math.round(tminOvernight)}°C → ${Math.round(tmaxDay)}°C with ${rain48h >= 5 ? Math.round(rain48h) + 'mm rain' : Math.round(snow24h) + 'cm snow'} creates ideal black ice conditions`,
-                timeframe: 'Until roads clear',
-                severity: 'urgent',
-                dismissTTLHours: DISMISSAL_TTLS.basement // Reuse basement TTL for road warnings
-            });
-        }
-
-        //  actions.push({
                 id: generateActionId('basement', 'freeze_thaw_rain', forecastData),
                 type: 'basement',
                 title: '💧 Check basement and drains',
@@ -205,9 +193,20 @@ const Actions = (() => {
                 why: 'Recent freezing followed by warming and rainfall creates runoff and flooding risk',
                 timeframe: 'Today and tonight',
                 severity: 'important',
-                dismissTTLHours: DISMISSAL_TTLS.basement,
-                easterEgg: true,
-                easterEggText: 'Gutter and downspout appreciation moment: clear a path for water.'
+                dismissTTLHours: DISMISSAL_TTLS.basement
+            });
+        }
+
+        if (season === 'winter' && tminOvernight !== null && tminOvernight <= 2 && tmaxDay !== null && tmaxDay >= 5 && ((rain48h !== null && rain48h >= 5) || (snow24h !== null && snow24h >= 3))) {
+            actions.push({
+                id: generateActionId('roads', 'freeze_thaw_slippery', forecastData),
+                type: 'roads',
+                title: '⚠️ Slippery roads - freeze-thaw cycle',
+                description: 'Freeze-thaw with precipitation can create black ice and slick surfaces. Use caution.',
+                why: `Temperature cycle ${Math.round(tminOvernight)}°C → ${Math.round(tmaxDay)}°C with ${rain48h >= 5 ? Math.round(rain48h) + 'mm rain' : Math.round(snow24h) + 'cm snow'} increases black ice risk`,
+                timeframe: 'Until roads clear',
+                severity: 'important',
+                dismissTTLHours: DISMISSAL_TTLS.roads
             });
         }
 
@@ -317,7 +316,6 @@ const Actions = (() => {
             // Non-actionable patterns
             if (action.title?.includes('No action needed')) return false;
             if (action.title?.includes('Skip watering') && action.severity === 'info') return false;
-            if (action.title?.includes('Wait to shovel') && action.severity === 'info') return false;
             return true;
         });
 
