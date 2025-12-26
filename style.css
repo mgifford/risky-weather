@@ -315,6 +315,40 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
 .model-val { font-size: 2.5rem; font-weight: 800; line-height: 1; }
 .model-rain { font-size: 0.9rem; font-weight: 600; margin-top: 8px; color: var(--highlight); }
 
+/* CURRENT CONDITIONS */
+#current-conditions {
+    border: 2px solid color-mix(in srgb, var(--highlight) 30%, transparent);
+    background: color-mix(in srgb, var(--card) 98%, var(--highlight));
+}
+.current-weather {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.current-icon {
+    font-size: 3.5rem;
+    line-height: 1;
+}
+.current-temp {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+}
+.current-desc {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 8px;
+    color: var(--text);
+}
+.current-details {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    color: var(--subtext);
+    line-height: 1.5;
+}
+
 /* 7-DAY TABLE */
 .forecast-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .forecast-table th { text-align: left; color: var(--subtext); padding: 8px 4px; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase;}
@@ -448,6 +482,7 @@ a:focus, button:focus, .official-link:focus, .secondary-btn:focus, input:focus {
     padding-top: 8px;
     border-top: 1px solid color-mix(in srgb, var(--card) 80%, transparent);
     text-align: center;
+    display: none; /* Hidden by default, shown only if has content */
 }
 /* Ensure storage display meets contrast and is theme-aware */
 #storage-display { color: var(--subtext); }

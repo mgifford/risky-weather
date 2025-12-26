@@ -352,6 +352,17 @@ const App = (() => {
             saveForecastForHistory(forecastData, config, lat, lon);
             checkHistory(lat, lon, config);
             
+            // Fetch and display current conditions
+            try {
+                const currentData = await API.fetchCurrentWeather(lat, lon);
+                if (currentData) {
+                    UI.renderCurrentConditions(currentData, config.nameA, config.nameB, config.units);
+                }
+            } catch (currentError) {
+                console.warn('Could not fetch current conditions:', currentError);
+                // Don't show error to user - this is an enhancement feature
+            }
+            
             // Fetch and display historical normals for today's date
             const now = new Date();
             const monthDay = String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');

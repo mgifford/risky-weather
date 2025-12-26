@@ -483,6 +483,35 @@ const API = (() => {
         }
     }
 
+    /**
+     * Fetch current weather conditions
+     * Returns temperature, weather code, and other current conditions
+     * Note: Open-Meteo returns single observation, not model-specific data
+     */
+    async function fetchCurrentWeather(lat, lon) {
+        const params = new URLSearchParams({
+            latitude: lat,
+            longitude: lon,
+            current: 'temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,precipitation,wind_speed_10m',
+            timezone: 'auto'
+        });
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.FORECAST_TIMEOUT);
+
+        try {
+            const response = await fetch(`${BASE_FORECAST}?${params}`, { signal: controller.signal });
+            if (!response.ok) throw new Error(`API returned ${response.status}`);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.warn(`Current weather fetch failed: ${error.message}`);
+            return null;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
     return {
         fetchForecast,
         fetchHistoricalDay,
@@ -490,6 +519,7 @@ const API = (() => {
         fetchHistoricalNormals,
         getCityName,
         fetchECCCAlmanac,
-        fetchActualWeather
+        fetchActualWeather,
+        fetchCurrentWeather
     };
 })();

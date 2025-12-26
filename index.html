@@ -85,6 +85,24 @@
             <div id="winner-display"></div>
         </section>
 
+        <section id="current-conditions" class="card hidden">
+            <div class="card-title">
+                <h2 style="margin:0; font-size:1.1rem;">🌡️ <span data-i18n="ui.currentConditions">Current Conditions</span></h2>
+                <span style="font-size: 0.85rem; color: var(--subtext);" id="current-time">--</span>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <div class="current-weather" style="display: inline-block;">
+                    <div class="current-icon" id="current-icon">☁️</div>
+                    <div class="current-temp" id="current-temp">--°</div>
+                </div>
+                <div class="current-desc" id="current-desc" style="margin: 12px 0;">--</div>
+                <div class="current-details" id="current-details" style="max-width: 400px; margin: 0 auto;"></div>
+                <div style="font-size: 0.75rem; color: var(--subtext); margin-top: 16px;">
+                    <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Data: Open-Meteo</a>
+                </div>
+            </div>
+        </section>
+
         <section class="card" id="todays-forecast">
             <div class="card-title">
                 <a href="#todays-forecast" style="text-decoration: none; color: inherit;">
@@ -171,12 +189,12 @@
         </section>
 
         <section id="historical-normals-section" class="card hidden">
-            <div class="card-title">
-                <a href="#historical-averages" style="text-decoration: none; color: inherit;" id="historical-averages">
-                    <span data-i18n="ui.historicalNormals">📈 Historical Averages (Last 10 Years)</span>
-                </a>
-            </div>
-            <div id="historical-normals-content" style="font-size: 0.9rem; line-height: 1.6;"></div>
+            <details>
+                <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">
+                    📈 <span data-i18n="ui.historicalNormals">Historical Averages (Last 10 Years)</span>
+                </summary>
+                <div id="historical-normals-content" style="font-size: 0.9rem; line-height: 1.6; margin-top: 12px;"></div>
+            </details>
         </section>
 
         <!-- Battle History Section -->

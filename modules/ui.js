@@ -184,6 +184,7 @@ const UI = (() => {
          */
         setIP(ip) {
             ELEMENTS.ipDisplay.innerText = ip || '—';
+            this.updateDebugInfoVisibility();
         },
 
         /**
@@ -199,6 +200,25 @@ const UI = (() => {
             
             const text = items.length > 0 ? items.join(', ') : 'Empty';
             ELEMENTS.storageDisplay.innerText = text;
+            this.updateDebugInfoVisibility();
+        },
+
+        /**
+         * Hide debug info if nothing to display
+         */
+        updateDebugInfoVisibility() {
+            const debugInfo = document.querySelector('.debug-info');
+            if (!debugInfo) return;
+            
+            const ipText = ELEMENTS.ipDisplay.innerText;
+            const storageText = ELEMENTS.storageDisplay.innerText;
+            
+            // Hide if both are empty or just dashes
+            if ((ipText === '—' || !ipText) && (storageText === 'Empty' || !storageText)) {
+                debugInfo.style.display = 'none';
+            } else {
+                debugInfo.style.display = '';
+            }
         },
 
         /**
@@ -1240,6 +1260,135 @@ const UI = (() => {
             } else {
                 container.style.display = 'none';
             }
+        },
+
+        /**
+         * Render current weather conditions
+         */
+        renderCurrentConditions(currentData, modelAName, modelBName, units) {
+            const section = document.getElementById('current-conditions');
+            if (!section || !currentData || !currentData.current) {
+                console.warn('Current conditions section not found or no data');
+                return;
+            }
+
+            // Show the section
+            section.classList.remove('hidden');
+
+            // Update time
+            const currentTime = document.getElementById('current-time');
+            if (currentTime && currentData.current.time) {
+                const time = new Date(currentData.current.time);
+                currentTime.textContent = `${I18n.t('ui.asOf') || 'As of'} ${time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+            }
+
+            // Extract current data (Open-Meteo returns single current observation)
+            const temp = currentData.current.temperature_2m;
+            const code = currentData.current.weather_code;
+            const humidity = currentData.current.relative_humidity_2m;
+            const feelsLike = currentData.current.apparent_temperature;
+            const precip = currentData.current.precipitation;
+            const wind = currentData.current.wind_speed_10m;
+
+            // Get elements
+            const tempEl = document.getElementById('current-temp');
+            const iconEl = document.getElementById('current-icon');
+            const descEl = document.getElementById('current-desc');
+            const detailsEl = document.getElementById('current-details');
+
+            if (!tempEl || !iconEl || !descEl || !detailsEl) return;
+
+            // Temperature
+            if (temp !== null && temp !== undefined) {
+                tempEl.textContent = `${Math.round(temp)}°${units === 'fahrenheit' ? 'F' : 'C'}`;
+            } else {
+                tempEl.textContent = '--°';
+            }
+
+            // Weather icon and description
+            const icon = Calculations.getWeatherIcon(code);
+            const description = Calculations.getWeatherDescription(code);
+            iconEl.textContent = icon;
+            descEl.textContent = description;
+
+            // Additional details
+            let details = [];
+            
+            if (feelsLike !== null && feelsLike !== undefined) {
+                const feelsLikeRounded = Math.round(feelsLike);
+                const tempDiff = Math.abs(feelsLikeRounded - Math.round(temp));
+                if (tempDiff >= 3) {
+                    details.push(`${I18n.t('ui.feelsLike') || 'Feels like'} ${feelsLikeRounded}°${units === 'fahrenheit' ? 'F' : 'C'}`);
+                }
+            }
+            
+            if (humidity !== null && humidity !== undefined) {
+                details.push(`${I18n.t('ui.humidity') || 'Humidity'}: ${Math.round(humidity)}%`);
+            }
+            
+            if (wind !== null && wind !== undefined && wind > 0) {
+                const windUnit = units === 'fahrenheit' ? 'mph' : 'km/h';
+                details.push(`${I18n.t('ui.wind') || 'Wind'}: ${Math.round(wind)} ${windUnit}`);
+            }
+            
+            if (precip !== null && precip !== undefined && precip > 0) {
+                const precipUnit = units === 'fahrenheit' ? 'in' : 'mm';
+                details.push(`${I18n.t('ui.precipitation') || 'Precipitation'}: ${precip.toFixed(1)} ${precipUnit}`);
+            }
+
+            detailsEl.innerHTML = details.join(' &nbsp;•&nbsp; ');
+        },
+
+        /**
+         * Render current conditions for a single model
+         */
+        renderCurrentModel(modelId, temp, weatherCode, humidity, feelsLike, precip, wind, units) {
+            const tempEl = document.getElementById(`current-temp-${modelId}`);
+            const iconEl = document.getElementById(`current-icon-${modelId}`);
+            const descEl = document.getElementById(`current-desc-${modelId}`);
+            const detailsEl = document.getElementById(`current-details-${modelId}`);
+
+            if (!tempEl || !iconEl || !descEl || !detailsEl) return;
+
+            // Temperature
+            if (temp !== null && temp !== undefined) {
+                tempEl.textContent = `${Math.round(temp)}°${units === 'fahrenheit' ? 'F' : 'C'}`;
+            } else {
+                tempEl.textContent = '--°';
+            }
+
+            // Weather icon and description
+            const icon = Calculations.getWeatherIcon(weatherCode);
+            const description = Calculations.getWeatherDescription(weatherCode);
+            iconEl.textContent = icon;
+            descEl.textContent = description;
+
+            // Additional details
+            let details = [];
+            
+            if (feelsLike !== null && feelsLike !== undefined) {
+                const feelsLikeRounded = Math.round(feelsLike);
+                const tempDiff = Math.abs(feelsLikeRounded - Math.round(temp));
+                if (tempDiff >= 3) {
+                    details.push(`${I18n.t('ui.feelsLike') || 'Feels like'} ${feelsLikeRounded}°${units === 'fahrenheit' ? 'F' : 'C'}`);
+                }
+            }
+            
+            if (humidity !== null && humidity !== undefined) {
+                details.push(`${I18n.t('ui.humidity') || 'Humidity'}: ${Math.round(humidity)}%`);
+            }
+            
+            if (wind !== null && wind !== undefined && wind > 0) {
+                const windUnit = units === 'fahrenheit' ? 'mph' : 'km/h';
+                details.push(`${I18n.t('ui.wind') || 'Wind'}: ${Math.round(wind)} ${windUnit}`);
+            }
+            
+            if (precip !== null && precip !== undefined && precip > 0) {
+                const precipUnit = units === 'fahrenheit' ? 'in' : 'mm';
+                details.push(`${I18n.t('ui.precipitation') || 'Precipitation'}: ${precip.toFixed(1)} ${precipUnit}`);
+            }
+
+            detailsEl.innerHTML = details.join('<br>');
         }
     };
 })();
