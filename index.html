@@ -36,10 +36,9 @@
                 </div>
             </div>
         </div>
-        <div class="location-badge" id="location-display">Initializing...</div>
         
-        <!-- City Search -->
-        <div style="margin: 15px auto; max-width: 50%; position: relative;">
+        <!-- City Search and Location on same line -->
+        <div style="margin: 12px auto; max-width: 50%; display: flex; gap: 12px; align-items: center; position: relative;">
             <label for="city-search-input" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">Search for a city</label>
             <input 
                 type="text" 
@@ -47,10 +46,12 @@
                 placeholder="Search for a city..."
                 data-i18n-placeholder="ui.searchCity"
                 role="combobox" aria-autocomplete="list" aria-controls="city-search-results" aria-expanded="false"
-                style="width: 100%; padding: 10px 40px 10px 12px; border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-radius: 8px; font-size: 0.95rem;"
+                style="flex: 1; padding: 8px 32px 8px 10px; border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-radius: 6px; font-size: 0.9rem;"
             />
-            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--subtext); pointer-events: none;">🔍</span>
-            <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+            <span style="position: absolute; left: auto; right: 200px; color: var(--subtext); pointer-events: none;">🔍</span>
+            <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 200px; background: var(--card); border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-top: none; border-radius: 0 0 6px 6px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+            
+            <div class="location-badge" id="location-display" style="white-space: nowrap; font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; background: color-mix(in srgb, var(--card) 50%, transparent); border: 1px solid var(--border-color, #e0e0e0); min-width: 120px; text-align: right;">—</div>
         </div>
         
         <div class="debug-info">

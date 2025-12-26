@@ -1,7 +1,7 @@
 /**
  * RSS Module
  * Fetches and displays climate news from various RSS feeds
- * Uses a CORS proxy to fetch feeds client-side
+ * Uses CORS proxies with local caching for resilience
  */
 
 const RSS = (() => {
@@ -22,26 +22,79 @@ const RSS = (() => {
         "https://api.codetabs.com/v1/proxy?quest="
     ];
 
+    // Cache settings
+    const CACHE_KEY = 'riskyWeather:rssCache';
+    const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
     /**
-     * Fetch and parse an RSS feed with fallback
+     * Get cached RSS data for a feed
+     */
+    function getCachedFeed(feedUrl) {
+        try {
+            const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            const cached = cache[feedUrl];
+            
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+                console.log(`Using cached RSS for ${feedUrl}`);
+                return cached.xml;
+            }
+        } catch (e) {
+            console.warn('Error reading RSS cache:', e);
+        }
+        return null;
+    }
+
+    /**
+     * Save RSS data to cache
+     */
+    function cacheFeed(feedUrl, xmlString) {
+        try {
+            const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            cache[feedUrl] = {
+                xml: xmlString,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        } catch (e) {
+            console.warn('Error saving RSS cache:', e);
+        }
+    }
+
+    /**
+     * Fetch and parse an RSS feed with fallback to cache
      */
     async function fetchFeed(feedUrl) {
+        // Try to fetch fresh data
         for (const proxy of PROXIES) {
             try {
-                const response = await fetch(proxy + encodeURIComponent(feedUrl));
+                const response = await fetch(proxy + encodeURIComponent(feedUrl), {
+                    signal: AbortSignal.timeout(10000)
+                });
                 if (!response.ok) throw new Error(`Proxy ${proxy} returned ${response.status}`);
                 const text = await response.text();
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, "text/xml");
                 // Check if parsing failed (some browsers return an error document)
                 if (xml.querySelector("parsererror")) throw new Error("XML parsing failed");
+                
+                // Cache the successful result
+                cacheFeed(feedUrl, text);
                 return xml;
             } catch (error) {
                 console.warn(`Error fetching RSS feed via ${proxy}:`, error);
                 // Continue to next proxy
             }
         }
-        console.error("All RSS fetch attempts failed.");
+        
+        // All proxies failed - try cache as fallback
+        const cachedXml = getCachedFeed(feedUrl);
+        if (cachedXml) {
+            console.log('All proxies failed, using cached RSS data');
+            const parser = new DOMParser();
+            return parser.parseFromString(cachedXml, "text/xml");
+        }
+        
+        console.error("All RSS fetch attempts failed and no cache available.");
         return null;
     }
 
@@ -96,7 +149,7 @@ const RSS = (() => {
         const contentDiv = container.querySelector('#rss-content');
 
         if (!xml) {
-            contentDiv.innerHTML = `<div style="text-align: center; color: var(--accent);">Unable to load news feed.</div>`;
+            contentDiv.innerHTML = `<div style="text-align: center; color: var(--accent);">Unable to load news feed. Please try again later.</div>`;
             return;
         }
 
