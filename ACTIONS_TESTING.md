@@ -61,12 +61,7 @@ Add `&debug=1` to see:
 http://localhost:8000?scenario=tropicalNight&debug=1&city=Ottawa
 ```
 
-### Disable Easter Eggs
 
-```
-?eggs=0   # Hide easter eggs
-?eggs=1   # Show easter eggs (default)
-```
 
 ## Action Categories
 
@@ -83,6 +78,9 @@ http://localhost:8000?scenario=tropicalNight&debug=1&city=Ottawa
 ### Basement/Drainage
 - **Check basement and drains**: When freeze-thaw + rain creates runoff risk
 
+### Road Safety
+- **Slippery roads - freeze-thaw cycle**: When overnight freezing followed by daytime warming + precipitation creates black ice conditions
+
 ### Watering
 - **Have you watered the plants?**: When hot, dry, minimal recent/forecast rain
 - **Skip watering**: When significant rain forecast
@@ -93,6 +91,7 @@ http://localhost:8000?scenario=tropicalNight&debug=1&city=Ottawa
 - Snow: 12 hours
 - Watering: 48 hours
 - Basement: 24 hours
+- Roads: 24 hours
 - Cooling: 12 hours
 - Heat: 12 hours
 
@@ -138,11 +137,7 @@ This keeps test dismissals separate from real weather.
 4. Reappears after time expires
 ```
 
-### 3. Test Easter Eggs
-```
-?scenario=tropicalNight&city=Ottawa
-```
-Look for gold-bordered box with "🥚 Easter egg:" message.
+
 
 ### 4. Test Debug Mode
 ```
@@ -232,10 +227,6 @@ localStorage.removeItem('riskyWeather:dismissedActions:45.42,-75.69:real');
 3. Verify mode is correct (real vs scenario)
 4. Check TTL hasn't expired
 
-### Easter eggs not showing
-1. Verify action has `easterEgg: true` property
-2. Check `eggs=0` isn't set in URL
-3. Confirm action severity and type are correct
 
 ## Future Enhancements
 

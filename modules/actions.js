@@ -14,6 +14,7 @@ const Actions = (() => {
         basement: 24,
         cooling: 12,
         heat: 12,
+        roads: 24,
         easterEgg: 24
     };
 
@@ -150,9 +151,7 @@ const Actions = (() => {
                 why: `Temperature ${Math.round(temp)}°C and humidity ${Math.round(humidity)}% suggests moisture management`,
                 timeframe: 'Tonight',
                 severity: 'info',
-                dismissTTLHours: DISMISSAL_TTLS.cooling,
-                easterEgg: true,
-                easterEggText: 'Great night to run a dehumidifier and pretend you\'re a museum curator.'
+                dismissTTLHours: DISMISSAL_TTLS.cooling
             });
         }
 
@@ -169,9 +168,7 @@ const Actions = (() => {
                 dismissTTLHours: DISMISSAL_TTLS.snow,
                 remindLaterTTLHours: REMIND_LATER_TTLS.snow,
                 easterEgg: true,
-                easterEggText: 'Snow day checklist: charge devices, prep hot drinks, stage a shovel by the door.'
-            });
-        } else if (snow24h !== null && snow24h >= 5 && tminOvernight !== null && tminOvernight > 0) {
+                easterEggText: 'Snow day checklist: charge 
             actions.push({
                 id: generateActionId('snow', 'light_snow_warming', forecastData),
                 type: 'snow',
@@ -186,7 +183,21 @@ const Actions = (() => {
 
         // Basement/drainage actions
         if (season === 'winter' && tminOvernight !== null && tminOvernight > 2 && rain48h !== null && rain48h >= 10) {
+           Road safety actions - freeze-thaw cycle creates slippery conditions
+        if (season === 'winter' && tminOvernight !== null && tminOvernight <= 2 && tmaxDay !== null && tmaxDay >= 5 && (rain48h !== null && rain48h >= 5 || snow24h !== null && snow24h >= 3)) {
             actions.push({
+                id: generateActionId('roads', 'freeze_thaw_slippery', forecastData),
+                type: 'roads',
+                title: '⚠️ Slippery roads - freeze-thaw cycle',
+                description: 'Overnight freezing followed by daytime warming and precipitation creates ice patches on roads. Reduce speed, increase following distance, and watch for black ice.',
+                why: `Temperature cycle ${Math.round(tminOvernight)}°C → ${Math.round(tmaxDay)}°C with ${rain48h >= 5 ? Math.round(rain48h) + 'mm rain' : Math.round(snow24h) + 'cm snow'} creates ideal black ice conditions`,
+                timeframe: 'Until roads clear',
+                severity: 'urgent',
+                dismissTTLHours: DISMISSAL_TTLS.basement // Reuse basement TTL for road warnings
+            });
+        }
+
+        //  actions.push({
                 id: generateActionId('basement', 'freeze_thaw_rain', forecastData),
                 type: 'basement',
                 title: '💧 Check basement and drains',

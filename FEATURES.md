@@ -86,6 +86,7 @@ Complete documentation of all current features and how to use them.
 **Snow/Winter:**
 - ❄️ Time to shovel the snow? (10cm+ expected) — **URGENT** (red)
 - Wait to shovel (light snow but warming approaching)
+- ⚠️ Slippery roads - freeze-thaw cycle (overnight freeze + daytime warm + precipitation)
 
 **Water/Drainage:**
 - 💧 Check basement and drains (freeze-thaw cycle with heavy rain)
@@ -101,12 +102,6 @@ Complete documentation of all current features and how to use them.
   - 🔴 **Urgent** (red border) — High priority
   - 🟠 **Important** (orange border) — Should do soon
   - 🔵 **Info** (blue border) — Nice to know
-
-**Easter Eggs:**
-- Fun, safe tips hidden in each action
-- Examples: "DIY swamp cooler," "charge devices for snow day," "gutter appreciation moment"
-- Clearly labeled with 🥚 emoji
-- Never compromise on safety
 
 ---
 

@@ -4,6 +4,9 @@
  */
 
 const CAT = (() => {
+    const CACHE_KEY = 'riskyWeather:catCache';
+    const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    
     // Mapping of country names (from ipwho.is) to CAT slugs
     const COUNTRY_MAP = {
         'Argentina': 'argentina',
@@ -73,10 +76,58 @@ const CAT = (() => {
         "https://api.codetabs.com/v1/proxy?quest="
     ];
 
+    /**
+     * Get cached rating for a country
+     */
+    function getCachedRating(url) {
+        try {
+            const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            const entry = cache[url];
+            if (entry && entry.timestamp && Date.now() - entry.timestamp < CACHE_TTL) {
+                console.log(`CAT: Using cached rating for ${url}`);
+                return entry.rating;
+            }
+        } catch (e) {
+            console.warn('CAT: Cache read error', e.message);
+        }
+        return null;
+    }
+
+    /**
+     * Cache a rating for future use
+     */
+    function cacheRating(url, rating) {
+        try {
+            const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            cache[url] = {
+                rating: rating,
+                timestamp: Date.now()
+            };
+            // Keep only last 50 entries to avoid bloating localStorage
+            const entries = Object.entries(cache).sort((a, b) => b[1].timestamp - a[1].timestamp);
+            const trimmed = Object.fromEntries(entries.slice(0, 50));
+            localStorage.setItem(CACHE_KEY, JSON.stringify(trimmed));
+        } catch (e) {
+            console.warn('CAT: Cache write error', e.message);
+        }
+    }
+
     async function fetchRating(url) {
+        // Check cache first
+        const cached = getCachedRating(url);
+        if (cached) return cached;
+
         for (const proxy of PROXIES) {
             try {
-                const response = await fetch(proxy + encodeURIComponent(url));
+                // Set a 5-second timeout for the fetch
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(proxy + encodeURIComponent(url), {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
                 if (!response.ok) continue;
                 const text = await response.text();
                 const parser = new DOMParser();
@@ -104,13 +155,15 @@ const CAT = (() => {
                         
                         for (const r of ratings) {
                             if (cleanText.toUpperCase().includes(r)) {
+                                cacheRating(url, r); // Cache the found rating
                                 return r; // Return the found rating
                             }
                         }
                     }
                 }
             } catch (e) {
-                console.warn(`CAT fetch failed via ${proxy}`, e);
+                console.warn(`CAT fetch failed via ${proxy}:`, e.message);
+                // Continue to next proxy on timeout or other errors
             }
         }
         return null;
