@@ -153,6 +153,56 @@ const Scenario = (() => {
     }
 
     /**
+     * Expand single-day scenario data to 7 days for UI rendering
+     */
+    function expandScenarioTo7Days(scenarioData) {
+        const data = JSON.parse(JSON.stringify(scenarioData));
+        
+        if (!data.daily) data.daily = {};
+        
+        // Generate 7-day time array (starting today)
+        const today = new Date();
+        const times = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(today);
+            date.setDate(date.getDate() + i);
+            times.push(date.toISOString().split('T')[0]);
+        }
+        data.daily.time = times;
+        
+        // Expand daily arrays to 7 days
+        const fieldsToExpand = [
+            'temperature_2m_min',
+            'temperature_2m_max', 
+            'precipitation_probability_max',
+            'precipitation_sum',
+            'snowfall_sum',
+            'windspeed_10m_max',
+            'windgusts_10m_max',
+            'weather_code'
+        ];
+        
+        fieldsToExpand.forEach(field => {
+            if (data.daily[field] && Array.isArray(data.daily[field])) {
+                const baseValue = data.daily[field][0];
+                // Extend with gradual decay to show forecast evolution
+                const decayFactor = 0.95;
+                data.daily[field] = [
+                    data.daily[field][0],
+                    baseValue * decayFactor,
+                    baseValue * decayFactor ** 2,
+                    baseValue * decayFactor ** 3,
+                    baseValue * decayFactor ** 4,
+                    baseValue * decayFactor ** 5,
+                    baseValue * decayFactor ** 6
+                ];
+            }
+        });
+        
+        return data;
+    }
+
+    /**
      * Apply overrides to forecast data
      */
     function applyOverrides(forecastData, overrides) {
@@ -166,7 +216,7 @@ const Scenario = (() => {
         if (overrides.scenario) {
             const scenarioData = getScenario(overrides.scenario);
             if (scenarioData) {
-                data = JSON.parse(JSON.stringify(scenarioData));
+                data = expandScenarioTo7Days(scenarioData);
             }
         }
 
@@ -177,14 +227,27 @@ const Scenario = (() => {
         if (overrides.dp_out !== undefined) data.current.dewpoint_2m = overrides.dp_out;
 
         if (!data.daily) data.daily = {};
+        
+        // Ensure time array exists for 7 days
+        if (!data.daily.time) {
+            const today = new Date();
+            const times = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                times.push(date.toISOString().split('T')[0]);
+            }
+            data.daily.time = times;
+        }
+        
         if (overrides.rain_48h !== undefined) {
-            data.daily.precipitation_sum = [(overrides.rain_48h / 2), (overrides.rain_48h / 2)];
+            data.daily.precipitation_sum = [(overrides.rain_48h / 2), (overrides.rain_48h / 2), 0, 0, 0, 0, 0];
         }
         if (overrides.snow_24h !== undefined) {
-            data.daily.snowfall_sum = [overrides.snow_24h];
+            data.daily.snowfall_sum = [overrides.snow_24h, 0, 0, 0, 0, 0, 0];
         }
         if (overrides.tmin_overnight !== undefined) {
-            data.daily.temperature_2m_min = [overrides.tmin_overnight];
+            data.daily.temperature_2m_min = [overrides.tmin_overnight, overrides.tmin_overnight + 1, overrides.tmin_overnight + 2, overrides.tmin_overnight + 2, overrides.tmin_overnight + 1, overrides.tmin_overnight, overrides.tmin_overnight];
         }
 
         return data;

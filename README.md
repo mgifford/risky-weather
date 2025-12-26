@@ -23,7 +23,7 @@ This repository contains a client-side, single-page web app that helps people le
 
 ## Quick Highlights
 - **Bilingual UI:** English and French support with browser default detection and a language toggle.
-- **IP Geolocation & Fallbacks:** Displays your IP and uses `ipwho.is`/Nominatim/Open-Meteo fallbacks to resolve a city name when reverse geocoding is unavailable.
+- **IP Geolocation & Fallbacks:** Displays your IP and uses [IPWho.is]* / Nominatim / [Open-Meteo]* fallbacks to resolve a city name when reverse geocoding is unavailable.
 - **Model Comparison:** Side-by-side comparison of regional GEM vs ECMWF/GFS model outputs; GEM regional data is blended with GEM global for later days when needed.
 - **Uncertainty Indicators:** Visual warnings (⚠️ ⚡) highlight days when models disagree significantly on temperature (>5°C) or rain probability (>30%), teaching users when forecasts are less reliable.
 - **Probability Education:** Hover tooltips explain what "60% rain" actually means in practical frequency terms (e.g., "out of 10 similar forecasts, rain occurs 6 times").
@@ -34,19 +34,18 @@ This repository contains a client-side, single-page web app that helps people le
 
 ---
 
-## Weather Models 
+## Weather Models Included
 
-- From [Open-Meteo](https://open-meteo.com/en/docs) 
-- [Global Environmental Multiscale Model (GEM)](https://en.wikipedia.org/wiki/Global_Environmental_Multiscale_Model) - [Environment Canada Models](https://weather.gc.ca/mainmenu/modelling_menu_e.html)
-- [Regional Deterministic Prediction System (RDPS)](https://open.canada.ca/data/en/dataset/a9f2828c-0d78-5eb6-a4c7-1fc1219f1e3d) 
-- [European Centre for Medium-Range Weather Forecasts (ECMWF)](https://en.wikipedia.org/wiki/European_Centre_for_Medium-Range_Weather_Forecasts) - [European Model](https://www.ecmwf.int/en/forecasts)
-- [Global Forecast System (GFS)](https://en.wikipedia.org/wiki/Global_Forecast_System) - [NOAA USA](https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast)
+- Global Environmental Multiscale Model (GEM)*
+- Regional Deterministic Prediction System (RDPS)*
+- European Centre for Medium-Range Weather Forecasts (ECMWF)*
+- Global Forecast System (GFS)*
 - CONUS Swiss HD 4x4
-- [North American Ensemble Forecast System (NAEFS)](https://en.wikipedia.org/wiki/North_American_Ensemble_Forecast_System)
-- [High Resolution Deterministic Prediction System (HRDPS)](https://open.canada.ca/data/en/dataset/5b401fa0-6c29-57f0-b3d5-749f301d829d)
-- [ICON (Icosahedral Nonhydrostatic)](https://windy.app/blog/what-is-icon-weather-model-forecast.html) - [DWD Info](https://www.dwd.de/EN/research/weatherforecasting/num_modelling/01_num_weather_prediction_modells/icon_description.html)
-- [UKMO, also known as UKMET (United Kingdom Met Office)](https://en.wikipedia.org/wiki/Met_Office)
-- [BBC Weather](https://www.bbc.com/weather) Uses the [MeteoGroup's Model](https://en.wikipedia.org/wiki/MeteoGroup)
+- North American Ensemble Forecast System (NAEFS)*
+- High Resolution Deterministic Prediction System (HRDPS)*
+- ICON (Icosahedral Nonhydrostatic)*
+- UKMO (United Kingdom Met Office)*
+- MeteoGroup (BBC Weather)*
 
 
 ---
@@ -110,8 +109,9 @@ Notes:
 ## Important Behaviors & Troubleshooting
 - **URL Params Win:** If the page URL includes `lat`, `lon`, or `city` parameters, the app will use those values (this allows reproducible shared views).
 - **IP Display:** The app always fetches and displays your public IP (via `ipwho.is`) for transparency.
-- **Rate Limits:** The Open-Meteo archive endpoint may return HTTP 429 for heavy historical requests. The UI detects this and shows a friendly, translated message rather than throwing an error.
-- **Reverse Geocoding & CORS:** When served from `file://` or when reverse geocoding is blocked, the app falls back from Open-Meteo geocoding → `ipwho.is` → Nominatim → coordinate label.
+- **Rate Limits:** The Open-Meteo archive endpoint may return HTTP 429 forIPWho.is)* for transparency.
+- **Rate Limits:** The Open-Meteo* archive endpoint may return HTTP 429 for heavy historical requests. The UI detects this and shows a friendly, translated message rather than throwing an error.
+- **Reverse Geocoding & CORS:** When served from `file://` or when reverse geocoding is blocked, the app falls back from Open-Meteo* geocoding → IPWho.is* → Nominatim → coordinate label.
 - **Language:** Toggle language using the header button. Language choice is persisted and included in shared URLs.
 
 ---
@@ -125,6 +125,23 @@ Notes:
 ## Contributing
 Open a PR or file an issue with a clear reproduction case. If you are testing geocoding behavior, run the app from `http://localhost:8000` to avoid file:// CORS problems.
 
+---
+
+## References
+
+* [Open-Meteo API](https://open-meteo.com/en/docs) — Weather forecast data and geocoding
+* [IPWho.is](https://ipwho.is/) — IP geolocation service
+* [Environment Canada Models](https://weather.gc.ca/mainmenu/modelling_menu_e.html) — GEM model data
+* [RDPS Dataset](https://open.canada.ca/data/en/dataset/a9f2828c-0d78-5eb6-a4c7-1fc1219f1e3d) — Regional deterministic prediction system
+* [ECMWF](https://www.ecmwf.int/en/forecasts) — European weather forecasts
+* [NOAA Global Forecast System](https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast) — US model data
+* [NAEFS](https://en.wikipedia.org/wiki/North_American_Ensemble_Forecast_System) — Ensemble forecasting
+* [HRDPS Dataset](https://open.canada.ca/data/en/dataset/5b401fa0-6c29-57f0-b3d5-749f301d829d) — High resolution Canadian predictions
+* [ICON Weather Model](https://www.dwd.de/EN/research/weatherforecasting/num_modelling/01_num_weather_prediction_modells/icon_description.html) — German meteorological institute
+* [Nominatim](https://nominatim.org/) — Reverse geocoding fallback
+* [MeteoGroup](https://en.wikipedia.org/wiki/MeteoGroup) — BBC Weather provider
+
+---
 ## AI Disclosure
 
 Yes. AI was used in creating this tool. There be dragons! 
