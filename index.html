@@ -66,6 +66,24 @@
 
     <main>
         
+        <section id="current-conditions" class="card hidden">
+            <div class="card-title">
+                <h2 style="margin:0; font-size:1.1rem;">🌡️ <span data-i18n="ui.currentConditions">Current Conditions</span></h2>
+                <span style="font-size: 0.85rem; color: var(--subtext);" id="current-time">--</span>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <div class="current-weather" style="display: inline-block;">
+                    <div class="current-icon" id="current-icon">☁️</div>
+                    <div class="current-temp" id="current-temp">--°</div>
+                </div>
+                <div class="current-desc" id="current-desc" style="margin: 12px 0;">--</div>
+                <div class="current-details" id="current-details" style="max-width: 400px; margin: 0 auto;"></div>
+                <div style="font-size: 0.75rem; color: var(--subtext); margin-top: 16px;">
+                    <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Data: Open-Meteo</a>
+                </div>
+            </div>
+        </section>
+
         <section id="scoreboard-section" class="card hidden">
             <div class="card-title">
                 <h2 style="margin:0; font-size:1.1rem;" data-i18n="ui.scoreboard">🏆 Model Scoreboard</h2>
@@ -88,24 +106,6 @@
             <div class="card-title"><h2 style="margin:0; font-size:1.1rem;" data-i18n="ui.yesterday">🔍 Yesterday's Result</h2></div>
             <div id="reality-content" style="font-size: 0.95rem; line-height: 1.6;"></div>
             <div id="winner-display"></div>
-        </section>
-
-        <section id="current-conditions" class="card hidden">
-            <div class="card-title">
-                <h2 style="margin:0; font-size:1.1rem;">🌡️ <span data-i18n="ui.currentConditions">Current Conditions</span></h2>
-                <span style="font-size: 0.85rem; color: var(--subtext);" id="current-time">--</span>
-            </div>
-            <div style="text-align: center; padding: 20px;">
-                <div class="current-weather" style="display: inline-block;">
-                    <div class="current-icon" id="current-icon">☁️</div>
-                    <div class="current-temp" id="current-temp">--°</div>
-                </div>
-                <div class="current-desc" id="current-desc" style="margin: 12px 0;">--</div>
-                <div class="current-details" id="current-details" style="max-width: 400px; margin: 0 auto;"></div>
-                <div style="font-size: 0.75rem; color: var(--subtext); margin-top: 16px;">
-                    <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Data: Open-Meteo</a>
-                </div>
-            </div>
         </section>
 
         <!-- Scenario Badge (appears when in test mode) -->
