@@ -321,4 +321,27 @@ document.getElementById('reset-loc').addEventListener('click', () => {
     location.reload();
 });
 
+// Add click handler for connection indicator
+if (document.getElementById('connection-indicator')) {
+    document.getElementById('connection-indicator').addEventListener('click', async () => {
+        const indicator = document.getElementById('connection-indicator');
+        const text = indicator.querySelector('.connection-text');
+        const originalText = text.textContent;
+        text.textContent = 'Checking...';
+        await Connection.manualCheck();
+        // Show result for 2 seconds
+        setTimeout(() => {
+            text.textContent = originalText;
+        }, 2000);
+    });
+    
+    // Also handle Enter key for accessibility
+    document.getElementById('connection-indicator').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            document.getElementById('connection-indicator').click();
+        }
+    });
+}
+
 init();

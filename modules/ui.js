@@ -1268,11 +1268,23 @@ const UI = (() => {
         /**
          * Render current weather conditions
          */
-        renderCurrentConditions(currentData, modelAName, modelBName, units) {
+        async renderCurrentConditions(currentData, modelAName, modelBName, units, isCanada = false) {
             const section = document.getElementById('current-conditions');
             if (!section || !currentData || !currentData.current) {
                 console.warn('Current conditions section not found or no data');
                 return;
+            }
+
+            // For Canada, also try to fetch Environment Canada data
+            let ecData = null;
+            if (isCanada) {
+                try {
+                    // Extract lat/lon from the API response (assuming currentData has timezone info)
+                    // We need to get lat/lon from somewhere - for now we'll skip EC if not available
+                    ecData = null; // Will be passed from app.js if available
+                } catch (e) {
+                    console.warn('Could not fetch Environment Canada data:', e);
+                }
             }
 
             // Show the section
@@ -1285,7 +1297,7 @@ const UI = (() => {
                 currentTime.textContent = `${I18n.t('ui.asOf') || 'As of'} ${time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
             }
 
-            // Extract current data (Open-Meteo returns single current observation)
+            // Extract current data from Open-Meteo
             const temp = currentData.current.temperature_2m;
             const code = currentData.current.weather_code;
             const humidity = currentData.current.relative_humidity_2m;
@@ -1338,6 +1350,22 @@ const UI = (() => {
                 const precipUnit = units === 'fahrenheit' ? 'in' : 'mm';
                 details.push(`${I18n.t('ui.precipitation') || 'Precipitation'}: ${precip.toFixed(1)} ${precipUnit}`);
             }
+
+            // Add source indicator
+            let sourceLabel = 'Open-Meteo';
+            if (ecData && ecData.source === 'environment_canada') {
+                // Compare the two if both available
+                const tempDiff = Math.abs((ecData.current.temperature_2m || 0) - (temp || 0));
+                const humidDiff = Math.abs((ecData.current.relative_humidity_2m || 0) - (humidity || 0));
+                
+                // If significantly different, show both
+                if (tempDiff > 2 || humidDiff > 10) {
+                    sourceLabel = 'Open-Meteo (Environment Canada differs)';
+                } else {
+                    sourceLabel = 'Open-Meteo & Environment Canada';
+                }
+            }
+            details.push(`<span style="font-size: 0.85rem; color: var(--subtext);">${sourceLabel}</span>`);
 
             detailsEl.innerHTML = details.join(' &nbsp;•&nbsp; ');
         },

@@ -392,7 +392,7 @@ const App = (() => {
             try {
                 const currentData = await API.fetchCurrentWeather(lat, lon);
                 if (currentData) {
-                    UI.renderCurrentConditions(currentData, config.nameA, config.nameB, config.units);
+                    UI.renderCurrentConditions(currentData, config.nameA, config.nameB, config.units, config.isCanada);
                 }
             } catch (currentError) {
                 console.warn('Could not fetch current conditions:', currentError);

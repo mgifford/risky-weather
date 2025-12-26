@@ -512,6 +512,84 @@ const API = (() => {
         }
     }
 
+    /**
+     * Fetch current weather from Environment Canada for Canadian locations
+     * Uses GeoJSON stations API to find nearest weather station
+     * Returns standardized current weather object
+     */
+    async function fetchEnvironmentCanadaWeather(lat, lon) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), CONFIG.FORECAST_TIMEOUT);
+
+        try {
+            // Step 1: Find the nearest weather station
+            const geoUrl = `https://api.weather.gc.ca/collections/stations/items?limit=10&f=json`;
+            const geoResponse = await fetch(geoUrl, { signal: controller.signal });
+            if (!geoResponse.ok) throw new Error(`GeoJSON API returned ${geoResponse.status}`);
+            const geoData = await geoResponse.json();
+
+            // Find nearest station by calculating distance
+            let nearestStation = null;
+            let minDistance = Infinity;
+
+            if (geoData.features) {
+                for (const feature of geoData.features) {
+                    const [stationLon, stationLat] = feature.geometry.coordinates;
+                    const dx = stationLon - lon;
+                    const dy = stationLat - lat;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestStation = feature.properties.id;
+                    }
+                }
+            }
+
+            if (!nearestStation) throw new Error('No weather station found');
+
+            // Step 2: Fetch current conditions from the nearest station
+            const wxUrl = `https://api.weather.gc.ca/collections/weather-observations-daily-results/items?station_id=${nearestStation}&limit=1&f=json`;
+            const wxResponse = await fetch(wxUrl, { signal: controller.signal });
+            if (!wxResponse.ok) throw new Error(`Weather API returned ${wxResponse.status}`);
+            const wxData = await wxResponse.json();
+
+            if (!wxData.features || wxData.features.length === 0) {
+                throw new Error('No weather data for station');
+            }
+
+            // Convert EC data to format similar to Open-Meteo for comparison
+            const obs = wxData.features[0].properties;
+            return {
+                source: 'environment_canada',
+                current: {
+                    time: obs.date_obs || new Date().toISOString(),
+                    temperature_2m: obs.mean_temp !== null ? obs.mean_temp : null,
+                    relative_humidity_2m: obs.rel_humidity !== null ? obs.rel_humidity : null,
+                    precipitation: obs.precip_total !== null ? obs.precip_total : null,
+                    wind_speed_10m: obs.wind_spd !== null ? obs.wind_spd : null,
+                    // Weather code mapping (simplified)
+                    weather_code: mapECWeatherCode(obs.weather_code)
+                },
+                station_id: nearestStation
+            };
+        } catch (error) {
+            console.warn(`Environment Canada fetch failed: ${error.message}`);
+            return null;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    /**
+     * Map Environment Canada weather codes to WMO codes for consistency
+     */
+    function mapECWeatherCode(ecCode) {
+        // Simplified mapping - EC uses different codes
+        // For now, return null to indicate we don't have a reliable mapping
+        return null;
+    }
+
     return {
         fetchForecast,
         fetchHistoricalDay,
@@ -520,6 +598,7 @@ const API = (() => {
         getCityName,
         fetchECCCAlmanac,
         fetchActualWeather,
-        fetchCurrentWeather
+        fetchCurrentWeather,
+        fetchEnvironmentCanadaWeather
     };
 })();

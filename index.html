@@ -26,6 +26,10 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
                 <button id="language-toggle-btn" class="language-toggle" title="Toggle language" aria-label="Toggle language"></button>
+                <div id="connection-indicator" class="connection-indicator" title="Click to check connection" aria-label="Connection status" role="button" tabindex="0" style="display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; cursor: pointer; background: var(--card); border: 1px solid var(--border-color, #e0e0e0);">
+                    <span class="connection-dot connected" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: green; transition: background 0.3s;"></span>
+                    <span class="connection-text" style="font-size: 0.8rem; color: var(--subtext);">Online</span>
+                </div>
                 <div id="theme-toggle" aria-label="Toggle theme" role="group" style="display:flex; gap:6px; align-items:center;">
                     <button id="btn-light" class="theme-btn" title="Light mode" aria-label="Light mode" onclick="(function(){ document.body.classList.remove('dark-theme'); document.documentElement.removeAttribute('data-theme'); localStorage.setItem('preferred-theme','light'); document.getElementById('btn-light')?.setAttribute('aria-pressed','true'); document.getElementById('btn-dark')?.setAttribute('aria-pressed','false'); })()">☀️</button>
                     <button id="btn-dark" class="theme-btn" title="Dark mode" aria-label="Dark mode" onclick="(function(){ document.body.classList.add('dark-theme'); document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('preferred-theme','dark'); document.getElementById('btn-dark')?.setAttribute('aria-pressed','true'); document.getElementById('btn-light')?.setAttribute('aria-pressed','false'); })()">🌙</button>
@@ -305,6 +309,7 @@
     <script src="modules/climate_data.js"></script>
     <script src="modules/scenario.js"></script>
     <script src="modules/actions.js"></script>
+    <script src="modules/connection.js"></script>
     <script src="modules/app.js"></script>
 
     <!-- Application Entry Point -->
