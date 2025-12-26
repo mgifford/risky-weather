@@ -910,7 +910,8 @@ const UI = (() => {
                 lowDiff < 0 ? `<span style="color: var(--highlight);">▼ ${Math.abs(lowDiff)}° below average</span>` :
                 `<span style="color: var(--subtext);">at average</span>`;
 
-            ELEMENTS.historicalNormalsContent.innerHTML = `
+            // Summary section (always visible)
+            const summaryContent = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                     <div style="background: var(--card); padding: 12px; border-radius: 6px;">
                         <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">Average High</div>
@@ -931,11 +932,24 @@ const UI = (() => {
                         <span>Record Low:</span> <strong style="color: var(--highlight);">${recordLow}°</strong>
                     </div>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--subtext); margin-top: 12px; text-align: right;">
+            `;
+
+            // Accordion content (additional details)
+            const detailsContent = `
+                <div style="font-size: 0.8rem; color: var(--subtext); text-align: right;">
                     Based on ${normals.yearsOfData} years of data • 
                     <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Data: Open-Meteo Archive API</a>
                 </div>
             `;
+
+            // Render summary (always visible)
+            const summaryElement = document.getElementById('historical-normals-summary');
+            if (summaryElement) {
+                summaryElement.innerHTML = summaryContent;
+            }
+
+            // Render details (in accordion)
+            ELEMENTS.historicalNormalsContent.innerHTML = detailsContent;
 
             ELEMENTS.historicalNormalsSection.classList.remove('hidden');
         },

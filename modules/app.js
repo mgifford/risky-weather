@@ -312,7 +312,9 @@ const App = (() => {
                 }
             } catch (e) {
                 console.error(`Failed to load section ${selectedSection.id}:`, e);
-                sectionEl.innerHTML = '<p style="color:red; text-align:center;">Error loading content.</p>';
+                const errorMsg = e.message || 'Unknown error';
+                const errorType = selectedSection.id || 'unknown section';
+                sectionEl.innerHTML = `<p style="color:red; text-align:center; font-size: 0.9rem;">⚠️ Error loading ${errorType}<br><span style="font-size: 0.8rem; color: #cc6666;">${errorMsg}</span></p>`;
             }
         }
     }
@@ -354,7 +356,18 @@ const App = (() => {
         const links = Geo.getOfficialLinks(lat, lon, config.isCanada, city);
         UI.setOfficialLinks(links);
 
-        // Fetch weather data
+        // Fetch current conditions first (for immediate display)
+        try {
+            const currentData = await API.fetchCurrentWeather(lat, lon);
+            if (currentData) {
+                UI.renderCurrentConditions(currentData, config.nameA, config.nameB, config.units, config.isCanada);
+            }
+        } catch (currentError) {
+            console.warn('Could not fetch current conditions:', currentError);
+            // Don't show error to user - this is an enhancement feature
+        }
+
+        // Fetch forecast data
         try {
             let forecastData = await API.fetchForecast(lat, lon, config.modelA, config.modelB, config.isCanada);
             
@@ -386,17 +399,6 @@ const App = (() => {
                 }
             } catch (actionsError) {
                 console.warn('Could not generate actions:', actionsError);
-            }
-            
-            // Fetch and display current conditions
-            try {
-                const currentData = await API.fetchCurrentWeather(lat, lon);
-                if (currentData) {
-                    UI.renderCurrentConditions(currentData, config.nameA, config.nameB, config.units, config.isCanada);
-                }
-            } catch (currentError) {
-                console.warn('Could not fetch current conditions:', currentError);
-                // Don't show error to user - this is an enhancement feature
             }
             
             // Fetch and display historical normals for today's date

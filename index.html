@@ -188,29 +188,32 @@
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section class="card" id="model-disagreement">
-            <details>
-                <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">🎯 Understanding Model Disagreement</summary>
-                <div style="margin-top:6px; font-size:0.85rem;">
-                    <a href="#model-disagreement" style="text-decoration: none; color: inherit; display:inline-block;">Jump to section</a>
-                </div>
-                <div style="margin-top: 12px;">
-                    <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.</p>
-                    <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: var(--subtext);">
-                        • <strong>Temperature difference &gt;5°C:</strong> Plan for a wide range<br>
-                        • <strong>Rain difference &gt;30%:</strong> One model sees rain, another doesn't<br>
-                        • <strong>Models agree closely:</strong> High confidence forecast
-                    </p>
-                </div>
-            </details>
+            
+            <!-- Model Disagreement - moved inside 7-day section -->
+            <div style="margin-top: 24px; border-top: 1px solid var(--border-color, #e0e0e0); padding-top: 16px;">
+                <details>
+                    <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">🎯 Understanding Model Disagreement</summary>
+                    <div style="margin-top:6px; font-size:0.85rem;">
+                        <a href="#seven-day" style="text-decoration: none; color: inherit; display:inline-block;">Back to top</a>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <p style="margin: 0;" data-i18n="ui.uncertaintyDescription">When models disagree significantly, forecast uncertainty is <strong>high</strong>. Look for 🤔 (high uncertainty) or 🔀 (moderate uncertainty) icons next to days below.</p>
+                        <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: var(--subtext);">
+                            • <strong>Temperature difference &gt;5°C:</strong> Plan for a wide range<br>
+                            • <strong>Rain difference &gt;30%:</strong> One model sees rain, another doesn't<br>
+                            • <strong>Models agree closely:</strong> High confidence forecast
+                        </p>
+                    </div>
+                </details>
+            </div>
         </section>
 
         <section id="historical-normals-section" class="card hidden">
+            <div class="card-title"><h2 style="margin:0; font-size:1.1rem;">📈 <span data-i18n="ui.historicalNormals">Historical Averages (Last 10 Years)</span></h2></div>
+            <div id="historical-normals-summary" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 12px;"></div>
             <details>
-                <summary style="cursor: pointer; font-weight: 600; font-size: 1rem; padding: 8px 0; list-style-position: outside;">
-                    📈 <span data-i18n="ui.historicalNormals">Historical Averages (Last 10 Years)</span>
+                <summary style="cursor: pointer; font-weight: 600; font-size: 0.95rem; padding: 8px 0; list-style-position: outside;">
+                    <span data-i18n="ui.moreDetails">More Details</span>
                 </summary>
                 <div id="historical-normals-content" style="font-size: 0.9rem; line-height: 1.6; margin-top: 12px;"></div>
             </details>

@@ -79,20 +79,20 @@ const Connection = (() => {
 
     /**
      * Update the connection indicator in the DOM
+     * Only show when offline for minimal visual clutter
      */
     function updateIndicator() {
         const indicator = document.getElementById('connection-indicator');
         if (!indicator) return;
 
-        const dot = indicator.querySelector('.connection-dot');
-        const text = indicator.querySelector('.connection-text');
-
         if (isOnline) {
-            dot.style.background = '#4CAF50'; // Green
-            text.textContent = 'Online';
-            indicator.title = 'Connected to internet (cached data may still be from last update)';
-            indicator.setAttribute('aria-label', 'Connection status: Online');
+            // Hide indicator when online
+            indicator.style.display = 'none';
         } else {
+            // Show red offline indicator
+            indicator.style.display = 'flex';
+            const dot = indicator.querySelector('.connection-dot');
+            const text = indicator.querySelector('.connection-text');
             dot.style.background = '#f44336'; // Red
             text.textContent = 'Offline';
             indicator.title = 'No internet connection (showing cached data)';
