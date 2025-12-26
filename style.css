@@ -349,6 +349,47 @@ h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 1.8rem; }
     line-height: 1.5;
 }
 
+/* ACTIONS PANEL */
+.action-card {
+    background: color-mix(in srgb, var(--card) 98%, var(--text));
+    border-left: 4px solid var(--highlight);
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.action-urgent {
+    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--card));
+}
+.action-important {
+    border-left-color: #FF9800;
+    background: color-mix(in srgb, #FF9800 10%, var(--card));
+}
+.action-info {
+    border-left-color: var(--highlight);
+    background: color-mix(in srgb, var(--highlight) 8%, var(--card));
+}
+.action-btn {
+    background: var(--highlight);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: opacity 0.2s;
+}
+.action-btn:hover {
+    opacity: 0.85;
+}
+.action-btn-remind {
+    background: color-mix(in srgb, var(--highlight) 60%, transparent);
+    color: var(--highlight);
+}
+
 /* 7-DAY TABLE */
 .forecast-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
 .forecast-table th { text-align: left; color: var(--subtext); padding: 8px 4px; border-bottom: 2px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase;}

@@ -321,6 +321,15 @@ const App = (() => {
      * Main application flow
      */
     async function runApp(lat, lon, city, country) {
+        // Parse scenario/debug overrides from URL
+        const overrides = Scenario.parseOverrides(window.location.search);
+        
+        // Show scenario badge if in test mode
+        if (overrides.scenario || overrides.debug) {
+            const badgeInfo = Scenario.getScenarioModeBadge(overrides);
+            UI.showScenarioBadge(badgeInfo);
+        }
+
         UI.setLocation(city);
         const loadingMsg = I18n.t('status.loadingWeather', city);
         UI.setStatus(loadingMsg);
@@ -347,10 +356,37 @@ const App = (() => {
 
         // Fetch weather data
         try {
-            const forecastData = await API.fetchForecast(lat, lon, config.modelA, config.modelB, config.isCanada);
+            let forecastData = await API.fetchForecast(lat, lon, config.modelA, config.modelB, config.isCanada);
+            
+            // Apply scenario overrides if present
+            const overrides = Scenario.parseOverrides(window.location.search);
+            if (overrides && (overrides.scenario || Object.keys(overrides).some(k => overrides[k] && k !== 'mode' && k !== 'debug'))) {
+                forecastData = Scenario.applyOverrides(forecastData, overrides);
+            }
+            
             const todayData = renderForecast(forecastData, config);
             saveForecastForHistory(forecastData, config, lat, lon);
             checkHistory(lat, lon, config);
+            
+            // Generate and render actions
+            try {
+                const candidates = Actions.getCandidateActions(forecastData, { lat, lon }, overrides);
+                const actions = Actions.getActions(forecastData, { lat, lon }, overrides);
+                
+                // Show actions panel if there are actionable items
+                if (actions && actions.length > 0) {
+                    UI.renderActionsPanel(actions, { lat, lon });
+                }
+                
+                // Show debug info if debug=1
+                if (overrides.debug) {
+                    const dismissed = Actions.getDismissedActions(`${lat},${lon}`, overrides.mode || 'real');
+                    const debugInfo = Scenario.getDebugInfo(candidates, actions, overrides, dismissed);
+                    UI.showDebugInfo(debugInfo);
+                }
+            } catch (actionsError) {
+                console.warn('Could not generate actions:', actionsError);
+            }
             
             // Fetch and display current conditions
             try {

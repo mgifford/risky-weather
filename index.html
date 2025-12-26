@@ -103,6 +103,21 @@
             </div>
         </section>
 
+        <!-- Scenario Badge (appears when in test mode) -->
+        <div id="scenario-badge" style="display: none; background: color-mix(in srgb, #FF9800 15%, transparent); border: 2px solid #FF9800; border-radius: 8px; padding: 12px; margin: 16px 0; color: var(--text); font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;"></div>
+
+        <!-- Actions Panel -->
+        <section id="actions-section" class="card hidden">
+            <div class="card-title">
+                <h2 style="margin:0; font-size:1.1rem;">⚡ Actions</h2>
+                <span style="font-size: 0.85rem; color: var(--subtext);">What to do today</span>
+            </div>
+            <div id="actions-content"></div>
+        </section>
+
+        <!-- Debug Section (only shown when debug=1) -->
+        <section id="debug-section" style="display: none; background: color-mix(in srgb, var(--card) 80%, transparent); border: 1px solid color-mix(in srgb, var(--card) 60%, transparent); border-radius: 8px; padding: 16px; margin: 16px 0; font-family: monospace; font-size: 0.85rem;"></section>
+
         <section class="card" id="todays-forecast">
             <div class="card-title">
                 <a href="#todays-forecast" style="text-decoration: none; color: inherit;">
@@ -288,6 +303,8 @@
     <script src="modules/geo.js"></script>
     <script src="modules/history.js"></script>
     <script src="modules/climate_data.js"></script>
+    <script src="modules/scenario.js"></script>
+    <script src="modules/actions.js"></script>
     <script src="modules/app.js"></script>
 
     <!-- Application Entry Point -->

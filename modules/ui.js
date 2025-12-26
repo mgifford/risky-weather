@@ -45,7 +45,10 @@ const UI = (() => {
         citySearchResults: document.getElementById('city-search-results'),
         historicalNormalsSection: document.getElementById('historical-normals-section'),
         historicalNormalsContent: document.getElementById('historical-normals-content'),
-        srAnnouncer: document.getElementById('sr-announcer')
+        srAnnouncer: document.getElementById('sr-announcer'),
+        actionsSection: document.getElementById('actions-section'),
+        debugSection: document.getElementById('debug-section'),
+        scenarioBadge: document.getElementById('scenario-badge')
     };
 
     let currentLessonIndex = 0;
@@ -1389,6 +1392,134 @@ const UI = (() => {
             }
 
             detailsEl.innerHTML = details.join('<br>');
+        },
+
+        /**
+         * Render Actions Panel
+         */
+        renderActionsPanel(actions, location) {
+            if (!ELEMENTS.actionsSection) return;
+
+            if (!actions || actions.length === 0) {
+                ELEMENTS.actionsSection.classList.add('hidden');
+                return;
+            }
+
+            ELEMENTS.actionsSection.classList.remove('hidden');
+
+            const html = actions.map(action => {
+                const severityClass = action.severity === 'urgent' ? 'action-urgent' : 
+                                     action.severity === 'important' ? 'action-important' : 
+                                     'action-info';
+                
+                const easterEggHtml = action.easterEgg && action.easterEggText ? 
+                    `<div style="margin-top: 8px; padding: 8px; background: color-mix(in srgb, #FFD700 20%, transparent); border-left: 3px solid #FFD700; border-radius: 3px; font-size: 0.9rem; color: var(--text);"><strong>🥚 Easter egg:</strong> ${action.easterEggText}</div>` : '';
+                
+                return `
+                    <div class="action-card ${severityClass}" data-action-id="${action.id}">
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; color: var(--text);">${action.title}</div>
+                                <div style="font-size: 0.95rem; color: var(--text); margin-bottom: 8px; line-height: 1.4;">${action.description}</div>
+                                <div style="font-size: 0.8rem; color: var(--subtext); font-style: italic;">Why: ${action.why}</div>
+                                ${action.timeframe ? `<div style="font-size: 0.8rem; color: var(--subtext); margin-top: 4px;"><strong>When:</strong> ${action.timeframe}</div>` : ''}
+                            </div>
+                        </div>
+                        ${easterEggHtml}
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="action-btn action-btn-done" onclick="UI.dismissAction('${action.id}', '${location.lat},${location.lon}', ${action.dismissTTLHours})">Done</button>
+                            ${action.remindLaterTTLHours ? `<button class="action-btn action-btn-remind" onclick="UI.dismissAction('${action.id}', '${location.lat},${location.lon}', ${action.remindLaterTTLHours})">Remind later</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const container = ELEMENTS.actionsSection.querySelector('#actions-content');
+            if (container) {
+                container.innerHTML = html;
+            }
+        },
+
+        /**
+         * Handle action dismissal
+         */
+        dismissAction(actionId, locationKey, ttlHours) {
+            Actions.dismissAction(actionId, locationKey, ttlHours);
+            
+            // Remove from DOM
+            const card = document.querySelector(`[data-action-id="${actionId}"]`);
+            if (card) {
+                card.style.opacity = '0.5';
+                card.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    card.remove();
+                    
+                    // Hide section if no actions remain
+                    const container = document.getElementById('actions-content');
+                    if (container && container.children.length === 0) {
+                        ELEMENTS.actionsSection.classList.add('hidden');
+                    }
+                }, 300);
+            }
+        },
+
+        /**
+         * Show scenario mode badge
+         */
+        showScenarioBadge(badgeInfo) {
+            if (!ELEMENTS.scenarioBadge || !badgeInfo || !badgeInfo.show) return;
+
+            ELEMENTS.scenarioBadge.style.display = 'flex';
+            ELEMENTS.scenarioBadge.innerHTML = `
+                <div style="flex: 1;">
+                    <strong style="color: #FF9800;">🧪 ${badgeInfo.text}</strong>
+                </div>
+                <button onclick="Scenario.clearOverrides(); location.reload();" style="
+                    background: none;
+                    border: none;
+                    color: #FF9800;
+                    cursor: pointer;
+                    font-weight: 600;
+                    padding: 0;
+                ">Clear</button>
+            `;
+        },
+
+        /**
+         * Show debug section
+         */
+        showDebugInfo(debugInfo) {
+            if (!ELEMENTS.debugSection) return;
+
+            const html = `
+                <details>
+                    <summary style="cursor: pointer; font-weight: 600; padding: 8px 0;">🐛 Debug Info</summary>
+                    <div style="margin-top: 12px; font-size: 0.85rem; line-height: 1.6; color: var(--subtext); background: var(--card); padding: 12px; border-radius: 6px; max-height: 400px; overflow-y: auto;">
+                        <div><strong>Mode:</strong> ${debugInfo.mode}</div>
+                        ${debugInfo.scenario ? `<div><strong>Scenario:</strong> ${debugInfo.scenario}</div>` : ''}
+                        <div><strong>Overrides active:</strong> ${debugInfo.overridesActive}</div>
+                        <div style="margin-top: 12px;"><strong>Candidates (${debugInfo.candidates.length}):</strong></div>
+                        <ul style="margin: 4px 0 0 20px;">
+                            ${debugInfo.candidates.map(a => `<li>${a.type}: ${a.title}</li>`).join('')}
+                        </ul>
+                        <div style="margin-top: 12px;"><strong>Actionable (${debugInfo.filtered.length}):</strong></div>
+                        <ul style="margin: 4px 0 0 20px;">
+                            ${debugInfo.filtered.map(a => `<li>${a.type}: ${a.title}</li>`).join('')}
+                        </ul>
+                        ${Object.keys(debugInfo.dismissed).length > 0 ? `
+                            <div style="margin-top: 12px;"><strong>Dismissed (by TTL):</strong></div>
+                            <ul style="margin: 4px 0 0 20px;">
+                                ${Object.entries(debugInfo.dismissed).map(([id, info]) => 
+                                    `<li>${id} (expires in ${Math.round((info.ttlHours * 3600000 - (Date.now() - info.dismissedAt)) / 3600000)} hrs)</li>`
+                                ).join('')}
+                            </ul>
+                        ` : ''}
+                    </div>
+                </details>
+            `;
+
+            ELEMENTS.debugSection.innerHTML = html;
+            ELEMENTS.debugSection.style.display = 'block';
         }
     };
 })();
