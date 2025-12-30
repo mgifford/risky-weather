@@ -288,15 +288,24 @@ const Geo = (() => {
                 try {
                     const results = await queryGeocoding(name);
                     if (results.length) {
-                        return results.map(result => ({
-                            name: result.name,
-                            region: result.admin1 || '',
-                            country: result.country,
-                            countryCode: result.country_code,
-                            lat: result.latitude,
-                            lon: result.longitude,
-                            displayName: [result.name, result.admin1, result.country].filter(Boolean).join(', ')
-                        }));
+                        return results.map(result => {
+                            // Avoid duplicating city name if admin1 is the same as name
+                            const parts = [];
+                            parts.push(result.name);
+                            if (result.admin1 && result.admin1 !== result.name) {
+                                parts.push(result.admin1);
+                            }
+                            parts.push(result.country);
+                            return {
+                                name: result.name,
+                                region: result.admin1 || '',
+                                country: result.country,
+                                countryCode: result.country_code,
+                                lat: result.latitude,
+                                lon: result.longitude,
+                                displayName: parts.filter(Boolean).join(', ')
+                            };
+                        });
                     }
                 } catch (innerErr) {
                     console.warn('Geocoding attempt failed for', name, innerErr);

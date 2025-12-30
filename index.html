@@ -4,6 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risky Weather: Model Comparison</title>
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Risky Weather: Model Comparison">
+    <meta name="description" content="Learn probabilistic thinking and climate context by comparing weather forecast models. Explore model uncertainty, climate data, and educational lessons on weather vs risk.">
+    <meta name="keywords" content="weather forecast, climate literacy, model comparison, uncertainty, probabilistic thinking, GEM, ECMWF, GFS, climate education">
+    <meta name="author" content="Risky Weather Project">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mgifford.github.io/risky-weather/">
+    <meta property="og:title" content="Risky Weather: Model Comparison">
+    <meta property="og:description" content="Learn probabilistic thinking and climate context by comparing weather forecast models. Explore model uncertainty, climate data, and educational lessons on weather vs risk.">
+    <meta property="og:image" content="https://mgifford.github.io/risky-weather/icons/icon-512.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="Risky Weather application icon showing sun and cloud">
+    <meta property="og:site_name" content="Risky Weather">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://mgifford.github.io/risky-weather/">
+    <meta name="twitter:title" content="Risky Weather: Model Comparison">
+    <meta name="twitter:description" content="Learn probabilistic thinking and climate context by comparing weather forecast models. Explore model uncertainty, climate data, and educational lessons.">
+    <meta name="twitter:image" content="https://mgifford.github.io/risky-weather/icons/icon-512.png">
+    <meta name="twitter:image:alt" content="Risky Weather application icon">
+    
+    <!-- LinkedIn-specific optimizations -->
+    <meta property="article:author" content="Risky Weather Project">
+    <meta property="article:tag" content="Climate Literacy">
+    <meta property="article:tag" content="Weather Forecasting">
+    <meta property="article:tag" content="Data Visualization">
+    <meta property="article:tag" content="Educational Technology">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mgifford.github.io/risky-weather/">
+    
     <link rel="stylesheet" href="style.css">
     <!-- Use system font stack for performance and sustainability -->
 </head>
@@ -38,20 +75,22 @@
         </div>
         
         <!-- City Search and Location on same line -->
-        <div style="margin: 12px auto; max-width: 50%; display: flex; gap: 12px; align-items: center; position: relative;">
-            <label for="city-search-input" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">Search for a city</label>
-            <input 
-                type="text" 
-                id="city-search-input" 
-                placeholder="Search for a city..."
-                data-i18n-placeholder="ui.searchCity"
-                role="combobox" aria-autocomplete="list" aria-controls="city-search-results" aria-expanded="false"
-                style="flex: 1; padding: 8px 32px 8px 10px; border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-radius: 6px; font-size: 0.9rem;"
-            />
-            <span style="position: absolute; left: auto; right: 200px; color: var(--subtext); pointer-events: none;">🔍</span>
-            <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 200px; background: var(--card); border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-top: none; border-radius: 0 0 6px 6px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
-            
-            <div class="location-badge" id="location-display" style="white-space: nowrap; font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; background: color-mix(in srgb, var(--card) 50%, transparent); border: 1px solid var(--border-color, #e0e0e0); min-width: 120px; text-align: right;">—</div>
+        <div style="width: 100%; max-width: min(95%, 600px); margin: 12px auto;">
+            <label for="city-search-input" style="display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 500; color: var(--text);">Search for a city</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; position: relative;">
+                <input 
+                    type="text" 
+                    id="city-search-input" 
+                    placeholder="Search for a city..."
+                    data-i18n-placeholder="ui.searchCity"
+                    role="combobox" aria-autocomplete="list" aria-controls="city-search-results" aria-expanded="false"
+                    style="flex: 1; min-width: 180px; padding: 8px 32px 8px 10px; border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-radius: 6px; font-size: 0.9rem;"
+                />
+                <span style="position: absolute; left: auto; right: auto; color: var(--subtext); pointer-events: none; margin-left: 8px;">🔍</span>
+                <ul id="city-search-results" role="listbox" aria-live="polite" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--card); border: 2px solid color-mix(in srgb, var(--card) 80%, transparent); border-top: none; border-radius: 0 0 6px 6px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></ul>
+                
+                <div class="location-badge" id="location-display" style="font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; background: color-mix(in srgb, var(--card) 50%, transparent); border: 1px solid var(--border-color, #e0e0e0); text-align: right; flex: 0 1 auto; word-break: break-word;">—</div>
+            </div>
         </div>
         
         <div class="debug-info">
@@ -72,6 +111,15 @@
                 <span style="font-size: 0.85rem; color: var(--subtext);" id="current-time">--</span>
             </div>
             <div style="text-align: center; padding: 20px;">
+                <!-- Weather Alerts Section (Canada Only) -->
+                <div id="weather-alerts" style="display: none; background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; padding: 12px; margin: 0 0 16px 0; text-align: left;">
+                    <div style="font-weight: 600; color: #856404; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 1.3rem;">⚠️</span>
+                        <span>Active Weather Alerts</span>
+                    </div>
+                    <div id="alerts-content" style="color: #856404; font-size: 0.9rem; line-height: 1.5;"></div>
+                </div>
+
                 <div class="current-weather" style="display: inline-block;">
                     <div class="current-icon" id="current-icon">☁️</div>
                     <div class="current-temp" id="current-temp">--°</div>
@@ -242,10 +290,20 @@
         <!-- Random Sections Container -->
         <div id="random-sections"></div>
 
-        <button id="reset-btn" class="secondary-btn" data-i18n="ui.resetLocation">Reset Location & History</button>
-        <button id="refresh-location-btn" class="secondary-btn" data-i18n="ui.refreshLocation" style="margin-left: 10px;">🔄 Refresh Location</button>
-        <button id="view-cache-btn" class="secondary-btn" data-i18n="ui.viewCache" style="margin-left: 10px;">📋 View Cache</button>
-        <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" style="margin-left: 10px;">🔗 Share</button>
+        <div style="text-align: center; margin: 20px 0;">
+            <button id="reset-btn" class="secondary-btn" data-i18n="ui.resetLocation">Reset Location & History</button>
+            <button id="refresh-location-btn" class="secondary-btn" data-i18n="ui.refreshLocation" style="margin-left: 10px;">🔄 Refresh Location</button>
+            <button id="view-cache-btn" class="secondary-btn" data-i18n="ui.viewCache" style="margin-left: 10px;">📋 View Cache</button>
+            <div style="position: relative; display: inline-block; margin-left: 10px;">
+                <button id="share-btn" class="secondary-btn" data-i18n="ui.shareLocation" aria-haspopup="menu" aria-expanded="false">🔗 Share</button>
+                <div id="share-menu" role="menu" style="display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border-color, #e0e0e0); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; margin-bottom: 8px; z-index: 1000; overflow: hidden;">
+                    <button id="share-copy-btn" role="menuitem" style="width: 100%; text-align: left; padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: background 0.2s;" onmouseover="this.style.background='color-mix(in srgb, var(--card) 70%, transparent)'" onmouseout="this.style.background='none'">📋 Copy Link</button>
+                    <button id="share-linkedin-btn" role="menuitem" style="width: 100%; text-align: left; padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: background 0.2s;" onmouseover="this.style.background='color-mix(in srgb, var(--card) 70%, transparent)'" onmouseout="this.style.background='none'">💼 Share on LinkedIn</button>
+                    <button id="share-mastodon-btn" role="menuitem" style="width: 100%; text-align: left; padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: background 0.2s;" onmouseover="this.style.background='color-mix(in srgb, var(--card) 70%, transparent)'" onmouseout="this.style.background='none'">🐘 Share on Mastodon</button>
+                    <button id="share-bluesky-btn" role="menuitem" style="width: 100%; text-align: left; padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 0.9rem; color: var(--text); transition: background 0.2s;" onmouseover="this.style.background='color-mix(in srgb, var(--card) 70%, transparent)'" onmouseout="this.style.background='none'">☁️ Share on Bluesky</button>
+                </div>
+            </div>
+        </div>
     
         <footer style="text-align: center; margin: 40px 0 20px; padding: 20px 0; border-top: 1px solid color-mix(in srgb, var(--card) 80%, transparent);">
             <p style="font-size: 0.85rem; color: var(--subtext); margin: 0 0 8px 0;">
@@ -260,9 +318,6 @@
                     </svg>
                     View on GitHub
                 </a>
-            </p>
-            <p style="font-size: 0.85rem; color: var(--subtext); margin: 8px 0 0 0;">
-                <a href="ACCESSIBILITY.md" target="_blank" style="color: inherit; text-decoration: underline;">Accessibility Statement</a>
             </p>
 
             <!-- Bluesky Footer -->

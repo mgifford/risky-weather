@@ -18,7 +18,7 @@ const App = (() => {
         
         // Hide language toggle until localization is ready
         UI.updateLanguageToggle(true);
-        UI.onShare(shareLocation);
+        initializeShareMenu();
         
         // Initialize city search
         UI.initCitySearch((lat, lon, city) => {
@@ -365,6 +365,16 @@ const App = (() => {
         } catch (currentError) {
             console.warn('Could not fetch current conditions:', currentError);
             // Don't show error to user - this is an enhancement feature
+        }
+
+        // Fetch ECCC weather alerts if in Canada
+        if (config.isCanada) {
+            try {
+                await fetchAndDisplayECCCAlerts(lat, lon, city);
+            } catch (alertError) {
+                console.warn('Could not fetch ECCC alerts:', alertError);
+                // Don't show error to user - this is an enhancement feature
+            }
         }
 
         // Fetch forecast data
@@ -883,28 +893,249 @@ const App = (() => {
     }
 
     /**
-     * Share current location as a URL
+     * Initialize share menu and social handlers
      */
-    async function shareLocation() {
-        if (!currentConfig) {
-            alert('No location loaded yet');
+    function initializeShareMenu() {
+        const shareBtn = document.getElementById('share-btn');
+        const shareMenu = document.getElementById('share-menu');
+
+        if (!shareBtn || !shareMenu) {
+            console.warn('Share menu elements not found');
             return;
         }
 
-        const shareUrl = Storage.getShareUrl(
-            currentConfig.lat,
-            currentConfig.lon,
-            currentConfig.city
-        );
+        // Toggle menu on button click
+        shareBtn.addEventListener('click', () => {
+            const isOpen = shareMenu.style.display !== 'none';
+            shareMenu.style.display = isOpen ? 'none' : 'block';
+            shareBtn.setAttribute('aria-expanded', !isOpen);
+        });
 
-        // Try to copy to clipboard
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const shareContainer = shareBtn.parentElement;
+            if (shareContainer && !shareContainer.contains(e.target)) {
+                shareMenu.style.display = 'none';
+                shareBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Register social share button handlers
+        const copyBtn = document.getElementById('share-copy-btn');
+        const linkedinBtn = document.getElementById('share-linkedin-btn');
+        const mastodonBtn = document.getElementById('share-mastodon-btn');
+        const blueskyBtn = document.getElementById('share-bluesky-btn');
+
+        const closeMenu = () => {
+            shareMenu.style.display = 'none';
+            shareBtn.setAttribute('aria-expanded', 'false');
+        };
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!currentConfig) {
+                    alert('No location loaded yet');
+                    return;
+                }
+                const shareUrl = Storage.getShareUrl(
+                    currentConfig.lat,
+                    currentConfig.lon,
+                    currentConfig.city
+                );
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    alert(I18n.t('ui.linkCopied'));
+                } catch (err) {
+                    prompt(I18n.t('ui.linkCopyFailed', ''), shareUrl);
+                }
+                closeMenu();
+            });
+        }
+
+        if (linkedinBtn) {
+            linkedinBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!currentConfig) {
+                    alert('No location loaded yet');
+                    return;
+                }
+                const shareUrl = Storage.getShareUrl(
+                    currentConfig.lat,
+                    currentConfig.lon,
+                    currentConfig.city
+                );
+                const url = encodeURIComponent(shareUrl);
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+                closeMenu();
+            });
+        }
+
+        if (mastodonBtn) {
+            mastodonBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!currentConfig) {
+                    alert('No location loaded yet');
+                    return;
+                }
+                const shareUrl = Storage.getShareUrl(
+                    currentConfig.lat,
+                    currentConfig.lon,
+                    currentConfig.city
+                );
+                const text = encodeURIComponent(`Check out Risky Weather - learn about weather forecasts, model uncertainty, and climate context: ${shareUrl}`);
+                window.open(`https://toot.kytta.dev/?text=${text}`, '_blank', 'width=600,height=400');
+                closeMenu();
+            });
+        }
+
+        if (blueskyBtn) {
+            blueskyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!currentConfig) {
+                    alert('No location loaded yet');
+                    return;
+                }
+                const shareUrl = Storage.getShareUrl(
+                    currentConfig.lat,
+                    currentConfig.lon,
+                    currentConfig.city
+                );
+                const text = encodeURIComponent(`Check out Risky Weather - learn about weather forecasts, model uncertainty, and climate context: ${shareUrl}`);
+                window.open(`https://bsky.app/intent/compose?text=${text}`, '_blank', 'width=600,height=400');
+                closeMenu();
+            });
+        }
+    }
+
+    /**
+     * Fetch and display ECCC weather alerts for a Canadian location
+     */
+    async function fetchAndDisplayECCCAlerts(lat, lon, city) {
         try {
-            await navigator.clipboard.writeText(shareUrl);
-            alert(I18n.t('ui.linkCopied'));
-            console.log('Share URL:', shareUrl);
-        } catch (err) {
-            // Fallback: show URL in prompt
-            prompt(I18n.t('ui.linkCopyFailed', ''), shareUrl);
+            // Environment Canada publishes alerts via RSS feeds per province
+            // Format: https://weather.gc.ca/rss/alertsCap_xx.xml where xx is province code
+            
+            // Try to detect province code from city or use a generic feed
+            let provCode = null;
+            
+            // Common Canadian cities and their provinces for quick lookup
+            const cityToProvince = {
+                'Ottawa': 'ON', 'Toronto': 'ON', 'Montreal': 'QC', 'Vancouver': 'BC',
+                'Calgary': 'AB', 'Edmonton': 'AB', 'Winnipeg': 'MB', 'Halifax': 'NS',
+                'Quebec City': 'QC', 'Kingston': 'ON', 'Victoria': 'BC', 'Saskatoon': 'SK'
+            };
+            
+            // Try to match city name
+            for (const [cityName, code] of Object.entries(cityToProvince)) {
+                if (city && city.toLowerCase().includes(cityName.toLowerCase())) {
+                    provCode = code;
+                    break;
+                }
+            }
+            
+            // If no province found, try to infer from latitude/longitude
+            if (!provCode) {
+                // Rough bounds for provinces (lat/lon boxes)
+                const provBounds = {
+                    'BC': { minLat: 49, maxLat: 60, minLon: -139, maxLon: -114 },
+                    'AB': { minLat: 49, maxLat: 60, minLon: -120, maxLon: -110 },
+                    'SK': { minLat: 49, maxLat: 60, minLon: -110, maxLon: -102 },
+                    'MB': { minLat: 49, maxLat: 60, minLon: -102, maxLon: -95 },
+                    'ON': { minLat: 42, maxLat: 52, minLon: -95, maxLon: -74 },
+                    'QC': { minLat: 45, maxLat: 52, minLon: -79, maxLon: -57 },
+                    'NB': { minLat: 45, maxLat: 48, minLon: -69, maxLon: -64 },
+                    'NS': { minLat: 43, maxLat: 47, minLon: -66, maxLon: -60 },
+                    'PE': { minLat: 45, maxLat: 47, minLon: -64, maxLon: -62 },
+                    'NL': { minLat: 47, maxLat: 53, minLon: -59, maxLon: -52 }
+                };
+                
+                for (const [code, bounds] of Object.entries(provBounds)) {
+                    if (lat >= bounds.minLat && lat <= bounds.maxLat && 
+                        lon >= bounds.minLon && lon <= bounds.maxLon) {
+                        provCode = code;
+                        break;
+                    }
+                }
+            }
+            
+            if (!provCode) {
+                console.warn('Could not determine province code for alerts');
+                return;
+            }
+            
+            // Fetch ECCC alerts RSS feed
+            const feedUrl = `https://weather.gc.ca/rss/alertsCap_${provCode}.xml`;
+            const response = await fetch(feedUrl, { signal: AbortSignal.timeout(5000) });
+            
+            if (!response.ok) {
+                console.warn(`ECCC alerts feed returned ${response.status}`);
+                return;
+            }
+            
+            const xml = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xml, 'text/xml');
+            
+            // Check for parse errors
+            if (doc.querySelector('parsererror')) {
+                console.warn('Failed to parse ECCC alerts feed');
+                return;
+            }
+            
+            // Extract alert entries from the RSS/Atom feed
+            const entries = doc.querySelectorAll('entry');
+            
+            if (entries.length === 0) {
+                // No alerts - hide the alerts section
+                const alertsDiv = document.getElementById('weather-alerts');
+                if (alertsDiv) alertsDiv.style.display = 'none';
+                return;
+            }
+            
+            // Parse and display alerts
+            const alerts = [];
+            entries.forEach(entry => {
+                const title = entry.querySelector('title')?.textContent || '';
+                const summary = entry.querySelector('summary')?.textContent || '';
+                const updated = entry.querySelector('updated')?.textContent || '';
+                
+                // Extract alert type from title (Warning, Watch, Advisory, etc.)
+                const alertType = title.split(' ').slice(0, 3).join(' ') || title;
+                
+                alerts.push({
+                    type: alertType,
+                    summary: summary,
+                    updated: new Date(updated).toLocaleString()
+                });
+            });
+            
+            // Display alerts in the UI
+            if (alerts.length > 0) {
+                const alertsDiv = document.getElementById('weather-alerts');
+                const contentDiv = document.getElementById('alerts-content');
+                
+                if (alertsDiv && contentDiv) {
+                    let html = '';
+                    alerts.forEach((alert, idx) => {
+                        html += `<div style="margin-bottom: 8px;">
+                            <strong>${alert.type}</strong><br>
+                            ${alert.summary.substring(0, 200)}${alert.summary.length > 200 ? '...' : ''}<br>
+                            <span style="font-size: 0.8rem; opacity: 0.8;">Updated: ${alert.updated}</span>
+                        </div>`;
+                        if (idx < alerts.length - 1) {
+                            html += '<hr style="border: none; border-top: 1px solid #ffc107; margin: 8px 0;">';
+                        }
+                    });
+                    
+                    contentDiv.innerHTML = html;
+                    alertsDiv.style.display = 'block';
+                }
+            }
+            
+        } catch (error) {
+            console.warn('ECCC alerts fetch error:', error);
+            // Silently fail - alerts are optional
         }
     }
 
@@ -912,7 +1143,6 @@ const App = (() => {
         init,
         reset,
         refreshLocation,
-        toggleLanguage,
-        shareLocation
+        toggleLanguage
     };
 })();
