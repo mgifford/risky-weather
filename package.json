@@ -1,0 +1,18 @@
+{
+  "name": "risky-weather",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static single-page weather risk education tool",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "ci:a11y": "node scripts/ci-a11y.js",
+    "ci:security": "node scripts/ci-security.js",
+    "ci:qa": "npm run ci:security && npm run ci:a11y"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.7.3",
+    "playwright": "1.40.1"
+  }
+}

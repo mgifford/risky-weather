@@ -103,6 +103,14 @@ python3 -m http.server 8000
 Notes:
 - If you open the file locally via `file://`, some third-party reverse-geocoding endpoints may reject the request (CORS). Use the local server above to avoid that.
 - The app will request geolocation only when needed; if blocked it falls back to IP-based location.
+- For GitHub Pages, serve the static files from a `docs/` directory and keep asset URLs relative so they work under the repo subpath.
+
+## QA checks (accessibility + security)
+- Install tooling once: `npm install` (Node 18+).
+- Serve docs locally (for example): `npx serve docs -l 4173` or `python3 -m http.server 4173 --directory docs`.
+- Accessibility scan: `BASE_URL=http://127.0.0.1:4173 A11Y_PAGES=index.html node scripts/ci-a11y.js` (use `A11Y_EXCLUDE` for comma-separated selectors to skip demo sections).
+- Security scan: `node scripts/ci-security.js` (set `DOCS_DIR` if your HTML lives elsewhere).
+- CI ready: `npm run ci:qa` runs security then accessibility; start the docs server first in CI (see example in issue/PR template or workflow).
 
 ---
 

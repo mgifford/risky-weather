@@ -891,66 +891,103 @@ const UI = (() => {
         renderHistoricalNormals(normals, todayHigh, todayLow) {
             if (!normals || !ELEMENTS.historicalNormalsContent) return;
 
-            const avgHigh = Math.round(normals.avgHigh);
-            const avgLow = Math.round(normals.avgLow);
-            const recordHigh = Math.round(normals.recordHigh);
-            const recordLow = Math.round(normals.recordLow);
-            
-            // Compare today's forecast to historical averages
-            const highDiff = todayHigh !== null ? Math.round(todayHigh - avgHigh) : null;
-            const lowDiff = todayLow !== null ? Math.round(todayLow - avgLow) : null;
-            
-                const highComparison = highDiff === null ? '' : 
-                highDiff > 0 ? `<span style="color: var(--accent);">▲ ${highDiff}° above average</span>` :
-                highDiff < 0 ? `<span style="color: var(--highlight);">▼ ${Math.abs(highDiff)}° below average</span>` :
-                `<span style="color: var(--subtext);">at average</span>`;
-                
-                const lowComparison = lowDiff === null ? '' :
-                lowDiff > 0 ? `<span style="color: var(--accent);">▲ ${lowDiff}° above average</span>` :
-                lowDiff < 0 ? `<span style="color: var(--highlight);">▼ ${Math.abs(lowDiff)}° below average</span>` :
-                `<span style="color: var(--subtext);">at average</span>`;
-
-            // Summary section (always visible)
-            const summaryContent = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <div style="background: var(--card); padding: 12px; border-radius: 6px;">
-                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">Average High</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">${avgHigh}°</div>
-                        ${todayHigh !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: var(--text);">Today: ${Math.round(todayHigh)}° ${highComparison}</div>` : ''}
-                    </div>
-                    <div style="background: var(--card); padding: 12px; border-radius: 6px;">
-                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">Average Low</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--highlight);">${avgLow}°</div>
-                        ${todayLow !== null ? `<div style="font-size: 0.9rem; margin-top: 4px; color: var(--text);">Today: ${Math.round(todayLow)}° ${lowComparison}</div>` : ''}
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.9rem; color: var(--text);">
-                    <div>
-                        <span>Record High:</span> <strong style="color: var(--accent);">${recordHigh}°</strong>
-                    </div>
-                    <div>
-                        <span>Record Low:</span> <strong style="color: var(--highlight);">${recordLow}°</strong>
-                    </div>
-                </div>
-            `;
-
-            // Accordion content (additional details)
-            const detailsContent = `
-                <div style="font-size: 0.8rem; color: var(--subtext); text-align: right;">
-                    Based on ${normals.yearsOfData} years of data • 
-                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Data: Open-Meteo Archive API</a>
-                </div>
-            `;
-
-            // Render summary (always visible)
             const summaryElement = document.getElementById('historical-normals-summary');
+            const rolling = normals.rolling31 || {};
+            const rollingBaseline = rolling.baseline || null;
+            const rollingRecent = rolling.recent || null;
+            const todayStats = normals.today || null;
+            const monthStats = normals.month || {};
+            const prevMonthStats = monthStats.previous || {};
+
+            const fmtTemp = (value) => (value == null || Number.isNaN(value)) ? '—' : `${Math.round(value)}°`;
+            const diffLabel = (actual, baseline) => {
+                if (actual == null || baseline == null || Number.isNaN(actual) || Number.isNaN(baseline)) {
+                    return `<span style="color: var(--subtext);">${I18n.t('ui.noRecentData')}</span>`;
+                }
+                const delta = Math.round(actual - baseline);
+                if (delta === 0) return `<span style="color: var(--subtext);">${I18n.t('ui.atAverage')}</span>`;
+                if (delta > 0) return `<span style="color: var(--accent);">${I18n.t('ui.deltaWarmer', delta)}</span>`;
+                return `<span style="color: var(--highlight);">${I18n.t('ui.deltaCooler', Math.abs(delta))}</span>`;
+            };
+
+            const monthName = (m) => {
+                const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                if (!m || m < 1 || m > 12) return '';
+                return names[m - 1];
+            };
+
+            const summaryContent = `
+                <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; align-items:start;">
+                    <div style="background: var(--card); padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">${I18n.t('ui.rollingWindowActual', rolling.windowDays || 31)}</div>
+                        <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent);">High: ${fmtTemp(rollingRecent?.avgHigh)}</div>
+                        <div style="font-size: 1.3rem; font-weight: 700; color: var(--highlight);">Low: ${fmtTemp(rollingRecent?.avgLow)}</div>
+                        <div style="font-size: 0.9rem; margin-top: 6px; color: var(--text);">${diffLabel(rollingRecent?.avgHigh, rollingBaseline?.avgHigh)}</div>
+                        <div style="font-size: 0.9rem; margin-top: 2px; color: var(--text);">${diffLabel(rollingRecent?.avgLow, rollingBaseline?.avgLow)}</div>
+                    </div>
+                    <div style="background: var(--card); padding: 12px; border-radius: 6px;">
+                        <div style="font-size: 0.85rem; color: var(--subtext); margin-bottom: 4px;">${I18n.t('ui.rollingWindowBaseline', rolling.windowDays || 31)}</div>
+                        <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent);">High: ${fmtTemp(rollingBaseline?.avgHigh)}</div>
+                        <div style="font-size: 1.3rem; font-weight: 700; color: var(--highlight);">Low: ${fmtTemp(rollingBaseline?.avgLow)}</div>
+                        <div style="font-size: 0.85rem; margin-top: 6px; color: var(--subtext);">${I18n.t('ui.recordsLabel')}: ${fmtTemp(rollingBaseline?.recordHigh)} / ${fmtTemp(rollingBaseline?.recordLow)}</div>
+                    </div>
+                </div>
+            `;
+
+            const todayContent = todayStats ? `
+                <div style="background: var(--card); padding: 12px; border-radius: 6px; margin-top: 10px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${I18n.t('ui.todayVsDaily')}</div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 10px;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--subtext);">Forecast High</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--accent);">${fmtTemp(todayHigh)}</div>
+                            <div style="font-size: 0.9rem; margin-top: 4px;">${diffLabel(todayHigh, todayStats.avgHigh)}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--subtext);">Forecast Low</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--highlight);">${fmtTemp(todayLow)}</div>
+                            <div style="font-size: 0.9rem; margin-top: 4px;">${diffLabel(todayLow, todayStats.avgLow)}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--subtext); margin-top: 6px;">${I18n.t('ui.recordsLabel')}: ${fmtTemp(todayStats.recordHigh)} / ${fmtTemp(todayStats.recordLow)}</div>
+                </div>
+            ` : '';
+
+            const prevMonthContent = (prevMonthStats.baseline || prevMonthStats.actual) ? `
+                <div style="background: var(--card); padding: 12px; border-radius: 6px; margin-top: 10px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">${I18n.t('ui.prevMonthVsBaseline', monthName(prevMonthStats.month))}</div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 10px;">
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--subtext);">${I18n.t('ui.monthThisYear')}</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--accent);">High: ${fmtTemp(prevMonthStats.actual?.avgHigh)}</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--highlight);">Low: ${fmtTemp(prevMonthStats.actual?.avgLow)}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; color: var(--subtext);">${I18n.t('ui.baselineLabel')}</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--accent);">High: ${fmtTemp(prevMonthStats.baseline?.avgHigh)}</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: var(--highlight);">Low: ${fmtTemp(prevMonthStats.baseline?.avgLow)}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 6px;">${diffLabel(prevMonthStats.actual?.avgHigh, prevMonthStats.baseline?.avgHigh)}</div>
+                    <div style="font-size: 0.9rem; margin-top: 2px;">${diffLabel(prevMonthStats.actual?.avgLow, prevMonthStats.baseline?.avgLow)}</div>
+                </div>
+            ` : '';
+
+            const meta = rollingBaseline?.yearsOfData || todayStats?.yearsOfData || prevMonthStats.baseline?.yearsOfData;
+            const detailsContent = `
+                ${todayContent}
+                ${prevMonthContent}
+                <div style="font-size: 0.8rem; color: var(--subtext); text-align: right; margin-top: 10px;">
+                    ${meta ? `Based on ${meta} data points` : 'Based on historical archive data'} • 
+                    <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">${I18n.t('ui.dataSourceArchive')}</a>
+                </div>
+            `;
+
             if (summaryElement) {
                 summaryElement.innerHTML = summaryContent;
             }
 
-            // Render details (in accordion)
             ELEMENTS.historicalNormalsContent.innerHTML = detailsContent;
-
             ELEMENTS.historicalNormalsSection.classList.remove('hidden');
         },
 

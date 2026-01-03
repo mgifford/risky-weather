@@ -265,15 +265,17 @@ const API = (() => {
      * Returns average, record high, and record low for comparison
      */
     async function fetchHistoricalNormals(lat, lon, monthDay, yearsBack = 10) {
-        const currentYear = new Date().getFullYear();
+        const today = new Date();
+        const currentYear = today.getFullYear();
         const startYear = currentYear - yearsBack;
+        const endDate = today.toISOString().split('T')[0];
 
-        // Fetch a date range covering the last N years, then filter to the target month-day
+        // Fetch a date range covering the last N years, including current year to calculate recent averages
         const params = new URLSearchParams({
             latitude: lat,
             longitude: lon,
             start_date: `${startYear}-01-01`,
-            end_date: `${currentYear - 1}-12-31`,
+            end_date: endDate,
             daily: 'temperature_2m_max,temperature_2m_min',
             timezone: 'auto'
         });
@@ -296,24 +298,35 @@ const API = (() => {
             const highsAll = data.daily?.temperature_2m_max || [];
             const lowsAll = data.daily?.temperature_2m_min || [];
 
-            // Filter entries matching the requested month-day (MM-DD)
-            const targetMD = monthDay; // already MM-DD
-            const idxs = times
-                .map((t, i) => ({ t, i }))
-                .filter(({ t }) => t.slice(5) === targetMD)
-                .map(({ i }) => i);
+            if (!times.length || !highsAll.length || !lowsAll.length) return null;
 
-            const highs = idxs.map(i => highsAll[i]).filter(v => v != null);
-            const lows = idxs.map(i => lowsAll[i]).filter(v => v != null);
+            const entries = times.map((t, i) => ({
+                dateStr: t,
+                date: new Date(`${t}T00:00:00Z`),
+                month: Number(t.slice(5, 7)),
+                day: Number(t.slice(8, 10)),
+                high: highsAll[i],
+                low: lowsAll[i]
+            }));
 
-            if (highs.length === 0 || lows.length === 0) return null;
+            const targetMD = monthDay; // MM-DD
+            const targetMonth = Number(monthDay.slice(0, 2));
+            const targetDay = Number(monthDay.slice(3));
+            const prevMonth = targetMonth === 1 ? 12 : targetMonth - 1;
+
+            const todayBaseline = computeDayStats(entries, targetMD, currentYear);
+            const rollingBaseline = computeRollingWindow(entries, targetMonth, targetDay, currentYear);
+            const recent31 = computeRecentWindow(entries, today, 31);
+            const monthStats = computeMonthlyStats(entries, targetMonth, prevMonth, currentYear);
 
             return {
-                avgHigh: highs.reduce((a, b) => a + b, 0) / highs.length,
-                avgLow: lows.reduce((a, b) => a + b, 0) / lows.length,
-                recordHigh: Math.max(...highs),
-                recordLow: Math.min(...lows),
-                yearsOfData: highs.length
+                today: todayBaseline,
+                rolling31: {
+                    baseline: rollingBaseline,
+                    recent: recent31,
+                    windowDays: 31
+                },
+                month: monthStats
             };
         } catch (error) {
             console.error(`Historical normals fetch failed: ${error.message}`);
@@ -321,6 +334,69 @@ const API = (() => {
         } finally {
             clearTimeout(timeoutId);
         }
+    }
+
+    function computeStats(list) {
+        const highs = list.map(e => e.high).filter(v => v != null);
+        const lows = list.map(e => e.low).filter(v => v != null);
+        if (!highs.length || !lows.length) return null;
+        return {
+            avgHigh: highs.reduce((a, b) => a + b, 0) / highs.length,
+            avgLow: lows.reduce((a, b) => a + b, 0) / lows.length,
+            recordHigh: Math.max(...highs),
+            recordLow: Math.min(...lows),
+            yearsOfData: highs.length
+        };
+    }
+
+    function computeDayStats(entries, targetMD, currentYear) {
+        const dayEntries = entries.filter(e => e.dateStr.slice(5) === targetMD && e.date.getFullYear() <= currentYear - 1);
+        return computeStats(dayEntries);
+    }
+
+    function computeRollingWindow(entries, month, day, currentYear) {
+        const windowKeys = buildWindowKeys(month, day, 15);
+        const windowEntries = entries.filter(e => windowKeys.has(e.dateStr.slice(5)) && e.date.getFullYear() <= currentYear - 1);
+        return computeStats(windowEntries);
+    }
+
+    function computeRecentWindow(entries, today, days) {
+        const cutoff = new Date(today);
+        cutoff.setDate(cutoff.getDate() - (days - 1));
+        const recentEntries = entries.filter(e => e.date >= cutoff && e.date <= today && e.date.getFullYear() === today.getFullYear());
+        return computeStats(recentEntries);
+    }
+
+    function computeMonthlyStats(entries, currentMonth, prevMonth, currentYear) {
+        const prevActual = entries.filter(e => e.date.getFullYear() === currentYear && e.month === prevMonth);
+        const prevBaseline = entries.filter(e => e.month === prevMonth && e.date.getFullYear() <= currentYear - 1);
+
+        const currentBaseline = entries.filter(e => e.month === currentMonth && e.date.getFullYear() <= currentYear - 1);
+
+        return {
+            previous: {
+                month: prevMonth,
+                actual: computeStats(prevActual),
+                baseline: computeStats(prevBaseline)
+            },
+            current: {
+                month: currentMonth,
+                baseline: computeStats(currentBaseline)
+            }
+        };
+    }
+
+    function buildWindowKeys(month, day, span) {
+        const base = new Date(Date.UTC(2001, month - 1, day));
+        const keys = new Set();
+        for (let offset = -span; offset <= span; offset++) {
+            const d = new Date(base);
+            d.setUTCDate(base.getUTCDate() + offset);
+            const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(d.getUTCDate()).padStart(2, '0');
+            keys.add(`${m}-${dd}`);
+        }
+        return keys;
     }
 
     /**
